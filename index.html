@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benai Bernardo | Consultoria de Treinamento</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- qrcode.js library (para geração do PIX) - URL Corrigida -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts: Montserrat (Títulos) e Roboto (Texto) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        marinho: '#001F5B',
+                        ciano: '#00A8E8',
+                        offwhite: '#F7F8FC',
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                        brand: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F7F8FC;
+            color: #001F5B;
+        }
+        /* Utilitário para garantir que o scroll seja suave */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Garantir que o canvas gerado pelo QR code seja exibido corretamente */
+        #qrcode-container canvas {
+            display: block;
+            border-radius: 0.5rem; /* rounded-xl do container */
+            margin: auto; /* Centraliza o canvas dentro do div pai */
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col items-center min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+
+    <!-- CONTAINER PRINCIPAL -->
+    <main class="w-full max-w-3xl space-y-8">
+
+        <!-- 1. CABEÇALHO (HEADER) -->
+        <header class="bg-white rounded-2xl shadow-sm p-8 text-center border-t-4 border-marinho">
+            <h1 class="font-brand text-4xl sm:text-5xl font-extrabold tracking-tight text-marinho uppercase">
+                Benai Bernardo
+            </h1>
+            <!-- Linha Divisória -->
+            <div class="w-24 h-1.5 bg-ciano mx-auto my-4 rounded-full"></div>
+            <p class="font-brand text-sm sm:text-base font-medium tracking-[0.2em] text-ciano uppercase">
+                Consultoria de Treinamento
+            </p>
+        </header>
+
+        <!-- 2. INTRODUÇÃO -->
+        <section class="bg-white rounded-2xl shadow-sm p-8 sm:p-10">
+            <div class="border-l-4 border-ciano pl-6">
+                <h2 class="font-brand text-2xl sm:text-3xl font-bold text-marinho mb-4">
+                    Consultoria de Treinamento Online
+                </h2>
+                <p class="text-gray-700 leading-relaxed text-lg">
+                    Como você sabe, o contato próximo e a individualização do seu treino sempre foram minha prioridade. Estou estruturando a <strong class="text-marinho">Consultoria de Treinamento Online Benai Bernardo</strong>, e faço questão que esta nova etapa nasça com a <strong class="text-marinho">qualidade, profissionalismo e seriedade</strong> que você já conhece.
+                </p>
+                <p class="text-gray-700 leading-relaxed text-lg mt-4">
+                    Agradeço por sua atenção e por considerar a validação do meu processo.
+                </p>
+            </div>
+        </section>
+
+        <!-- 3. A PROPOSTA -->
+        <section class="bg-white rounded-2xl shadow-sm p-8 sm:p-10">
+            <h3 class="font-brand text-xl font-bold text-marinho mb-6 flex items-center">
+                <span class="bg-marinho text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">1</span>
+                A Proposta
+            </h3>
+            <ul class="space-y-4">
+                <li class="flex items-start">
+                    <span class="text-ciano mr-3 mt-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                    <span class="text-gray-700 text-lg">
+                        <strong class="text-marinho">100% Personalizado:</strong> Baseado na sua Anamnese (saúde, equipamentos, tempo).
+                    </span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-ciano mr-3 mt-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                    <span class="text-gray-700 text-lg">
+                        <strong class="text-marinho">Foco e Estrutura:</strong> Treinos objetivos e eficazes para manter sua constância.
+                    </span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-ciano mr-3 mt-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                    <span class="text-gray-700 text-lg">
+                        <strong class="text-marinho">Suporte via WhatsApp:</strong> Acompanhamento durante o período para dúvidas e ajustes.
+                    </span>
+                </li>
+            </ul>
+        </section>
+
+        <!-- 4. O PROCESSO -->
+        <section class="bg-white rounded-2xl shadow-sm p-8 sm:p-10">
+            <h3 class="font-brand text-xl font-bold text-marinho mb-6 flex items-center">
+                <span class="bg-marinho text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">2</span>
+                O Processo de Trabalho
+            </h3>
+            <div class="space-y-6">
+                <div class="flex">
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="w-2 h-2 mt-2.5 rounded-full bg-ciano"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-marinho text-lg">Anamnese Completa</h4>
+                        <p class="text-gray-600">Você preencherá um formulário objetivo para que eu tenha todos os dados de saúde, logística e objetivos.</p>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="w-2 h-2 mt-2.5 rounded-full bg-ciano"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-marinho text-lg">Análise Detalhada</h4>
+                        <p class="text-gray-600">Eu utilizarei essas informações (e o nosso conhecimento presencial) para montar o plano.</p>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="w-2 h-2 mt-2.5 rounded-full bg-ciano"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-marinho text-lg">Entrega do Plano</h4>
+                        <p class="text-gray-600">Você receberá o treino em uma planilha interativa (Google Sheets), fácil de usar e acessar no celular.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. CONTRIBUIÇÃO (INVESTIMENTO) -->
+        <section class="bg-white rounded-2xl shadow-sm p-8 sm:p-10 border border-gray-100">
+            <h3 class="font-brand text-xl font-bold text-marinho mb-6 flex items-center">
+                <span class="bg-marinho text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">3</span>
+                Contribuição (Sua Contribuição)
+            </h3>
+            
+            <p class="text-gray-700 text-lg mb-4">
+                Honestamente, esta é uma fase de aprendizado e estruturação do meu método de atendimento 100% online. Sua contribuição é mais sobre a <strong>validação do processo</strong> do que sobre o valor.
+            </p>
+            <p class="text-gray-700 text-lg mb-6">
+                Por isso, a contribuição nesta consultoria inicial será um <strong class="text-marinho">Valor de Contribuição</strong> (Pay-What-You-Want).
+            </p>
+
+            <blockquote class="bg-offwhite border-l-4 border-ciano p-6 rounded-r-lg italic text-gray-700 text-lg">
+                "Após receber e começar a usar o treino, <strong class="text-marinho">você decide o valor justo a ser pago</strong> pela qualidade e pela atenção dedicada ao seu plano."
+            </blockquote>
+        </section>
+
+        <!-- 6. CHAMADA PARA AÇÃO (CTA) -->
+        <section class="bg-white rounded-2xl shadow-md p-10 text-center transform transition duration-500 hover:scale-[1.01]">
+            <h2 class="font-brand text-2xl font-bold text-marinho mb-8">
+                PRÓXIMO PASSO: Inicie Agora sua Consultoria!
+            </h2>
+            
+            <a href="https://forms.gle/TGkTypDMEd9ZYTbV8" target="_blank" class="inline-block bg-ciano hover:bg-opacity-90 text-white font-brand font-bold text-lg px-8 py-4 rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-1 mb-6">
+                ACESSAR ANAMNESE (Formulário)
+            </a>
+
+            <p class="text-gray-500 text-sm max-w-md mx-auto">
+                Após o envio, você receberá uma mensagem de confirmação e eu entrarei em contato o mais breve possível para alinharmos o cronograma de entrega do seu treino.
+            </p>
+        </section>
+
+        <!-- 7. QR CODE / PAGAMENTO -->
+        <section class="bg-white rounded-2xl shadow-sm p-8 text-center opacity-90">
+            <h3 class="font-brand text-lg font-bold text-marinho mb-6">
+                Chave de Contribuição (Apenas após a entrega do plano):
+            </h3>
+            
+            <!-- CONTAINER ONDE O QR CODE PIX SERÁ INJETADO PELO JAVASCRIPT -->
+            <div id="qrcode-container" class="mx-auto w-48 h-48 border-2 border-gray-200 rounded-xl flex items-center justify-center bg-white mb-4 p-2">
+                <!-- Conteúdo de fallback, caso o JS falhe -->
+                <p class="text-gray-400 text-xs">Gerando QR Code PIX...</p>
+            </div>
+
+            <p class="text-gray-600 text-sm">
+                Você pode escanear o QR Code acima para fazer sua contribuição via Pix.
+            </p>
+        </section>
+
+        <!-- 8. RODAPÉ -->
+        <footer class="text-center py-8">
+            <p class="font-bold text-marinho text-lg mb-2">Agradeço imensamente sua confiança no meu trabalho.</p>
+            <div class="text-sm text-gray-500 font-medium">
+                <p>Benai Bernardo</p>
+                <p class="opacity-75">Consultoria de Treinamento</p>
+            </div>
+        </footer>
+
+    </main>
+    
+    <!-- Script para gerar o QR Code -->
+    <script>
+        // Código PIX fornecido pelo usuário (PIX COPIA E COLA)
+        const pixCode = "00020126460014BR.GOV.BCB.PIX0124benaialvarenga@gmail.com5204000053039865802BR5925Benai Bernardo de Alvaren6009SAO PAULO6214051071z0o8zFQk6304D3E0";
+        
+        // Garante que o script só rode após o carregamento do DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Instancia o gerador de QR Code
+                // O primeiro argumento é o ID do elemento (string) onde o código será renderizado.
+                new QRCode("qrcode-container", {
+                    text: pixCode,
+                    width: 170, // Tamanho interno do QR code
+                    height: 170,
+                    colorDark : "#001F5B", // Cor Marinho
+                    colorLight : "#ffffff", // Fundo Branco
+                    correctLevel : QRCode.CorrectLevel.H // Alta correção de erros
+                });
+
+                // Remove o fallback de texto após a geração
+                const fallback = document.querySelector('#qrcode-container p');
+                if (fallback) fallback.remove();
+
+            } catch (e) {
+                // Loga o erro, mas agora usando a nova URL deve funcionar
+                console.error("Erro ao gerar QR Code (Verifique a conexão CDN):", e);
+                const container = document.getElementById('qrcode-container');
+                if (container) {
+                     container.innerHTML = `<p class="text-red-500 text-sm p-4">Erro: Não foi possível gerar o QR Code. Tente recarregar a página.</p>`;
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
