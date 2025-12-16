@@ -1,1 +1,1135 @@
+<!-- PLANILHA DE TREINO E INSTRUÇÕES - DESIGN MINIMALISTA E MODERNO -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benai Bernardo Consultoria</title>
+    <!-- Carrega Tailwind CSS para estilização moderna e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega Lucide Icons para símbolos visuais -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Configurações personalizadas do Tailwind e FONTES */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&family=Roboto:wght@100;300;400;500;700;900&display=swap');
+        
+        :root {
+            /* Cor primária (azul escuro e profissional, adaptado da logo) */
+            --color-primary: #1e3a8a; 
+            /* Cor de destaque para o nome */
+            --color-logo-name: #0f172a; /* Azul muito escuro, quase preto (slate-900) */
+            /* Cor secundária (subtítulo) */
+            --color-logo-subtitle: #475569; /* Cinza-azulado (slate-600) */
+            
+            --color-secondary: #fcd34d; 
+            --color-tertiary: #f97316; 
+            --color-success: #10b981; 
+        }
 
+        /* Aplica Roboto para o corpo do texto (mais legível) */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8fafc;
+            color: #1f2937; 
+        }
+
+        /* Aplica Montserrat para Títulos e Destaques (mais impactante) */
+        h1, h2, h3, .font-extrabold {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Estilo para a aba ativa com melhor contraste */
+        .tab-button.active {
+            border-bottom: 2px solid var(--color-primary);
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+        
+        /* Estilo para o botão de dia de treino ativo */
+        .day-button.active {
+            background-color: var(--color-primary) !important;
+            color: white !important;
+        }
+
+        /* Estilo para o modo de edição */
+        .edit-mode .editable-content {
+            /* Apenas um padding para indicar que é editável, sem borda para evitar quebra de layout */
+            padding: 4px;
+            cursor: text;
+        }
+        .edit-mode .editable-name {
+            border-bottom: 1px dashed var(--color-secondary);
+        }
+        .edit-mode input[type="text"], .edit-mode input[type="url"] {
+            border: 1px dashed var(--color-secondary) !important;
+        }
+        
+        /* NOVO: Estilo específico para o conteúdo dos pilares para evitar o bug de layout */
+        .pillar-content-body {
+            /* Garante que o conteúdo seja renderizado em bloco estável */
+             min-height: 20px;
+        }
+        .edit-mode .pillar-content-body {
+            border: 1px dashed var(--color-secondary);
+            padding: 4px;
+        }
+
+
+        /* Estilo minimalista para o checkbox de confirmação */
+        .custom-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #9ca3af;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .custom-checkbox:checked {
+            background-color: var(--color-success);
+            border-color: var(--color-success);
+        }
+        .custom-checkbox:checked::before {
+            content: '\2713'; /* Checkmark unicode */
+            color: white;
+            font-size: 14px;
+            line-height: 1;
+        }
+        
+        /* Estilo para o background do card de BI-SET */
+        .grouped-exercise.SS {
+            background-color: #fefce8; /* Amarelo claro para dar enfase */
+            border-left: 6px solid var(--color-secondary) !important; /* Borda mais grossa em amarelo */
+        }
+
+        /* Estilo para o background do card de TRI-SET */
+        .grouped-exercise.TS {
+            background-color: #fff7ed; /* Laranja/Salmão muito claro */
+            border-left: 6px solid var(--color-tertiary) !important; /* Borda mais grossa em laranja */
+        }
+
+        /* Estilo para o card de exercícios normais */
+        .normal-exercise {
+            background-color: #ffffff; /* Fundo branco */
+            border-left: 4px solid var(--color-primary) !important; /* Borda fina em azul */
+        }
+        
+        /* Estilos de cor padrão para os Pilares (baseados no JavaScript) */
+        .pillar-blue {
+            background-color: #eff6ff; 
+            border-color: #3b82f6 !important; 
+            color: #1e40af; 
+        }
+        .pillar-indigo {
+            background-color: #eef2ff; 
+            border-color: #6366f1 !important; 
+            color: #3730a3; 
+        }
+        .pillar-yellow {
+            background-color: #fffbeb; 
+            border-color: #f59e0b !important; 
+            color: #b45309; 
+        }
+        .pillar-emerald {
+            background-color: #ecfdf5; 
+            border-color: #10b981 !important; 
+            color: #047857; 
+        }
+        .pillar-red {
+            background-color: #fef2f2; 
+            border-color: #ef4444 !important; 
+            color: #b91c1c; 
+        }
+        .pillar-purple {
+            background-color: #f5f3ff; 
+            border-color: #8b5cf6 !important; 
+            color: #6d28d9; 
+        }
+        .pillar-cyan {
+            background-color: #f0f9ff; 
+            border-color: #06b6d4 !important; 
+            color: #0e7490; 
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <div id="app" class="max-w-4xl mx-auto p-4 md:p-8 bg-white shadow-xl rounded-xl mt-6 mb-12">
+        
+        <!-- CABEÇALHO E LOGO EM TEXTO (ESTILIZADO) -->
+        <header class="flex flex-col sm:flex-row justify-between items-center pb-6 border-b border-gray-100">
+            <!-- LOGO TEXTUAL COM FONTES MONTESERRAT/ROBOTO -->
+            <div class="flex-1 flex justify-center sm:justify-start">
+                <div class="text-center sm:text-left">
+                    <!-- Benai Bernardo (Maior, Montserrat, Cor do Logo) -->
+                    <h1 class="text-3xl font-extrabold leading-none" style="color: var(--color-logo-name);">
+                        Benai Bernardo
+                    </h1>
+                    <!-- Consultoria de treinamento (Menor, Roboto, Cor Secundária) -->
+                    <p class="text-sm font-medium mt-1" style="color: var(--color-logo-subtitle); font-family: 'Roboto', sans-serif;">
+                        Consultoria de treinamento
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Botão de Edição -->
+            <button id="editToggle" class="mt-4 sm:mt-0 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition duration-150 flex items-center shadow-sm">
+                <i data-lucide="pencil" class="w-4 h-4 mr-2"></i>
+                Modo Edição
+            </button>
+        </header>
+
+        <!-- SEÇÃO DE INFORMAÇÕES DO ALUNO E CONTATO -->
+        <section class="mt-6 p-5 bg-blue-50/50 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 shadow-inner">
+            <div class="space-y-1">
+                <p class="text-xs font-semibold uppercase text-gray-500">Aluno</p>
+                <!-- Removido contenteditable="false" estático -->
+                <div class="text-xl font-bold text-gray-800 editable-name" data-key="studentName">NOME DO ALUNO AQUI</div>
+                
+                <p class="text-xs font-semibold uppercase text-gray-500 mt-3">Objetivo</p>
+                <!-- Removido contenteditable="false" estático -->
+                <div class="text-sm italic text-gray-600 editable-name" data-key="studentGoal">Ganho de massa magra e resistência.</div>
+            </div>
+            
+            <!-- Botão de Contato WhatsApp em verde (Cor Sucesso) -->
+            <a href="https://wa.me/5541997222664" target="_blank" class="px-5 py-3 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition duration-150 shadow-lg flex items-center">
+                <i data-lucide="message-circle" class="w-5 h-5 mr-2 fill-white"></i>
+                Fale comigo
+            </a>
+        </section>
+
+        <!-- SEÇÃO DE ABAS (TABS) -->
+        <div class="mt-8">
+            <div class="flex border-b border-gray-200">
+                <button id="tabInstructions" class="tab-button active px-4 py-3 text-sm transition duration-200 focus:outline-none" onclick="switchTab('instructions')">
+                    Instruções Gerais
+                </button>
+                <!-- Nomenclatura alterada para 'Treino' -->
+                <button id="tabTraining" class="tab-button px-4 py-3 text-sm transition duration-200 focus:outline-none" onclick="switchTab('training')">
+                    Treino
+                </button>
+            </div>
+
+            <!-- CONTEÚDO DA ABA 1: INSTRUÇÕES GERAIS (PILARES DO TREINAMENTO) -->
+            <div id="contentInstructions" class="tab-content pt-6 space-y-4">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 border-l-4 border-yellow-500 pl-3">PILARES DO TREINAMENTO</h2>
+                
+                <!-- Botão para adicionar novo Pilar (Apenas no modo de edição) -->
+                <div id="addPillarButton" class="mb-4" style="display: none;">
+                    <button class="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full hover:bg-blue-200 transition" onclick="addNewPillar()">+ Novo Pilar</button>
+                </div>
+                
+                <div id="pillarsContainer" class="space-y-6 text-gray-700">
+                    <!-- Pilares serão injetados aqui via JavaScript -->
+                </div>
+                
+                <h2 class="text-xl font-bold pt-4 text-gray-800 border-l-4 border-cyan-500 pl-3">O DESAFIO DA PROGRESSÃO SEMANAL</h2>
+                <div id="progressionPillar" class="p-4 rounded-lg pillar-cyan">
+                    <!-- Conteúdo do Pilar de Progressão será injetado aqui -->
+                </div>
+            </div>
+
+            <!-- CONTEÚDO DA ABA 2: Treino -->
+            <div id="contentTraining" class="tab-content pt-6 hidden">
+                <!-- Seletor de Dias de Treino -->
+                <div id="daySelector" class="mb-6 flex flex-wrap gap-2 border-b border-gray-200 pb-2">
+                    <!-- Botões de Dia serão injetados aqui -->
+                </div>
+
+                <!-- Adicionar Bloco de Edição (Visível apenas no modo de edição) -->
+                <div id="addBlockButtons" class="mb-4 flex gap-3" style="display: none;">
+                    <button class="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full hover:bg-green-200 transition" onclick="addExercise(null)">+ Normal</button>
+                    <!-- Botões de adição de grupo ajustados para melhor contraste -->
+                    <button class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm font-medium rounded-full hover:bg-yellow-200 transition" onclick="addExercise('SS')">+ Bi-set</button>
+                    <button class="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-medium rounded-full hover:bg-orange-200 transition" onclick="addExercise('TS')">+ Tri-set</button>
+                </div>
+
+                <!-- Título do Treino (dinâmico) -->
+                <h2 id="currentTrainingTitle" class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-primary pl-3"></h2>
+                
+                <div id="trainingList" class="space-y-3">
+                    <!-- Cards de Treino serão injetados aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script JavaScript para funcionalidade e localStorage -->
+    <script>
+        const STORAGE_KEY = 'consultoria_training_data';
+        let editMode = false;
+        let currentDay = ''; 
+        
+        // Cores de Pilares Dinâmicos - Usadas para novos pilares adicionados
+        const dynamicPillarColors = [
+            'pillar-blue', 'pillar-purple', 'pillar-emerald', 'pillar-red', 
+            'pillar-yellow', 'pillar-cyan', 'pillar-indigo' 
+        ];
+
+        // Estrutura de dados inicial/default do treino com os novos pilares fornecidos
+        const defaultData = {
+            tabInstructions: {
+                studentName: 'NOME DO ALUNO AQUI',
+                studentGoal: 'Ganho de massa magra e resistência.',
+                // Armazenamos a estrutura dos pilares
+                pillars: [
+                    { 
+                        id: 'pillar1', 
+                        name: '🌬️ RESPIRAÇÃO TÁTICA', 
+                        icon: 'wind', 
+                        colorClass: 'pillar-blue',
+                        content: `
+                            <p class="font-bold">Não prenda o ar (apneia)!</p>
+                            <ul class="list-disc list-inside ml-4 text-sm space-y-1">
+                                <li><span class="font-semibold">INSPIRE (Puxe pelo nariz):</span> Na fase "fácil" (quando o peso desce ou volta).</li>
+                                <li><span class="font-semibold">EXPIRE (Solte pela boca):</span> Na fase de "força" (quando você empurra ou puxa o peso).</li>
+                            </ul>
+                        ` 
+                    },
+                    { 
+                        id: 'pillar2', 
+                        name: '🛡️ ESTABILIDADE E PROTEÇÃO (CORE)', 
+                        icon: 'shield', 
+                        colorClass: 'pillar-indigo',
+                        content: `
+                            <p>Mantenha o abdômen contraído em <strong>todos</strong> os exercícios. Imagine que alguém vai te dar um soco na barriga: essa rigidez protege sua coluna e te dá estabilidade.</p>
+                        ` 
+                    },
+                    { 
+                        id: 'pillar3', 
+                        name: '⏱️ CONTROLE DO MOVIMENTO (CADÊNCIA)', 
+                        icon: 'timer', 
+                        colorClass: 'pillar-yellow',
+                        content: `
+                            <p>O músculo cresce sob tensão, não por impulso. <strong>Não jogue a carga!</strong></p>
+                            <ul class="list-disc list-inside ml-4 text-sm space-y-1">
+                                <li><span class="font-semibold">Fase Negativa (Descida):</span> Sempre lenta e controlada (ex: conte 3 segundos).</li>
+                                <li><span class="font-semibold">Ponto de Força (Subida):</span> Explosivo, porém controlado.</li>
+                            </ul>
+                        ` 
+                    },
+                    { 
+                        id: 'pillar4', 
+                        name: '🧘 INTERVALO ESTRATÉGICO', 
+                        icon: 'coffee', 
+                        colorClass: 'pillar-emerald',
+                        content: `
+                            <p>O descanso é parte do treino. Use o tempo exato para garantir que você tenha energia suficiente para a próxima série, mas sem esfriar.</p>
+                            <ul class="list-disc list-inside ml-4 text-sm space-y-1">
+                                <li><span class="font-semibold">Tempo:</span> Use cronômetro. Não confie na memória.</li>
+                                <li><span class="font-semibold">Bi-Set/Tri-Set:</span> Nestes casos, o descanso é feito apenas após o último exercício do grupo. Não há descanso entre os exercícios combinados.</li>
+                            </ul>
+                        ` 
+                    },
+                    { 
+                        id: 'pillar5', 
+                        name: '🚨 DOR ARTICULAR É SINAL VERMELHO!', 
+                        icon: 'alert-triangle', 
+                        colorClass: 'pillar-red',
+                        content: `
+                            <p>Dor aguda, pontadas ou queimação nas articulações (joelho, ombro, lombar) <strong>NUNCA</strong> são normais. Dor muscular (queimação do músculo) é normal, a articular não.</p>
+                            <p class="mt-2"><span class="font-semibold">Ação Imediata:</span> <strong>PARE</strong> o exercício no mesmo instante.</p>
+                            <ul class="list-disc list-inside ml-4 text-sm space-y-1 mt-1">
+                                <li><span class="font-semibold">Próximo Passo:</span> Tente reduzir drasticamente a carga ou substituir por um exercício similar que não cause dor. Por exemplo: Se doeu no Agachamento, tente o Leg Press.</li>
+                                <li><span class="font-semibold">Obrigatório:</span> Avise o Benai imediatamente via WhatsApp para ajuste definitivo no plano.</li>
+                            </ul>
+                        ` 
+                    },
+                    { 
+                        id: 'pillar6', 
+                        name: '📈 INTENSIDADE REAL (RPE - Esforço Percebido)', 
+                        icon: 'bar-chart-2', 
+                        colorClass: 'pillar-purple',
+                        content: `
+                            <p>Sua carga é perfeita quando:</p>
+                            <ul class="list-disc list-inside ml-4 text-sm space-y-1">
+                                <li>Você atinge a faixa de repetições estipulada (ex: fez 10 na série de 8-10).</li>
+                                <li>E sente que conseguiria fazer <span class="font-semibold">somente mais 1 ou 2 repetições</span> com a técnica perfeita.</li>
+                            </ul>
+                            <p class="mt-2 text-red-700 font-medium">Se você conseguir fazer mais de 2, a carga está leve e precisa ser aumentada!</p>
+                        ` 
+                    },
+                    { 
+                        id: 'pillar7', 
+                        name: 'O DESAFIO DA PROGRESSÃO SEMANAL', 
+                        icon: 'trending-up', 
+                        colorClass: 'pillar-cyan',
+                        // Este é o pilar que será renderizado fora da lista principal
+                        isProgression: true,
+                        content: `
+                            <ul class="list-disc list-inside ml-4 text-sm space-y-2">
+                                <li><span class="font-semibold">A meta é Progredir:</span> Sua missão semanal é tentar superar o registro de carga anterior. Tente adicionar 1kg, ou 1 repetição a mais, mantendo sempre a técnica perfeita.</li>
+                                <li><span class="font-semibold">Priorize a Técnica:</span> Nunca aumente a carga se a sua forma de execução for prejudicada. O registro de peso é secundário à sua segurança.</li>
+                            </ul>
+                        ` 
+                    }
+                ]
+            },
+            trainingSchedule: {} // Vazio, para o consultor adicionar
+        };
+
+        let appData = {};
+
+        // 1. FUNÇÕES DE ARMAZENAMENTO (LOCALSTORAGE)
+        
+        // Carrega os dados do localStorage ou usa os dados default
+        function loadData() {
+            try {
+                const storedData = localStorage.getItem(STORAGE_KEY);
+                if (storedData) {
+                    let loadedData = JSON.parse(storedData);
+                    
+                    // Tratamento de migração: se a estrutura antiga ou inexistente, usa a default, mas tenta manter nome e objetivo do aluno
+                    if (!loadedData.tabInstructions || !loadedData.tabInstructions.pillars) {
+                         appData = defaultData;
+                         if(loadedData.tabInstructions) {
+                            appData.tabInstructions.studentName = loadedData.tabInstructions.studentName || defaultData.tabInstructions.studentName;
+                            appData.tabInstructions.studentGoal = loadedData.tabInstructions.studentGoal || defaultData.tabInstructions.studentGoal;
+                         }
+                    } else {
+                        appData = loadedData;
+                    }
+                    
+                    // Garante que o trainingSchedule exista e adiciona o campo videoUrl se ausente (para compatibilidade)
+                    if (!appData.trainingSchedule) {
+                         appData.trainingSchedule = {};
+                    } else {
+                        // Adiciona videoUrl a exercícios existentes (para migração)
+                        Object.values(appData.trainingSchedule).forEach(dayExercises => {
+                            dayExercises.forEach(exercise => {
+                                if (exercise.videoUrl === undefined) {
+                                    exercise.videoUrl = '';
+                                }
+                            });
+                        });
+                    }
+                    
+                } else {
+                    appData = defaultData;
+                }
+            } catch (e) {
+                console.error("Erro ao carregar dados do localStorage:", e);
+                appData = defaultData;
+            }
+            
+            // Define o primeiro dia como padrão se houver algum dia de treino
+            if (!currentDay || !appData.trainingSchedule[currentDay] || Object.keys(appData.trainingSchedule).length === 0) {
+                 const firstDay = Object.keys(appData.trainingSchedule)[0];
+                 currentDay = firstDay || '';
+            }
+        }
+
+        // Salva os dados no localStorage
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            } catch (e) {
+                console.error("Erro ao salvar dados no localStorage:", e);
+            }
+        }
+
+        // 2. FUNÇÕES DE RENDERIZAÇÃO
+        
+        // Renderiza os cards de treino na aba "Seu Treino"
+        function renderTraining() {
+            const listContainer = document.getElementById('trainingList');
+            const daySelector = document.getElementById('daySelector');
+            const currentDayTitle = document.getElementById('currentTrainingTitle');
+            const addBlockButtons = document.getElementById('addBlockButtons');
+            const hasTraining = Object.keys(appData.trainingSchedule).length > 0;
+
+            
+            // Controle de visibilidade dos botões de adição e título
+            addBlockButtons.style.display = editMode && hasTraining ? 'flex' : 'none';
+            currentDayTitle.style.display = hasTraining ? 'block' : 'none';
+
+            if (!hasTraining) {
+                listContainer.innerHTML = `<p class="text-gray-500 italic">Nenhum treino cadastrado. Clique em "Modo Edição" e depois em "+ Novo Treino" para começar.</p>`;
+                // Garante que não haja título se não houver treino
+                currentDayTitle.innerHTML = ''; 
+            }
+
+            if (!currentDay && hasTraining) {
+                // Se houver treinos, mas nenhum dia ativo (só acontece se o dia ativo for excluído), seleciona o primeiro
+                currentDay = Object.keys(appData.trainingSchedule)[0]; 
+            }
+            
+            if (!currentDay) {
+                daySelector.innerHTML = '';
+                // Adiciona botão para novo dia de treino no modo de edição (mesmo se não houver treinos)
+                if (editMode) {
+                    daySelector.innerHTML += `
+                        <button class="px-3 py-1 text-sm font-semibold rounded-full transition bg-gray-300 text-gray-800 hover:bg-gray-400" 
+                                onclick="addNewTrainingDay()">
+                            + Novo Treino
+                        </button>
+                    `;
+                }
+                return;
+            }
+
+            const exercises = appData.trainingSchedule[currentDay];
+            
+            // 1. Renderiza o Seletor de Dias
+            daySelector.innerHTML = '';
+            Object.keys(appData.trainingSchedule).forEach(day => {
+                // Estilo para o botão selecionado (ativo) - Corrigido para ter contraste
+                const isActive = day === currentDay ? 'day-button active' : 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+                
+                let dayButtonHtml = `
+                    <button class="px-3 py-1 text-sm font-semibold rounded-full transition ${isActive}" 
+                            onclick="switchTrainingDay('${day.replace(/'/g, "\\'").replace(/"/g, '\\"')}')">
+                        ${day.split('(')[0].trim()}
+                    </button>
+                `;
+
+                // Adiciona botão de exclusão no modo de edição
+                if (editMode && Object.keys(appData.trainingSchedule).length > 1) {
+                    dayButtonHtml = `
+                        <div class="flex items-center space-x-1 group">
+                            ${dayButtonHtml.replace('</button>', '')}
+                            <button class="p-1 text-red-500 rounded-full bg-red-100 opacity-0 group-hover:opacity-100 transition" onclick="deleteTrainingDay(event, '${day.replace(/'/g, "\\'").replace(/"/g, '\\"')}')"><i data-lucide="x" class="w-3 h-3"></i></button>
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                daySelector.innerHTML += dayButtonHtml;
+            });
+
+            // Adiciona botão para novo dia de treino no modo de edição
+            if (editMode) {
+                daySelector.innerHTML += `
+                    <button class="px-3 py-1 text-sm font-semibold rounded-full transition bg-gray-300 text-gray-800 hover:bg-gray-400" 
+                            onclick="addNewTrainingDay()">
+                        + Novo Treino
+                    </button>
+                `;
+            }
+
+            // 2. Renderiza o Título do Treino
+            // Usa editable-name para textos curtos e simples como o nome do treino
+            // Removido contenteditable do HTML estático, será injetado pelo JS em modo edição
+            currentDayTitle.innerHTML = `<span class="editable-name" data-key="trainingScheduleName.${currentDay.replace(/'/g, "\\'").replace(/"/g, '\\"')}" data-day-key="${currentDay}">${currentDay}</span>`;
+            
+            // 3. Renderiza os Exercícios
+            listContainer.innerHTML = ''; 
+            
+            exercises.forEach((exercise, index) => {
+                const isCompleted = exercise.completed ? 'opacity-50' : '';
+                
+                // Lógica de Superset/Triset para styling
+                const isGrouped = exercise.group !== null && exercise.group !== undefined && exercise.group !== '';
+                const cardClass = isGrouped ? `grouped-exercise ${exercise.group.substring(0, 2)}` : 'normal-exercise';
+                
+                let groupIndicator = '';
+                if (isGrouped) {
+                    const groupType = exercise.group.substring(0, 2);
+                    let indicatorClasses = '';
+                    let indicatorText = '';
+
+                    if (groupType === 'SS') {
+                        indicatorClasses = 'bg-yellow-200 text-yellow-800';
+                        indicatorText = `BI-SET (${exercise.group})`;
+                    } else if (groupType === 'TS') {
+                        indicatorClasses = 'bg-orange-200 text-orange-800';
+                        indicatorText = `TRI-SET (${exercise.group})`;
+                    }
+
+                    // Apenas mostra o indicador do grupo no modo de edição (para que o consultor possa identificar)
+                    if (editMode) {
+                         groupIndicator = `<span class="text-xs font-bold mr-2 grouped-indicator ${indicatorClasses} rounded px-2 py-0.5">${indicatorText}</span>`;
+                    } else {
+                         // Mostra apenas o nome do grupo no modo de aluno (mais compacto)
+                         groupIndicator = `<span class="text-xs font-bold text-gray-500 mr-2">${exercise.group}</span>`;
+                    }
+                }
+                
+                // O campo Obs. Geral e o campo de Vídeo
+                const extraFields = `
+                    <div class="mt-2 pt-2 border-t border-gray-200">
+                        <p class="font-bold text-gray-500 uppercase text-xs mb-0.5">Obs. Geral</p>
+                        <!-- Removido contenteditable do HTML estático, será injetado pelo JS em modo edição -->
+                        <div class="text-xs text-gray-700 editable-content" data-key="trainingSchedule.${currentDay.replace(/'/g, "\\'").replace(/"/g, '\\"')}.${index}.obs">${exercise.obs || 'Nenhuma observação extra.'}</div>
+                    </div>
+                    
+                    <!-- NOVO CAMPO: Link de Demonstração (URL) -->
+                    <div class="mt-2 pt-2 border-t border-gray-200">
+                        <p class="font-bold text-gray-500 uppercase text-xs mb-0.5">Link de Demonstração</p>
+                        ${editMode ? `
+                            <input type="url" value="${exercise.videoUrl || ''}" onchange="updateVideoUrl('${currentDay.replace(/'/g, "\\'")}', ${exercise.id}, this.value)" 
+                                   class="w-full text-xs p-0.5 border-b border-gray-300 bg-transparent text-blue-600 focus:border-blue-500 focus:ring-0 placeholder-gray-400"
+                                   placeholder="https://link-do-video.com">
+                        ` : ''}
+                        
+                        ${!editMode && exercise.videoUrl ? `
+                            <a href="${exercise.videoUrl}" target="_blank" class="text-blue-600 hover:underline text-xs flex items-center mt-1 font-medium hover:text-blue-800 transition">
+                                <i data-lucide="youtube" class="w-4 h-4 mr-1"></i> Ver Demonstração
+                            </a>
+                        ` : ''}
+                        
+                        ${!editMode && !exercise.videoUrl ? `
+                            <p class="text-xs italic text-gray-400">Nenhum link fornecido.</p>
+                        ` : ''}
+                    </div>
+                `;
+
+
+                listContainer.innerHTML += `
+                    <div class="training-card p-3 rounded-lg shadow-sm hover:shadow-md transition ${isCompleted} ${cardClass} relative" data-id="${exercise.id}">
+                        
+                        <!-- Botão de exclusão (Apenas no modo de edição) -->
+                        ${editMode ? `<button class="absolute top-2 right-2 text-red-500 hover:text-red-700 transition" onclick="deleteExercise('${currentDay.replace(/'/g, "\\'")}', ${exercise.id})"><i data-lucide="x-circle" class="w-4 h-4"></i></button>` : ''}
+
+                        <!-- Nome do Exercício (Mais proeminente) -->
+                        <div class="flex items-center justify-between mb-2 pr-6">
+                            <h3 class="text-base font-extrabold text-gray-800 flex items-center">
+                                ${groupIndicator}
+                                <!-- Removido contenteditable do HTML estático, será injetado pelo JS em modo edição -->
+                                <span class="editable-name" data-key="trainingSchedule.${currentDay.replace(/'/g, "\\'").replace(/"/g, '\\"')}.${index}.name">${exercise.name}</span>
+                            </h3>
+                            <!-- Checkbox de Confirmação para o Aluno -->
+                            <label class="cursor-pointer flex items-center space-x-2">
+                                <span class="text-xs text-gray-500 font-medium hidden sm:block">FEITO</span>
+                                <input type="checkbox" class="custom-checkbox" ${exercise.completed ? 'checked' : ''} onchange="toggleCompleted('${currentDay.replace(/'/g, "\\'")}', ${exercise.id})" ${editMode ? 'disabled' : ''}>
+                            </label>
+                        </div>
+                        
+                        <!-- Detalhes do Exercício (Compacto em 4 colunas) -->
+                        <div class="grid grid-cols-4 gap-2 text-xs text-gray-600 border-t border-gray-200 pt-2">
+                            
+                            <!-- Séries / Reps -->
+                            <div>
+                                <p class="font-bold text-gray-500 uppercase text-xs">S/R</p>
+                                <!-- Removido contenteditable do HTML estático, será injetado pelo JS em modo edição -->
+                                <div class="font-semibold text-gray-800 editable-name" data-key="trainingSchedule.${currentDay.replace(/'/g, "\\'").replace(/"/g, '\\"')}.${index}.setsReps">${exercise.setsReps}</div>
+                            </div>
+                            
+                            <!-- Técnica/Foco (Expandido) -->
+                            <div class="col-span-2">
+                                <p class="font-bold text-gray-500 uppercase text-xs">Técnica/Foco</p>
+                                <!-- Removido contenteditable do HTML estático, será injetado pelo JS em modo edição -->
+                                <div class="italic text-gray-800 editable-name text-ellipsis overflow-hidden whitespace-nowrap" data-key="trainingSchedule.${currentDay.replace(/'/g, "\\'").replace(/"/g, '\\"')}.${index}.technique">${exercise.technique}</div>
+                            </div>
+
+                            <!-- Carga Anterior -->
+                            <div class="flex flex-col items-end">
+                                <p class="font-bold text-gray-500 uppercase text-xs">Carga (kg)</p>
+                                <input type="text" value="${exercise.lastLoad}" onchange="updateLoad('${currentDay.replace(/'/g, "\\'")}', ${exercise.id}, this.value)" 
+                                       class="w-full text-right p-0.5 border-b border-gray-300 bg-transparent text-gray-800 font-medium focus:border-blue-500 focus:ring-0 disabled:opacity-75"
+                                       placeholder="0kg" ${editMode ? 'disabled' : ''}>
+                            </div>
+                        </div>
+
+                        ${extraFields}
+
+                    </div>
+                `;
+            });
+
+            // Re-renderiza os ícones Lucide após injetar o HTML
+            lucide.createIcons();
+        }
+        
+        // Renderiza o conteúdo da aba de instruções
+        function renderInstructions() {
+            // Renderiza informações básicas do aluno
+            // É necessário garantir que todos os elementos editáveis sejam encontrados, mesmo sem o atributo contenteditable no load inicial
+            document.querySelector('[data-key="studentName"]').innerHTML = appData.tabInstructions.studentName;
+            document.querySelector('[data-key="studentGoal"]').innerHTML = appData.tabInstructions.studentGoal;
+
+            const pillarsContainer = document.getElementById('pillarsContainer');
+            const progressionPillarContainer = document.getElementById('progressionPillar');
+            pillarsContainer.innerHTML = '';
+            
+            // Renderiza o botão de adicionar Pilar
+            document.getElementById('addPillarButton').style.display = editMode ? 'block' : 'none';
+
+            // Filtra os pilares de Progressão para renderizar separadamente
+            const mainPillars = appData.tabInstructions.pillars.filter(p => !p.isProgression);
+            const progressionPillar = appData.tabInstructions.pillars.find(p => p.isProgression);
+
+            // 1. Renderiza os Pilares Principais
+            mainPillars.forEach((pillar, index) => {
+                const baseClasses = pillar.colorClass; 
+                
+                // Pilares customizados (não default) podem ser excluídos
+                const isDefault = index < 6; 
+                
+                const deleteButton = !isDefault && editMode ? 
+                    `<button class="absolute top-2 right-2 text-red-500 hover:text-red-700 transition" 
+                             onclick="deletePillar(event, '${pillar.id}')">
+                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                    </button>` : '';
+
+                pillarsContainer.innerHTML += `
+                    <!-- Estrutura robusta para o pilar (Correção do bug) -->
+                    <div class="p-4 rounded-lg border-l-4 relative ${baseClasses}"> 
+                         
+                        ${deleteButton}
+
+                        <p class="font-bold text-lg mb-1 flex items-start">
+                            <i data-lucide="${pillar.icon}" class="w-5 h-5 mr-2 text-${baseClasses.split('-')[1]}-600 mt-0.5 flex-shrink-0"></i> 
+                            <!-- editable-name para o título simples do pilar (Removido contenteditable estático) -->
+                            <span class="editable-name" data-key="pillarName.${pillar.id}">${pillar.name}</span>
+                        </p>
+                        <!-- Conteúdo do Pilar (usa pillar-content-body para estabilidade e editable-content para salvar HTML) (Removido contenteditable estático) -->
+                        <div class="text-sm ml-7 pillar-content-body editable-content" 
+                             data-key="pillarContent.${pillar.id}">
+                            ${pillar.content}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // 2. Renderiza o Pilar de Progressão (Fora da lista principal)
+            if (progressionPillar) {
+                progressionPillarContainer.innerHTML = `
+                    <div class="text-sm pillar-content-body editable-content" 
+                         data-key="pillarContent.${progressionPillar.id}">
+                        ${progressionPillar.content}
+                    </div>
+                `;
+            }
+
+            // Re-renderiza os ícones Lucide após injetar o HTML
+            lucide.createIcons();
+            
+            // Se estiver no modo de edição, re-aplica o contenteditable nos elementos recém-renderizados
+            if (editMode) {
+                document.querySelectorAll('.editable-content, .editable-name').forEach(el => {
+                     el.contentEditable = "true";
+                });
+            }
+        }
+
+        // 3. FUNÇÕES DE INTERAÇÃO DO ALUNO
+
+        // Atualiza a carga anterior (campo de texto) no localStorage
+        function updateLoad(day, id, value) {
+            // Esta função pode ser usada tanto pelo aluno (Modo normal) quanto pelo consultor (Modo Edição)
+            const exercise = appData.trainingSchedule[day].find(e => e.id === id);
+            if (exercise) {
+                exercise.lastLoad = value;
+                saveData();
+            }
+        }
+        
+        // NOVO: Atualiza o link do vídeo (Campo de texto/URL) no localStorage
+        function updateVideoUrl(day, id, value) {
+            if (!editMode) return; // Só permite alteração no modo edição
+            
+            const exercise = appData.trainingSchedule[day].find(e => e.id === id);
+            if (exercise) {
+                exercise.videoUrl = value;
+                saveData();
+            }
+        }
+        
+        // Marca/desmarca o exercício como concluído (checkbox)
+        function toggleCompleted(day, id) {
+            if (editMode) return; // Não permite que o aluno marque como feito no modo de edição
+            
+            const exercise = appData.trainingSchedule[day].find(e => e.id === id);
+            if (exercise) {
+                exercise.completed = !exercise.completed;
+                saveData();
+                renderTraining(); // Re-renderiza para aplicar o efeito visual de 'completed'
+            }
+        }
+
+        // 4. FUNÇÕES DO MODO DE EDIÇÃO DO CONSULTOR
+        
+        // Busca o próximo ID disponível para um exercício
+        function getNextExerciseId() {
+            let maxId = 0;
+            Object.values(appData.trainingSchedule).forEach(dayExercises => {
+                dayExercises.forEach(exercise => {
+                    if (exercise.id > maxId) {
+                        maxId = exercise.id;
+                    }
+                });
+            });
+            return maxId + 1;
+        }
+
+        // Função para encontrar o próximo identificador de grupo (SS1, SS2, TS1, TS2)
+        function getNextGroupId(type) { // 'SS' para Superset, 'TS' para Triset
+            const currentExercises = appData.trainingSchedule[currentDay] || [];
+            
+            // Encontra todos os grupos do tipo atual (SS ou TS)
+            const groups = currentExercises
+                .map(e => e.group)
+                .filter(g => g && g.startsWith(type)); 
+            
+            // Extrai os números e encontra o máximo
+            const maxNum = groups.reduce((max, group) => {
+                const num = parseInt(group.substring(2)) || 0;
+                return num > max ? num : max;
+            }, 0);
+            
+            // Retorna o próximo ID
+            return `${type}${maxNum + 1}`;
+        }
+        
+        // Adiciona um novo pilar de instrução
+        function addNewPillar() {
+            if (!editMode) return;
+            
+            const numExistingPillars = appData.tabInstructions.pillars.length;
+            
+            // Encontra a próxima cor disponível que não está sendo usada nos pilares padrão
+            let nextColorClass = '';
+            let usedColors = appData.tabInstructions.pillars.map(p => p.colorClass);
+            
+            // Itera sobre as cores dinâmicas para encontrar a primeira não usada
+            for (let i = 0; i < dynamicPillarColors.length; i++) {
+                if (!usedColors.includes(dynamicPillarColors[i])) {
+                    nextColorClass = dynamicPillarColors[i];
+                    break;
+                }
+            }
+            
+            // Se todas as cores estiverem em uso, usa a primeira disponível
+            if (!nextColorClass) {
+                nextColorClass = dynamicPillarColors[0];
+            }
+
+
+            const newPillar = {
+                id: `pillar_custom_${Date.now()}`,
+                name: `Novo Pilar Personalizado`,
+                icon: 'lightbulb',
+                colorClass: nextColorClass,
+                content: `<p>Este é o conteúdo do novo pilar. Edite aqui.</p>`,
+                isDefault: false
+            };
+
+            appData.tabInstructions.pillars.push(newPillar);
+            saveData();
+            renderInstructions();
+            lucide.createIcons();
+        }
+
+        // Exclui um pilar de instrução (não padrão)
+        function deletePillar(event, id) {
+             event.stopPropagation();
+             if (!editMode) return;
+
+             const pillarIndex = appData.tabInstructions.pillars.findIndex(p => p.id === id);
+             // Pilares 1 a 6 são os padrões (Respiracao até Intensidade). 
+             // O pilar 7 é a progressão, que é renderizado separadamente, mas também não deve ser excluído.
+             const isDefault = pillarIndex > -1 && pillarIndex <= 6; 
+             
+             if (pillarIndex > -1 && !isDefault) {
+                // Usa modal customizado simples (simulado com confirm, mas ideal seria um modal UI)
+                if (confirm('Tem certeza que deseja excluir este pilar de instrução?')) {
+                    appData.tabInstructions.pillars.splice(pillarIndex, 1);
+                    saveData();
+                    renderInstructions();
+                }
+             } else if (isDefault) {
+                console.error("Não é possível excluir pilares padrão.");
+                // alert é proibido, usando console.error e um feedback simples (ideal seria um modal UI)
+                console.error("Não é possível excluir pilares padrão, apenas os personalizados."); 
+             }
+        }
+
+
+        // Adiciona um novo exercício
+        function addExercise(type) { // type: 'SS', 'TS', ou null
+            if (!editMode || !currentDay) {
+                // Se não houver dia ativo, o consultor precisa primeiro criar um.
+                if (Object.keys(appData.trainingSchedule).length === 0) {
+                    // alert é proibido, usando console.error e um feedback simples (ideal seria um modal UI)
+                    console.error('Você precisa criar um Treino primeiro (clique em "+ Novo Treino").');
+                }
+                return;
+            }
+
+            const newId = getNextExerciseId();
+            let groupIdentifier = null;
+
+            if (type) {
+                const currentExercises = appData.trainingSchedule[currentDay];
+                const lastExercise = currentExercises.length > 0 ? currentExercises[currentExercises.length - 1] : null;
+                
+                // Se o último exercício foi do mesmo tipo (SS ou TS), continua o mesmo grupo
+                if (lastExercise && lastExercise.group && lastExercise.group.startsWith(type)) {
+                    groupIdentifier = lastExercise.group;
+                } else {
+                    // Senão, cria um novo grupo (SS1, TS1, etc.)
+                    groupIdentifier = getNextGroupId(type);
+                }
+            }
+
+            const newExercise = {
+                id: newId,
+                name: 'Novo Exercício',
+                setsReps: '3 x 10',
+                technique: 'Foco no movimento.',
+                obs: '',
+                lastLoad: '0kg',
+                completed: false,
+                group: groupIdentifier,
+                videoUrl: '' // NOVO CAMPO
+            };
+
+            appData.trainingSchedule[currentDay].push(newExercise);
+            saveData();
+            renderTraining();
+        }
+
+        // Exclui um exercício
+        function deleteExercise(day, id) {
+            if (!editMode) return;
+            // Usa modal customizado simples (simulado com confirm, mas ideal seria um modal UI)
+            if (confirm(`Tem certeza que deseja excluir este exercício?`)) { 
+                appData.trainingSchedule[day] = appData.trainingSchedule[day].filter(e => e.id !== id);
+                saveData();
+                renderTraining();
+            }
+        }
+        
+        // Adiciona um novo dia de treino
+        function addNewTrainingDay() {
+            if (!editMode) return;
+            const newDayName = prompt("Digite o nome do novo treino (ex: Treino F (Braços e Cardio)):");
+            if (newDayName && newDayName.trim()) {
+                const cleanName = newDayName.trim();
+                if (appData.trainingSchedule[cleanName]) {
+                    console.error('Este nome de treino já existe. Por favor, escolha outro.');
+                    return;
+                }
+                appData.trainingSchedule[cleanName] = []; // Começa vazio
+                saveData();
+                currentDay = cleanName; // Mudar para o novo treino
+                renderTraining();
+                switchTab('training');
+            }
+        }
+        
+        // Exclui um dia de treino
+        function deleteTrainingDay(event, day) {
+            event.stopPropagation(); // Evita que o switchTrainingDay seja chamado
+            if (!editMode || Object.keys(appData.trainingSchedule).length < 1) return;
+            
+            let message = `Tem certeza que deseja excluir o treino "${day}"?`;
+            
+            // Não impede a exclusão se for o último, mas avisa
+            if (Object.keys(appData.trainingSchedule).length === 1) {
+                message = `ATENÇÃO: Este é o ÚLTIMO treino cadastrado. Excluí-lo deixará sua planilha vazia. Tem certeza que deseja excluir "${day}"?`;
+            }
+
+            // Usa modal customizado simples (simulado com confirm, mas ideal seria um modal UI)
+            if (confirm(message)) { 
+                delete appData.trainingSchedule[day];
+                
+                // Se o dia excluído era o ativo, muda para o primeiro dia restante
+                if (currentDay === day) {
+                    currentDay = Object.keys(appData.trainingSchedule)[0] || '';
+                }
+                saveData();
+                renderTraining();
+            }
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const app = document.getElementById('app');
+            const editButton = document.getElementById('editToggle');
+            
+            // Elementos com editable-content (HTML complexo) e editable-name (Texto simples)
+            const editableContentElements = document.querySelectorAll('.editable-content'); 
+            const editableNameElements = document.querySelectorAll('.editable-name'); 
+            
+            // Adiciona ou remove a classe que controla os estilos visuais de edição
+            app.classList.toggle('edit-mode', editMode);
+
+            if (editMode) {
+                editButton.classList.add('bg-yellow-500', 'text-white');
+                editButton.classList.remove('bg-gray-200', 'text-gray-700');
+                editButton.innerHTML = `<i data-lucide="check" class="w-4 h-4 mr-2"></i> Salvar Edição`;
+                
+                // Habilita edição em campos de conteúdo complexo (pilares, observações)
+                editableContentElements.forEach(el => {
+                    el.contentEditable = "true";
+                });
+                // Habilita edição em campos de nome simples (título, aluno, nome do exercício)
+                editableNameElements.forEach(el => {
+                    el.contentEditable = "true";
+                });
+
+                // Desabilita as interações do aluno e habilita a edição de carga/vídeo para o consultor
+                document.querySelectorAll('input[type="checkbox"]').forEach(el => el.disabled = true);
+                document.querySelectorAll('input[type="text"]').forEach(el => el.disabled = false); 
+                document.querySelectorAll('input[type="url"]').forEach(el => el.disabled = false); 
+                
+            } else {
+                editButton.classList.remove('bg-yellow-500', 'text-white');
+                editButton.classList.add('bg-gray-200', 'text-gray-700');
+                editButton.innerHTML = `<i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Modo Edição`;
+                
+                // Salva o novo conteúdo no appData
+                saveEditableContent();
+                
+                // Desabilita edição em campos de conteúdo complexo
+                editableContentElements.forEach(el => {
+                    el.contentEditable = "false";
+                });
+                // Desabilita edição em campos de nome simples
+                editableNameElements.forEach(el => {
+                    el.contentEditable = "false";
+                });
+
+                // Reabilita as interações do aluno e desabilita a edição de carga/vídeo para o aluno
+                document.querySelectorAll('input[type="checkbox"]').forEach(el => el.disabled = false);
+                document.querySelectorAll('input[type="text"]').forEach(el => el.disabled = false); // Carga ainda editável pelo aluno
+                document.querySelectorAll('input[type="url"]').forEach(el => el.disabled = true); // Vídeo desabilitado para o aluno
+            }
+            
+            // Re-renderiza o conteúdo para aplicar as novas classes e estados
+            renderInstructions();
+            renderTraining();
+            saveData();
+            
+            // Re-renderiza os ícones Lucide após mudar o texto do botão
+            lucide.createIcons();
+        }
+        
+        // Salva o conteúdo editado dos campos na estrutura appData
+        function saveEditableContent() {
+            // Salva conteúdos de texto simples e HTML (pilares, nome de treino, nome de exercício)
+            document.querySelectorAll('.editable-content, .editable-name').forEach(el => {
+                const keyPath = el.dataset.key; 
+                // Usa innerHTML para pegar o HTML completo (incluindo <ul>, <p> nos pilares)
+                const value = el.innerHTML.trim(); 
+
+                if (!keyPath) return;
+
+                if (keyPath.startsWith('trainingScheduleName')) {
+                    // Lógica para renomear o dia de treino
+                    const oldDayKey = el.dataset.dayKey;
+                    
+                    // Se houve alteração no nome
+                    if (oldDayKey !== value && value !== "") {
+                        if (appData.trainingSchedule[value] && value !== oldDayKey) {
+                             console.warn("Nome de treino já existe, não foi renomeado.");
+                             el.innerHTML = oldDayKey; 
+                             return;
+                        }
+                        
+                        const exercises = appData.trainingSchedule[oldDayKey];
+                        delete appData.trainingSchedule[oldDayKey];
+                        appData.trainingSchedule[value] = exercises;
+                        
+                        if (currentDay === oldDayKey) {
+                            currentDay = value;
+                        }
+                    }
+                } else if (keyPath.startsWith('pillarName.')) {
+                    // Lógica para salvar o nome/título do pilar
+                    const pillarId = keyPath.split('.')[1];
+                    const pillar = appData.tabInstructions.pillars.find(p => p.id === pillarId);
+                    if (pillar) {
+                         pillar.name = value;
+                    }
+                } else if (keyPath.startsWith('pillarContent.')) {
+                    // Lógica para salvar o conteúdo/corpo do pilar (pode conter HTML)
+                    const pillarId = keyPath.split('.')[1];
+                    const pillar = appData.tabInstructions.pillars.find(p => p.id === pillarId);
+                    if (pillar) {
+                         pillar.content = value;
+                    }
+                } else if (keyPath.includes('.')) {
+                    // Lógica para salvar campos de treino (nested keys - nome, reps, obs, técnica)
+                    const parts = keyPath.split('.'); 
+                    const listName = parts[0]; 
+                    const dayKey = parts[1];
+                    const index = parseInt(parts[2]);
+                    const prop = parts[3]; 
+
+                    if (appData[listName] && appData[listName][dayKey] && appData[listName][dayKey][index]) {
+                        appData[listName][dayKey][index][prop] = value;
+                    }
+                } else {
+                    // Lógica para salvar campos de instruções (top-level keys)
+                    appData.tabInstructions[keyPath] = value;
+                }
+            });
+        }
+        
+        // Função para mudar o dia de treino
+        function switchTrainingDay(day) {
+            currentDay = day;
+            renderTraining();
+        }
+
+        // 5. FUNÇÕES GERAIS DA INTERFACE
+        
+        // Função para alternar entre as abas
+        function switchTab(tabName) {
+            const tabs = ['instructions', 'training'];
+            tabs.forEach(tab => {
+                const button = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+                const content = document.getElementById(`content${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+                
+                if (tab === tabName) {
+                    button.classList.add('active');
+                    content.classList.remove('hidden');
+                } else {
+                    button.classList.remove('active');
+                    content.classList.add('hidden');
+                }
+            });
+            
+            // Garante que os ícones sejam renderizados e o conteúdo atualizado após a mudança de aba
+            if (tabName === 'instructions') {
+                renderInstructions();
+            } else if (tabName === 'training') {
+                renderTraining();
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Função de inicialização
+        function init() {
+            loadData();
+            
+            // Se não houver nenhum treino e não estiver no modo de edição, tenta criar um default simples
+            if (Object.keys(appData.trainingSchedule).length === 0) {
+                // Cria um treino de exemplo se for a primeira vez
+                appData.trainingSchedule['Treino A (Exemplo)'] = [
+                    // Adiciona o campo videoUrl nos exercícios padrão
+                    { id: 1, name: 'Supino Reto', setsReps: '3 x 10', technique: 'Controle a descida.', obs: 'Foco na cadência negativa.', lastLoad: '0kg', completed: false, group: null, videoUrl: 'https://youtu.be/some-example-link' },
+                    { id: 2, name: 'Rosca Direta', setsReps: '3 x 12', technique: 'Cotovelos fixos.', obs: 'Movimento lento e focado.', lastLoad: '0kg', completed: false, group: null, videoUrl: '' },
+                ];
+                currentDay = 'Treino A (Exemplo)';
+                saveData();
+            }
+
+            // Renderiza o conteúdo inicial
+            renderInstructions();
+            renderTraining();
+
+            // Configura o listener do botão de edição
+            document.getElementById('editToggle').addEventListener('click', toggleEditMode);
+
+            // Garante que a aba de instruções esteja ativa no carregamento
+            switchTab('instructions'); 
+            
+            // Cria os ícones Lucide
+            lucide.createIcons();
+        }
+
+        // Inicializa a aplicação quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>
