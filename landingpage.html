@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth scroll-pt-28">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benai Bernardo | Consultoria de Treinamento</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Outfit', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#06194A',
+                            cyan: '#00AEEF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * { animation: sweep .5s ease-in-out; }
+        @keyframes sweep {
+            0%    {opacity: 0; transform: translateY(-10px)}
+            100%  {opacity: 1; transform: translateY(0)}
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-body antialiased overflow-x-hidden selection:bg-brand-cyan selection:text-white">
+
+    <div id="progressBar" class="fixed top-0 left-0 h-1.5 bg-brand-cyan z-[60] w-0 transition-all duration-150 rounded-r-full shadow-[0_0_10px_rgba(0,174,239,0.5)]"></div>
+
+    <header class="w-full py-5 flex flex-col items-center justify-center bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200 sticky top-0 z-50 transition-all duration-300">
+        <h2 class="text-2xl md:text-4xl font-heading font-extrabold text-brand-navy tracking-wide uppercase">Benai Bernardo</h2>
+        <div class="h-1 w-24 bg-brand-cyan rounded-full mt-1.5 mb-1"></div>
+        <p class="text-[10px] md:text-xs font-medium text-slate-500 tracking-[0.2em] uppercase">Consultoria de Treinamento</p>
+    </header>
+
+    <a href="https://wa.me/5541997222664?text=Ol%C3%A1%20Benai%2C%20vi%20a%20sua%20p%C3%A1gina%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20consultoria." target="_blank" class="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 hover:scale-110 hover:shadow-green-500/40 transition-all duration-300 z-50 group flex items-center justify-center">
+        <i class="fab fa-whatsapp text-3xl"></i>
+        <span class="absolute right-14 bg-slate-900 text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Fale comigo</span>
+    </a>
+
+    <section class="relative min-h-[70vh] flex flex-col justify-center items-center text-center p-6 bg-gradient-to-b from-slate-50 to-blue-50/50 overflow-hidden rounded-b-[3rem] border-b border-blue-100 pt-10">
+        <div class="max-w-4xl mx-auto z-10 reveal">
+            <h1 class="text-4xl md:text-6xl font-heading font-extrabold text-slate-900 tracking-tight leading-tight">
+                Entenda o seu corpo. <br>
+                <span class="text-brand-cyan">Evolua com paciência.</span>
+            </h1>
+            <p class="mt-6 text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                Mais do que prescrever exercícios, meu objetivo é ensinar você a treinar. Uma progressão gradual focada em longevidade e qualidade de vida.
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#sobre" class="px-8 py-3.5 text-base font-medium text-white bg-brand-navy rounded-xl transition-all duration-300 hover:bg-blue-800 shadow-lg hover:shadow-brand-navy/30">
+                    Como eu trabalho
+                </a>
+                <a href="#planos" class="px-8 py-3.5 text-base font-medium text-slate-700 bg-white border border-slate-300 rounded-xl transition-all duration-300 hover:border-brand-cyan hover:text-brand-cyan">
+                    Ver Planos
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="sobre" class="py-24 px-6 bg-white max-w-4xl mx-auto reveal">
+        <div class="text-center">
+            <h2 class="text-3xl md:text-4xl font-heading font-bold text-brand-navy mb-6">Quem está por trás do seu treino?</h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                Muito prazer, sou o Benai. Aos 36 anos, e com mais de uma década de experiência lidando diretamente com o público, aprendi que o maior erro do mercado fitness atual é a falta de escuta e empatia. Sobram planilhas genéricas e falta cuidado real.
+            </p>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                Atuo em academias de treinamento personalizado onde o atendimento próximo e o cuidado com o aluno não são vistos como um "diferencial", mas sim como uma obrigação inegociável. É exatamente esse padrão de excelência e atenção aos detalhes que trago comigo e entrego a cada um dos meus alunos na consultoria.
+            </p>
+            <p class="text-slate-600 leading-relaxed mb-6">
+                Minha visão de treinamento é guiada pela longevidade, consciência corporal e autonomia. Sou praticante de calistenia e entusiasta de treinamentos híbridos (musculação, mobilidade, flow). Não acredito no extremismo que gera lesões, acredito na consistência e na paciência. Meu objetivo não é apenas prescrever exercícios, mas te ensinar a treinar para a vida toda, respeitando a sua biomecânica e construindo força real de forma gradual.
+            </p>
+
+            <div class="my-12 p-8 md:p-10 bg-brand-navy rounded-[2rem] shadow-xl relative overflow-hidden text-center max-w-3xl mx-auto transform hover:scale-[1.01] transition-transform duration-300">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-brand-cyan to-orange-500"></div>
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-brand-cyan/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <i class="fas fa-quote-left text-4xl text-brand-cyan/30 mb-6"></i>
+                <p class="text-lg md:text-xl text-slate-200 font-heading font-light leading-relaxed italic">
+                    "Tudo o que você precisa é o peso do próprio corpo para se exercitar, ter saúde, qualidade de vida e longevidade. <strong class="text-brand-cyan font-bold">O movimento cura!</strong> Meu foco é ajudar você a se movimentar. Com a orientação certa, consistência, resiliência e aceitando o processo, você consegue tudo. Prepare-se agora para viver os próximos momentos da sua vida com muito mais qualidade e alegria."
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 text-left max-w-2xl mx-auto">
+                <div class="border-l-2 border-orange-500 pl-4 bg-slate-50 p-4 rounded-r-xl">
+                    <h4 class="font-heading font-bold text-slate-800 text-lg">Paciência</h4>
+                    <p class="text-sm text-slate-500 mt-1">Evolução sem forçar seus limites precocemente.</p>
+                </div>
+                <div class="border-l-2 border-brand-cyan pl-4 bg-slate-50 p-4 rounded-r-xl">
+                    <h4 class="font-heading font-bold text-slate-800 text-lg">Longevidade</h4>
+                    <p class="text-sm text-slate-500 mt-1">Treinar hoje para ter qualidade de vida no futuro.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 bg-brand-navy text-white relative">
+        <div class="max-w-5xl mx-auto text-center reveal">
+            <h2 class="text-3xl md:text-4xl font-heading font-bold text-white mb-6">Tecnologia a favor do seu corpo</h2>
+            <p class="text-slate-300 leading-relaxed mb-12 max-w-2xl mx-auto">
+                Para garantir que você não fique perdido, desenvolvi um Web App próprio. Lá, você terá acesso ao seu treino completo, com vídeos demonstrativos de cada exercício para garantir a execução correta.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-3xl mx-auto">
+                <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                    <div class="w-10 h-10 bg-brand-cyan/20 text-brand-cyan rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-mobile-screen"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-lg mb-2">Direto no Navegador</h3>
+                    <p class="text-sm text-slate-400">Não precisa baixar nada. Acesse seu treino de qualquer celular, a qualquer momento.</p>
+                </div>
+                <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                    <div class="w-10 h-10 bg-brand-cyan/20 text-brand-cyan rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-lg mb-2">Registro de Progresso</h3>
+                    <p class="text-sm text-slate-400">Anote suas cargas e percepção de esforço diretamente no app para acompanharmos sua evolução.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 bg-slate-100 border-b border-slate-200">
+        <div class="max-w-6xl mx-auto text-center mb-16 reveal">
+            <h2 class="text-3xl md:text-4xl font-heading font-bold text-brand-navy">A base da nossa sessão</h2>
+            <p class="mt-4 text-slate-600 text-base max-w-2xl mx-auto">Uma metodologia pensada para o longo prazo, estruturada em 4 passos lógicos e sequenciais.</p>
+        </div>
+
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 reveal hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fas fa-child-reaching text-xl"></i>
+                </div>
+                <h3 class="text-xl font-heading font-bold mb-2 text-slate-800">Mobilidade</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Liberamos suas articulações para que o seu corpo se mova sem restrições ou dores.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 reveal delay-100 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fas fa-bolt text-xl"></i>
+                </div>
+                <h3 class="text-xl font-heading font-bold mb-2 text-slate-800">Ativação</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Ensinamos a sua musculatura a "acordar" da forma correta antes do esforço.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 reveal delay-200 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-rose-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fas fa-dumbbell text-xl"></i>
+                </div>
+                <h3 class="text-xl font-heading font-bold mb-2 text-slate-800">Força & Carga</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">O momento de desafiar o corpo com progressão gradual e foco em hipertrofia.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 reveal delay-300 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-sky-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fas fa-leaf text-xl"></i>
+                </div>
+                <h3 class="text-xl font-heading font-bold mb-2 text-slate-800">Desaceleração</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">O cuidado final. Baixamos a frequência cardíaca para otimizar a recuperação.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-5xl mx-auto reveal">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-brand-navy">Para quem é a consultoria?</h2>
+                <p class="mt-4 text-slate-600 text-base max-w-2xl mx-auto">O alinhamento de expectativas é o primeiro passo para o sucesso.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-brand-cyan/20">
+                    <div class="w-12 h-12 bg-brand-cyan/10 text-brand-cyan rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-check text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-4 text-slate-800">É para você se:</h3>
+                    <ul class="space-y-4 text-slate-600 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-brand-cyan mt-1"></i>
+                            <span>Busca longevidade, saúde e qualidade de vida acima de tudo.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-brand-cyan mt-1"></i>
+                            <span>Quer aprender a treinar com consciência corporal e autonomia.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-brand-cyan mt-1"></i>
+                            <span>Valoriza um acompanhamento próximo e humano.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-brand-cyan mt-1"></i>
+                            <span>Entende que consistência e paciência trazem resultados duradouros.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-orange-500/20">
+                    <div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-times text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-4 text-slate-800">NÃO é para você se:</h3>
+                    <ul class="space-y-4 text-slate-600 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-times-circle text-orange-500 mt-1"></i>
+                            <span>Busca atalhos ou resultados milagrosos em 30 dias.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-times-circle text-orange-500 mt-1"></i>
+                            <span>Não está disposto a ter paciência com o processo do próprio corpo.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-times-circle text-orange-500 mt-1"></i>
+                            <span>Prefere planilhas genéricas sem um acompanhamento real.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-times-circle text-orange-500 mt-1"></i>
+                            <span>Não tem comprometimento com a própria saúde a longo prazo.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 bg-white max-w-4xl mx-auto reveal">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-heading font-bold text-brand-navy">Como funciona a consultoria?</h2>
+            <p class="mt-4 text-slate-600 text-base">Tudo o que você precisa saber antes de iniciarmos.</p>
+        </div>
+
+        <div class="space-y-4">
+            <details class="group bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer">
+                <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-slate-800">
+                    <span>Qualquer pessoa pode entrar para a consultoria?</span>
+                    <span class="transition group-open:rotate-180 text-brand-cyan">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </summary>
+                <div class="text-slate-600 px-6 pb-6 text-sm leading-relaxed border-t border-slate-200 pt-4 mt-2">
+                    <p><strong>Não.</strong> No momento, as vagas são extremamente limitadas e o acesso é feito majoritariamente por indicação. Restrinjo o número de alunos para garantir a qualidade premium e o atendimento humano que você merece.</p>
+                </div>
+            </details>
+
+            <details class="group bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer">
+                <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-slate-800">
+                    <span>Como funciona a entrega do treino?</span>
+                    <span class="transition group-open:rotate-180 text-brand-cyan">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </summary>
+                <div class="text-slate-600 px-6 pb-6 text-sm leading-relaxed border-t border-slate-200 pt-4 mt-2">
+                    <ol class="list-decimal list-inside space-y-2 ml-2">
+                        <li><strong>Assinatura:</strong> Você escolhe o plano ideal abaixo e realiza o pagamento.</li>
+                        <li><strong>Anamnese Profunda:</strong> Imediatamente, você é direcionado para um questionário sobre a sua rotina, dores e objetivos.</li>
+                        <li><strong>O Web App:</strong> Com os dados em mãos, estruturo a periodização e envio o seu acesso exclusivo ao nosso Web App. Cada exercício terá vídeos explicativos, e qualquer dúvida técnica será tirada diretamente comigo via suporte ou no nosso check-up semanal.</li>
+                    </ol>
+                </div>
+            </details>
+
+            <details class="group bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer">
+                <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-slate-800">
+                    <span>Preciso treinar em uma academia completa?</span>
+                    <span class="transition group-open:rotate-180 text-brand-cyan">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </summary>
+                <p class="text-slate-600 px-6 pb-6 text-sm leading-relaxed border-t border-slate-200 pt-4 mt-2">
+                    Não! A consultoria é 100% adaptada à sua realidade. Podemos montar treinos eficientes usando apenas o peso do seu corpo na sala de casa, ou explorar todos os equipamentos se você tiver acesso a uma academia.
+                </p>
+            </details>
+
+            <details class="group bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer">
+                <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-6 text-slate-800">
+                    <span>Como funciona a garantia da consultoria?</span>
+                    <span class="transition group-open:rotate-180 text-brand-cyan">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </summary>
+                <p class="text-slate-600 px-6 pb-6 text-sm leading-relaxed border-t border-slate-200 pt-4 mt-2">
+                    Você tem 7 dias de garantia a partir da data de pagamento. Se após o preenchimento da anamnese e o recebimento do planejamento pelo WebApp você sentir que a metodologia não é a ideal para o seu momento, basta solicitar o cancelamento e o valor será reembolsado integralmente, sem burocracias.
+                </p>
+            </details>
+        </div>
+    </section>
+
+    <section id="planos" class="py-16 px-6 bg-slate-50 max-w-7xl mx-auto rounded-[3rem] mb-20 border border-slate-200 reveal">
+        <div class="text-center mb-16">
+            <span class="inline-block px-3 py-1 bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider rounded-full mb-3">Vagas Limitadas</span>
+            <h2 class="text-3xl md:text-4xl font-heading font-bold text-brand-navy">Valores da Consultoria</h2>
+            <p class="mt-4 text-slate-600">Acesso exclusivo mediante convite ou indicação.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-12 max-w-6xl mx-auto">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col hover:-translate-y-1 transition-transform">
+                <h3 class="text-xl font-heading font-bold text-brand-navy mb-1">Mensal Individual</h3>
+                <p class="text-slate-500 text-sm mb-6 pb-6 border-b border-slate-100">Renovação a cada 30 dias.</p>
+                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 150<span class="text-sm text-slate-500 font-body font-normal">/mês</span></div>
+                <p class="text-xs text-transparent mb-6 select-none" aria-hidden="true">Espaçador</p>
+                <ul class="space-y-3 mb-8 text-slate-600 text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Acesso ao Web App</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Check-in de acompanhamento</li>
+                </ul>
+                <a href="https://www.asaas.com/c/ipcsin79y1wwgxgk" target="_blank" class="block text-center w-full py-3 text-brand-navy font-medium border border-slate-300 rounded-xl hover:border-brand-cyan hover:text-brand-cyan transition-colors">Selecionar</a>
+            </div>
+            
+            <div class="bg-brand-navy p-8 rounded-3xl shadow-xl flex flex-col hover:-translate-y-1 transition-transform relative overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-1.5 bg-brand-cyan"></div>
+                <h3 class="text-xl font-heading font-bold text-white mb-1">Trimestral Individual</h3>
+                <p class="text-slate-300 text-sm mb-6 pb-6 border-b border-slate-700">Um ciclo de adaptação real.</p>
+                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 139<span class="text-sm text-slate-400 font-body font-normal">/mês</span></div>
+                <p class="text-xs text-slate-400 mb-6">Total de R$ 417 no trimestre</p>
+                <ul class="space-y-3 mb-8 text-slate-200 text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Todos os benefícios</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Ajustes de periodização</li>
+                </ul>
+                <a href="https://www.asaas.com/c/oonjexsbw08fh8va" target="_blank" class="block text-center w-full py-3 text-brand-navy font-bold bg-brand-cyan rounded-xl hover:bg-cyan-400 transition-colors">Selecionar</a>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col hover:-translate-y-1 transition-transform">
+                <h3 class="text-xl font-heading font-bold text-brand-navy mb-1">Semestral Individual</h3>
+                <p class="text-slate-500 text-sm mb-6 pb-6 border-b border-slate-100">Para quem pensa a longo prazo.</p>
+                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 129<span class="text-sm text-slate-500 font-body font-normal">/mês</span></div>
+                <p class="text-xs text-slate-400 mb-6">Total de R$ 774 no semestre</p>
+                <ul class="space-y-3 mb-8 text-slate-600 text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Todos os benefícios</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Maior custo-benefício</li>
+                </ul>
+                <a href="https://www.asaas.com/c/ppgwt600o1emc90z" target="_blank" class="block text-center w-full py-3 text-brand-navy font-medium border border-slate-300 rounded-xl hover:border-brand-cyan hover:text-brand-cyan transition-colors">Selecionar</a>
+            </div>
+        </div>
+
+        <div class="text-center mb-8">
+            <h3 class="text-2xl font-heading font-bold text-brand-navy">Planos para Casais</h3>
+            <p class="mt-2 text-slate-600">Treinem juntos com um valor especial.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-8 max-w-6xl mx-auto">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col hover:-translate-y-1 transition-transform">
+                <h3 class="text-xl font-heading font-bold text-brand-navy mb-1">Mensal Casal</h3>
+                <p class="text-slate-500 text-sm mb-6 pb-6 border-b border-slate-100">Acesso para duas pessoas.</p>
+                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 250<span class="text-sm text-slate-500 font-body font-normal">/mês</span></div>
+                <p class="text-xs text-transparent mb-6 select-none" aria-hidden="true">Espaçador</p>
+                <ul class="space-y-3 mb-8 text-slate-600 text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>2 Acessos ao Web App</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Economia de R$ 50/mês</li>
+                </ul>
+                <a href="https://www.asaas.com/c/1t1rlw6rouetzdh0" target="_blank" class="block text-center w-full py-3 text-brand-navy font-medium border border-slate-300 rounded-xl hover:border-brand-cyan hover:text-brand-cyan transition-colors">Selecionar</a>
+            </div>
+            
+            <div class="bg-brand-navy p-8 rounded-3xl shadow-xl flex flex-col hover:-translate-y-1 transition-transform relative overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-1.5 bg-brand-cyan"></div>
+                <h3 class="text-xl font-heading font-bold text-white mb-1">Trimestral Casal</h3>
+                <p class="text-slate-300 text-sm mb-6 pb-6 border-b border-slate-700">Comprometimento a dois.</p>
+                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 230<span class="text-sm text-slate-400 font-body font-normal">/mês</span></div>
+                <p class="text-xs text-slate-400 mb-6">Total de R$ 690 no trimestre</p>
+                <ul class="space-y-3 mb-8 text-slate-200 text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>2 Acessos ao Web App</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Economia de R$ 60 no plano</li>
+                </ul>
+                <a href="https://www.asaas.com/c/gwsg9k3021hu4dwn" target="_blank" class="block text-center w-full py-3 text-brand-navy font-bold bg-brand-cyan rounded-xl hover:bg-cyan-400 transition-colors">Selecionar</a>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col hover:-translate-y-1 transition-transform">
+                <h3 class="text-xl font-heading font-bold text-brand-navy mb-1">Semestral Casal</h3>
+                <p class="text-slate-500 text-sm mb-6 pb-6 border-b border-slate-100">Para quem pensa a longo prazo.</p>
+                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 210<span class="text-sm text-slate-500 font-body font-normal">/mês</span></div>
+                <p class="text-xs text-slate-400 mb-6">Total de R$ 1.260 no semestre</p>
+                <ul class="space-y-3 mb-8 text-slate-600 text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>2 Acessos ao Web App</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Maior custo-benefício</li>
+                </ul>
+                <a href="https://www.asaas.com/c/rxdb4hqlvwen9o3d" target="_blank" class="block text-center w-full py-3 text-brand-navy font-medium border border-slate-300 rounded-xl hover:border-brand-cyan hover:text-brand-cyan transition-colors">Selecionar</a>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-orange-50 to-white p-8 md:p-10 rounded-[2rem] shadow-lg border border-orange-100 max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-8 mt-12 relative overflow-hidden group hover:shadow-orange-500/10 transition-shadow duration-300">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-200/40 rounded-full blur-3xl group-hover:bg-orange-300/40 transition-colors pointer-events-none"></div>
+
+            <div class="flex-shrink-0 w-20 h-20 bg-orange-100 rounded-2xl flex items-center justify-center border border-orange-200 shadow-sm rotate-3 group-hover:rotate-0 transition-transform duration-300 z-10">
+                <i class="fas fa-location-dot text-4xl text-orange-600"></i>
+            </div>
+            
+            <div class="flex-grow text-center md:text-left z-10">
+                <span class="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider rounded-full mb-3">Atendimento VIP em Curitiba</span>
+                <h4 class="text-2xl font-heading font-bold text-slate-900">Sessão de Alinhamento Presencial</h4>
+                <p class="text-slate-600 mt-3 text-sm leading-relaxed">Exclusivo para alunos ativos da consultoria online. Um atendimento realizado no conforto e privacidade do seu <strong class="text-slate-800">condomínio ou residência</strong>, focado em avaliar a sua biomecânica e ajustar a execução perfeitamente.</p>
+                <div class="mt-4 inline-flex items-center gap-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-100">
+                    <i class="fas fa-star text-orange-400 text-sm"></i>
+                    <span class="text-xs text-orange-800 font-medium">Em breve: Avaliação Física completa disponível como serviço adicional.</span>
+                </div>
+            </div>
+            
+            <div class="flex-shrink-0 text-center w-full md:w-auto z-10 flex flex-col items-center md:items-end">
+                <div class="mb-4 text-center md:text-right">
+                    <span class="block text-sm text-slate-500 mb-1">Valor avulso (Individual)</span>
+                    <span class="text-3xl font-heading font-extrabold text-slate-900">R$ 100<span class="text-sm text-slate-500 font-body font-normal">/aula</span></span>
+                </div>
+                <div class="mb-4 text-center md:text-right">
+                    <span class="block text-sm text-slate-500 mb-1">Valor avulso (Casal)</span>
+                    <span class="text-3xl font-heading font-extrabold text-slate-900">R$ 160<span class="text-sm text-slate-500 font-body font-normal">/aula</span></span>
+                    <span class="block text-xs text-slate-400 mt-1">(R$ 80,00 por pessoa)</span>
+                </div>
+                <a href="https://wa.me/5541997222664?text=Ol%C3%A1%20Benai%2C%20sou%20aluno%20da%20consultoria%20e%20gostaria%20de%20verificar%20a%20sua%20disponibilidade%20para%20uma%20sess%C3%A3o%20de%20alinhamento%20presencial." target="_blank" class="block w-full md:w-auto text-center px-8 py-3.5 text-white font-medium bg-orange-500 rounded-xl hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 whitespace-nowrap">
+                    Consultar Disponibilidade
+                </a>
+                <span class="block mt-3 text-xs text-orange-600 font-medium">Vagas limitadas por mês</span>
+                <p class="mt-4 text-[10px] text-slate-500 max-w-[250px] text-center md:text-right leading-tight">
+                    * Valores válidos para atendimentos em um raio de até 5 km. Para distâncias maiores, há uma taxa fixa de deslocamento de R$ 25,00 por aula.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 px-6 border-t border-slate-800">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            
+            <div class="text-center md:text-left">
+                <h3 class="text-2xl font-heading font-extrabold text-white tracking-wide uppercase">Benai Bernardo</h3>
+                <p class="text-xs font-medium text-slate-500 tracking-[0.2em] uppercase mt-1">Consultoria de Treinamento</p>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="https://instagram.com/benaibernardo" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-brand-cyan hover:text-white transition-colors duration-300">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://wa.me/5541997222664" target="_blank" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors duration-300">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="max-w-6xl mx-auto mt-8 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+            <p>&copy; 2026 Benai Bernardo. Todos os direitos reservados.</p>
+            <p>Acesso e atendimento exclusivo por indicação.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            const hiddenElements = document.querySelectorAll('.reveal');
+            hiddenElements.forEach((el) => observer.observe(el));
+        });
+
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progressBar").style.width = scrolled + "%";
+        };
+    </script>
+</body>
+</html>
