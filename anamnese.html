@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Benai Bernardo | Anamnese</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary: #001F5B; --primary-light: #1e3a8a;
+            --accent: #00A8E8; --accent-hover: #0284c7;
+            --orange: #f97316; --orange-hover: #ea580c;
+            --bg: #f8fafc; --surface: #ffffff;
+            --text: #334155; --text-muted: #64748b;
+            --border: #e2e8f0;
+            --font-head: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); outline: none; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        /* HEADER */
+        .header { background: var(--surface); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .logo-container { text-align: center; }
+        .logo { font-family: var(--font-head); font-weight: 800; font-size: 1.4rem; color: var(--primary); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1; }
+        .logo span { color: var(--accent); }
+        .logo-sub { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
+
+        /* MAIN CONTAINER */
+        .container { max-width: 650px; margin: 20px auto; padding: 0 20px; flex: 1; display: flex; flex-direction: column; }
+
+        /* PROGRESS BAR */
+        .progress-container { margin-bottom: 25px; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .progress-track { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--orange); width: 0%; transition: width 0.5s ease; border-radius: 4px; }
+
+        /* WIZARD CARDS */
+        .step-card { background: var(--surface); border-radius: 24px; padding: 35px 30px; box-shadow: 0 10px 40px -10px rgba(0,31,91,0.08); border: 1px solid var(--border); display: none; animation: fadeIn 0.4s ease; flex-direction: column; gap: 24px; }
+        .step-card.active { display: flex; }
+        
+        .step-header { text-align: center; margin-bottom: 10px; }
+        .step-header h2 { font-family: var(--font-head); font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+        .step-header p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+
+        /* INPUTS */
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .inp { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; color: var(--text); transition: 0.2s; background: #f8fafc; }
+        .inp:focus { border-color: var(--orange); background: #fff; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
+        textarea.inp { resize: vertical; min-height: 120px; line-height: 1.5; }
+
+        /* OPTION CARDS (RADIO & CHECKBOX) */
+        .opt-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .opt-grid-2 { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 480px) { .opt-grid-2 { grid-template-columns: 1fr; } }
+        
+        .opt-label { display: flex; align-items: center; gap: 15px; padding: 16px; border: 2px solid var(--border); border-radius: 16px; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; background: var(--surface); }
+        .opt-label:hover { background: #fff7ed; border-color: #fed7aa; }
+        .opt-label.selected { border-color: var(--orange); background: #fff7ed; }
+        .opt-radio, .opt-checkbox { accent-color: var(--orange); width: 22px; height: 22px; flex-shrink: 0; cursor: pointer; }
+        .opt-content b { display: block; font-family: var(--font-head); color: var(--primary); font-size: 1.05rem; margin-bottom: 2px; }
+        .opt-content span { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; display: block; }
+
+        /* HELPER TAGS (EQUIPAMENTOS) */
+        .helper-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .tag:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+        /* TERMS BOX */
+        .terms-box { background: #f8fafc; border: 1px solid var(--border); padding: 20px; border-radius: 16px; }
+        .term-item { display: flex; gap: 12px; margin-bottom: 15px; cursor: pointer; align-items: flex-start; }
+        .term-item:last-child { margin-bottom: 0; }
+        .term-text { font-size: 0.85rem; color: var(--text); line-height: 1.5; }
+        .term-text b { color: var(--primary); display: block; margin-bottom: 4px; font-size: 0.9rem; }
+
+        /* NAVIGATION BUTTONS */
+        .nav-btns { display: flex; gap: 12px; margin-top: 10px; }
+        .btn { flex: 1; padding: 18px; border-radius: 14px; font-weight: 800; font-size: 1.05rem; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-head); letter-spacing: 0.5px; text-transform: uppercase; }
+        .btn-next { background: var(--orange); color: white; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.25); }
+        .btn-next:hover { background: var(--orange-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3); }
+        .btn-prev { background: transparent; color: var(--text-muted); border: 2px solid var(--border); }
+        .btn-prev:hover { border-color: var(--text-muted); color: var(--text); background: #f8fafc; }
+
+        /* SUCCESS SCREEN */
+        .success-box { text-align: center; padding: 40px 20px; }
+        .success-icon { width: 90px; height: 90px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 2.5rem; }
+        .success-box h2 { font-family: var(--font-head); font-size: 2rem; color: var(--primary); margin-bottom: 15px; }
+        .success-box p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 30px; }
+
+        /* WELCOME SCREEN */
+        .welcome-box { text-align: center; padding: 10px 10px; }
+        .welcome-icon { width: 80px; height: 80px; background: #e0f2fe; color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem; }
+        .welcome-box h2 { font-family: var(--font-head); font-size: 2.2rem; color: var(--primary); margin-bottom: 15px; line-height: 1.2; }
+        .welcome-box p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; margin-bottom: 25px; }
+        .highlight-box { background: #fff7ed; border: 1px solid #fed7aa; padding: 25px 20px; border-radius: 16px; text-align: left; margin-bottom: 30px; }
+        .highlight-box p { margin-bottom: 12px; font-size: 0.95rem; color: #9a3412; line-height: 1.6; }
+        .highlight-box p:last-child { margin-bottom: 0; }
+        .highlight-box b { color: var(--orange-hover); }
+
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo">Benai <span>Bernardo</span></div>
+            <div class="logo-sub">Consultoria de Treinamento</div>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="progress-container" style="display: none;">
+            <div class="progress-labels">
+                <span id="stepLabel">Dados Pessoais</span>
+                <span id="stepCount">1/8</span>
+            </div>
+            <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
+        </div>
+
+        <form id="anamneseForm" onsubmit="return false;">
+            
+            <!-- PASSO 0: BOAS VINDAS -->
+            <div class="step-card active" id="step0">
+                <div class="welcome-box">
+                    <div class="welcome-icon"><i data-lucide="sparkles"></i></div>
+                    <h2 id="welcomeTitle">Bem-vindo(a) à Consultoria!</h2>
+                    <p>Você acaba de dar o passo mais importante para transformar sua saúde, seu corpo e sua rotina.</p>
+                    
+                    <div class="highlight-box">
+                        <p><b>O seu treino começa aqui.</b></p>
+                        <p>As próximas perguntas são o "raio-x" que eu preciso para entender o seu corpo, sua rotina e seus objetivos.</p>
+                        <p>Por favor, seja <b>100% sincero(a) e detalhista</b>, especialmente nas perguntas que exigem respostas descritivas. O seu planejamento será construído <b>exclusivamente</b> com base nas informações que você me fornecer agora.</p>
+                        <p>Quanto mais detalhes você me der, mais personalizado, seguro e eficiente será o seu treino.</p>
+                    </div>
+
+                    <button class="btn btn-next" style="width: 100%;" onclick="startAnamnese()">
+                        Começar Anamnese <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PASSO 1: DADOS PESSOAIS -->
+            <div class="step-card" id="step1">
+                <div class="step-header">
+                    <h2>Dados Pessoais</h2>
+                    <p>Para prescrever o treino ideal, preciso conhecer você em detalhes.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Seu Nome Completo</label>
+                    <input type="text" id="name" class="inp" placeholder="Digite seu nome completo" required>
+                </div>
+
+                <div class="form-group">
+                    <label>E-mail da Compra</label>
+                    <input type="email" id="email" class="inp" placeholder="O mesmo e-mail usado no pagamento" required>
+                </div>
+
+                <div class="opt-grid opt-grid-2">
+                    <div class="form-group">
+                        <label>Data de Nascimento</label>
+                        <input type="date" id="dob" class="inp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp</label>
+                        <input type="tel" id="whatsapp" class="inp" placeholder="(DDD) 99999-9999" inputmode="numeric" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ocupação / Profissão</label>
+                    <input type="text" id="job" class="inp" placeholder="Ex: Bancário, Programador, Estudante..." required>
+                </div>
+
+                <div class="opt-grid opt-grid-2">
+                    <div class="form-group">
+                        <label>Peso (kg)</label>
+                        <input type="number" id="weight" class="inp" placeholder="Ex: 75.5" step="0.1" inputmode="decimal">
+                    </div>
+                    <div class="form-group">
+                        <label>Altura (m)</label>
+                        <input type="number" id="height" class="inp" placeholder="Ex: 1.75" step="0.01" inputmode="decimal">
+                    </div>
+                </div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-next" onclick="nextStep()">Avançar <i data-lucide="arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- PASSO 2: HISTÓRICO E ROTINA -->
+            <div class="step-card" id="step2">
+                <div class="step-header">
+                    <h2>Histórico e Rotina</h2>
+                    <p>Como é o seu dia a dia e a sua relação com o exercício?</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Há quanto tempo você treina ininterruptamente?</label>
+                    <select id="experience" class="inp">
+                        <option value="" disabled selected>Selecione uma opção</option>
+                        <option value="Sedentário">Nunca treinei / Estou parado há muito tempo</option>
+                        <option value="Iniciante">Menos de 6 meses</option>
+                        <option value="Intermediário">De 6 meses a 1 ano</option>
+                        <option value="Avançado">Mais de 1 ano consistente</option>
+                        <option value="Muito Avançado">Mais de 3 anos consistente</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Pratica ou já praticou outros esportes com frequência?</label>
+                    <input type="text" id="sports" class="inp" placeholder="Ex: Futebol, Natação, Corrida, Nenhum...">
+                </div>
+
+                <div class="form-group">
+                    <label>Como é a sua rotina de trabalho/estudo?</label>
+                    <select id="routine" class="inp">
+                        <option value="" disabled selected>Selecione uma opção</option>
+                        <option value="Sentado">Passo a maior parte do dia sentado(a)</option>
+                        <option value="Em pé">Passo a maior parte do dia em pé</option>
+                        <option value="Ativo">Trabalho com esforço físico / me movimento muito</option>
+                        <option value="Misto">Rotina mista</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Como você avalia a qualidade do seu sono e alimentação hoje?</label>
+                    <textarea id="lifestyle" class="inp" placeholder="Ex: Durmo mal (5h por noite) e como muita besteira no final de semana..." style="min-height: 80px;"></textarea>
+                </div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-prev" onclick="prevStep()">Voltar</button>
+                    <button class="btn btn-next" onclick="nextStep()">Continuar</button>
+                </div>
+            </div>
+
+            <!-- PASSO 3: OBJETIVOS -->
+            <div class="step-card" id="step3">
+                <div class="step-header">
+                    <h2>Quais são os seus objetivos?</h2>
+                    <p>Selecione o que você busca alcançar com a consultoria (pode marcar mais de um).</p>
+                </div>
+
+                <div class="opt-grid">
+                    <label class="opt-label" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" name="objective" value="Hipertrofia" class="opt-checkbox">
+                        <div class="opt-content"><b>Aumento de Massa Muscular</b><span>Foco em hipertrofia e construção de volume.</span></div>
+                    </label>
+                    <label class="opt-label" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" name="objective" value="Emagrecimento" class="opt-checkbox">
+                        <div class="opt-content"><b>Redução de Percentual de Gordura</b><span>Foco em emagrecimento e definição.</span></div>
+                    </label>
+                    <label class="opt-label" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" name="objective" value="Força/Condicionamento" class="opt-checkbox">
+                        <div class="opt-content"><b>Melhora de Condicionamento e Força</b><span>Foco em performance e capacidade física.</span></div>
+                    </label>
+                    <label class="opt-label" onclick="toggleCheckbox(this)">
+                        <input type="checkbox" name="objective" value="Saúde/Longevidade" class="opt-checkbox">
+                        <div class="opt-content"><b>Qualidade de Vida e Longevidade</b><span>Treinar para viver bem, com autonomia e sem dores.</span></div>
+                    </label>
+                </div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-prev" onclick="prevStep()">Voltar</button>
+                    <button class="btn btn-next" onclick="nextStep()">Continuar</button>
+                </div>
+            </div>
+
+            <!-- PASSO 4: DISPONIBILIDADE -->
+            <div class="step-card" id="step4">
+                <div class="step-header">
+                    <h2>Sua Disponibilidade</h2>
+                    <p>Vamos adaptar o treino à sua realidade, e não o contrário.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Quais dias da semana você tem certeza que pode treinar?</label>
+                    <div class="opt-grid opt-grid-2">
+                        <label class="opt-label" style="padding: 12px;" onclick="toggleCheckbox(this)"><input type="checkbox" name="days" value="Seg" class="opt-checkbox"><div class="opt-content"><b>Segunda-feira</b></div></label>
+                        <label class="opt-label" style="padding: 12px;" onclick="toggleCheckbox(this)"><input type="checkbox" name="days" value="Ter" class="opt-checkbox"><div class="opt-content"><b>Terça-feira</b></div></label>
+                        <label class="opt-label" style="padding: 12px;" onclick="toggleCheckbox(this)"><input type="checkbox" name="days" value="Qua" class="opt-checkbox"><div class="opt-content"><b>Quarta-feira</b></div></label>
+                        <label class="opt-label" style="padding: 12px;" onclick="toggleCheckbox(this)"><input type="checkbox" name="days" value="Qui" class="opt-checkbox"><div class="opt-content"><b>Quinta-feira</b></div></label>
+                        <label class="opt-label" style="padding: 12px;" onclick="toggleCheckbox(this)"><input type="checkbox" name="days" value="Sex" class="opt-checkbox"><div class="opt-content"><b>Sexta-feira</b></div></label>
+                        <label class="opt-label" style="padding: 12px;" onclick="toggleCheckbox(this)"><input type="checkbox" name="days" value="Sab" class="opt-checkbox"><div class="opt-content"><b>Sábado</b></div></label>
+                        <label class="opt-label" style="padding: 12px;" onclick="toggleCheckbox(this)"><input type="checkbox" name="days" value="Dom" class="opt-checkbox"><div class="opt-content"><b>Domingo</b></div></label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Tempo disponível por sessão de treino</label>
+                    <div class="opt-grid opt-grid-2">
+                        <label class="opt-label" style="padding: 12px;" onclick="selectRadio(this, 'time')">
+                            <input type="radio" name="time" value="30 a 40 min" class="opt-radio"> <div class="opt-content"><b>30 a 40 min</b></div>
+                        </label>
+                        <label class="opt-label" style="padding: 12px;" onclick="selectRadio(this, 'time')">
+                            <input type="radio" name="time" value="45 a 60 min" class="opt-radio"> <div class="opt-content"><b>45 a 60 min</b></div>
+                        </label>
+                        <label class="opt-label" style="padding: 12px;" onclick="selectRadio(this, 'time')">
+                            <input type="radio" name="time" value="Mais de 1 hora" class="opt-radio"> <div class="opt-content"><b>Mais de 1 hora</b></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-prev" onclick="prevStep()">Voltar</button>
+                    <button class="btn btn-next" onclick="nextStep()">Continuar</button>
+                </div>
+            </div>
+
+            <!-- PASSO 5: SAÚDE E LIMITAÇÕES -->
+            <div class="step-card" id="step5">
+                <div class="step-header">
+                    <h2>Saúde e Limitações</h2>
+                    <p>A segurança vem em primeiro lugar. Seja detalhista aqui.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Possui alguma condição de saúde diagnosticada?</label>
+                    <input type="text" id="medical_conditions" class="inp" placeholder="Ex: Hipertensão, Diabetes, Asma, Problemas Cardíacos (ou deixe em branco)">
+                </div>
+
+                <div class="form-group">
+                    <label>Tem alguma lesão, cirurgia recente ou sente dor ao treinar?</label>
+                    <div class="opt-grid opt-grid-2" style="margin-bottom: 15px;">
+                        <label class="opt-label" onclick="togglePain(false, this)">
+                            <input type="radio" name="has_pain" value="nao" class="opt-radio"> <div class="opt-content"><b>Não, tudo 100%</b></div>
+                        </label>
+                        <label class="opt-label" onclick="togglePain(true, this)">
+                            <input type="radio" name="has_pain" value="sim" class="opt-radio"> <div class="opt-content"><b>Sim, possuo.</b></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="painDetails" style="display: none; animation: fadeIn 0.3s;">
+                    <div class="form-group">
+                        <label>Descreva com detalhes (Onde dói? Qual movimento? Qual cirurgia?)</label>
+                        <textarea id="pain_desc" class="inp" placeholder="Ex: Sinto uma pontada no ombro direito quando levanto o braço acima da cabeça. Fiz cirurgia no joelho esquerdo há 2 anos..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Toma alguma medicação de uso contínuo?</label>
+                    <input type="text" id="meds" class="inp" placeholder="Se não, deixe em branco.">
+                </div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-prev" onclick="prevStep()">Voltar</button>
+                    <button class="btn btn-next" onclick="nextStep()">Continuar</button>
+                </div>
+            </div>
+
+            <!-- PASSO 6: LOCAL E EQUIPAMENTOS -->
+            <div class="step-card" id="step6">
+                <div class="step-header">
+                    <h2>Local de Treinamento</h2>
+                    <p>Onde você vai realizar os seus treinos?</p>
+                </div>
+
+                <div class="opt-grid" style="margin-bottom:20px;">
+                    <label class="opt-label" onclick="selectRadio(this, 'place'); togglePlace('Academia')">
+                        <input type="radio" name="place" value="Academia" class="opt-radio">
+                        <div class="opt-content"><b>Academia Completa</b><span>Tenho acesso a máquinas, polias, halteres, etc.</span></div>
+                    </label>
+                    <label class="opt-label" onclick="selectRadio(this, 'place'); togglePlace('Casa')">
+                        <input type="radio" name="place" value="Casa" class="opt-radio">
+                        <div class="opt-content"><b>Em Casa / Condomínio / Parque</b><span>Treino com o peso do corpo ou equipamentos próprios.</span></div>
+                    </label>
+                </div>
+
+                <div id="equip_casa" style="display: none; animation: fadeIn 0.3s; background: #fff7ed; border: 1px solid #fed7aa; padding: 20px; border-radius: 16px;">
+                    <div class="form-group">
+                        <label style="color: var(--orange-hover);">Descreva com o máximo de detalhes o que você tem disponível:</label>
+                        <p style="font-size: 0.8rem; color: #9a3412; margin-bottom: 10px;">Quanto mais detalhado, melhor será a adaptação do seu treino. Clique nas tags abaixo para adicionar rapidamente à caixa de texto:</p>
+                        
+                        <div class="helper-tags" style="margin-bottom: 15px;">
+                            <span class="tag" onclick="addTag('Halteres')">+ Halteres</span>
+                            <span class="tag" onclick="addTag('Anilhas e Barra')">+ Anilhas e Barra</span>
+                            <span class="tag" onclick="addTag('Elásticos (Bands)')">+ Elásticos (Bands)</span>
+                            <span class="tag" onclick="addTag('TRX (Suspensão)')">+ TRX (Suspensão)</span>
+                            <span class="tag" onclick="addTag('Kettlebell')">+ Kettlebell</span>
+                            <span class="tag" onclick="addTag('Caneleiras')">+ Caneleiras</span>
+                            <span class="tag" onclick="addTag('Colchonete')">+ Colchonete</span>
+                            <span class="tag" onclick="addTag('Bola Suíça')">+ Bola Suíça</span>
+                            <span class="tag" onclick="addTag('Banco Ajustável')">+ Banco Ajustável</span>
+                            <span class="tag" onclick="addTag('Barra de Porta')">+ Barra de Porta</span>
+                        </div>
+
+                        <textarea id="equip_desc" class="inp" placeholder="Ex: Tenho 1 par de halteres de 5kg, 1 elástico de tensão média e um colchonete..." style="border-color: #fdba74;"></textarea>
+                    </div>
+
+                    <!-- MÉTRICAS DE FORÇA CORPORAL (CALISTENIA) -->
+                    <div class="form-group" style="margin-top: 25px; border-top: 1px solid #fed7aa; padding-top: 20px;">
+                        <label style="color: var(--primary); font-size: 1.1rem; margin-bottom: 5px;">Métricas de Força Corporal (Calistenia)</label>
+                        <p style="font-size: 0.85rem; color: #9a3412; margin-bottom: 15px;">Como você treinará em casa, preciso saber o seu nível de força atual com o peso do corpo. Seja honesto(a)!</p>
+                        
+                        <!-- 1. Flexão -->
+                        <div style="margin-bottom: 15px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <label style="font-size: 0.95rem; color: var(--primary); font-weight: 700;">1. Flexão de Braço (Push-up)</label>
+                            <div class="opt-grid opt-grid-2" style="margin-top: 10px; gap: 8px;">
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('flexao', true, this)">
+                                    <input type="radio" name="cal_flexao_radio" value="Consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Consigo fazer</b></div>
+                                </label>
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('flexao', false, this)">
+                                    <input type="radio" name="cal_flexao_radio" value="Não consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Não consigo ainda</b></div>
+                                </label>
+                            </div>
+                            <div id="cal_flexao_qtd_box" style="display: none; margin-top: 10px;">
+                                <input type="number" id="cal_flexao_qtd" class="inp" placeholder="Quantas repetições máximas?" style="padding: 10px; font-size: 0.9rem;">
+                            </div>
+                        </div>
+
+                        <!-- 2. Barra Fixa -->
+                        <div style="margin-bottom: 15px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <label style="font-size: 0.95rem; color: var(--primary); font-weight: 700;">2. Barra Fixa (Pull-up/Chin-up)</label>
+                            <div class="opt-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 10px; gap: 8px;">
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('barra', true, this)">
+                                    <input type="radio" name="cal_barra_radio" value="Consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.85rem;">Consigo</b></div>
+                                </label>
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('barra', false, this)">
+                                    <input type="radio" name="cal_barra_radio" value="Não consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.85rem;">Não consigo</b></div>
+                                </label>
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('barra', false, this)">
+                                    <input type="radio" name="cal_barra_radio" value="Não tenho barra" class="opt-radio"> <div class="opt-content"><b style="font-size:0.85rem;">Não tenho</b></div>
+                                </label>
+                            </div>
+                            <div id="cal_barra_qtd_box" style="display: none; margin-top: 10px;">
+                                <input type="number" id="cal_barra_qtd" class="inp" placeholder="Quantas repetições máximas?" style="padding: 10px; font-size: 0.9rem;">
+                            </div>
+                        </div>
+
+                        <!-- 3. Mergulho -->
+                        <div style="margin-bottom: 15px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <label style="font-size: 0.95rem; color: var(--primary); font-weight: 700;">3. Mergulho no Banco/Cadeira (Bench Dips)</label>
+                            <div class="opt-grid opt-grid-2" style="margin-top: 10px; gap: 8px;">
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('mergulho', true, this)">
+                                    <input type="radio" name="cal_mergulho_radio" value="Consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Consigo fazer</b></div>
+                                </label>
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('mergulho', false, this)">
+                                    <input type="radio" name="cal_mergulho_radio" value="Não consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Não consigo ainda</b></div>
+                                </label>
+                            </div>
+                            <div id="cal_mergulho_qtd_box" style="display: none; margin-top: 10px;">
+                                <input type="number" id="cal_mergulho_qtd" class="inp" placeholder="Quantas repetições máximas?" style="padding: 10px; font-size: 0.9rem;">
+                            </div>
+                        </div>
+
+                        <!-- 4. Agachamento -->
+                        <div style="margin-bottom: 15px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <label style="font-size: 0.95rem; color: var(--primary); font-weight: 700;">4. Agachamento Livre (Bodyweight Squat)</label>
+                            <div class="opt-grid opt-grid-2" style="margin-top: 10px; gap: 8px;">
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('agachamento', true, this)">
+                                    <input type="radio" name="cal_agachamento_radio" value="Consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Consigo fazer</b></div>
+                                </label>
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('agachamento', false, this)">
+                                    <input type="radio" name="cal_agachamento_radio" value="Não consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Sinto dor/limitação</b></div>
+                                </label>
+                            </div>
+                            <div id="cal_agachamento_qtd_box" style="display: none; margin-top: 10px;">
+                                <input type="number" id="cal_agachamento_qtd" class="inp" placeholder="Quantas repetições máximas?" style="padding: 10px; font-size: 0.9rem;">
+                            </div>
+                        </div>
+
+                        <!-- 5. Pistol Squat -->
+                        <div style="margin-bottom: 15px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <label style="font-size: 0.95rem; color: var(--primary); font-weight: 700;">5. Pistol Squat (Agachamento Unilateral)</label>
+                            <div class="opt-grid opt-grid-2" style="margin-top: 10px; gap: 8px;">
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('pistol', true, this)">
+                                    <input type="radio" name="cal_pistol_radio" value="Consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Consigo fazer</b></div>
+                                </label>
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('pistol', false, this)">
+                                    <input type="radio" name="cal_pistol_radio" value="Não consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Não consigo ainda</b></div>
+                                </label>
+                            </div>
+                            <div id="cal_pistol_qtd_box" style="display: none; margin-top: 10px;">
+                                <input type="number" id="cal_pistol_qtd" class="inp" placeholder="Quantas repetições máximas (cada perna)?" style="padding: 10px; font-size: 0.9rem;">
+                            </div>
+                        </div>
+
+                        <!-- 6. Prancha -->
+                        <div style="margin-bottom: 5px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <label style="font-size: 0.95rem; color: var(--primary); font-weight: 700;">6. Prancha Abdominal (Plank)</label>
+                            <div class="opt-grid opt-grid-2" style="margin-top: 10px; gap: 8px;">
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('prancha', true, this)">
+                                    <input type="radio" name="cal_prancha_radio" value="Consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Consigo fazer</b></div>
+                                </label>
+                                <label class="opt-label" style="padding: 10px;" onclick="toggleCalistenia('prancha', false, this)">
+                                    <input type="radio" name="cal_prancha_radio" value="Não consigo" class="opt-radio"> <div class="opt-content"><b style="font-size:0.9rem;">Não consigo ainda</b></div>
+                                </label>
+                            </div>
+                            <div id="cal_prancha_qtd_box" style="display: none; margin-top: 10px;">
+                                <input type="number" id="cal_prancha_qtd" class="inp" placeholder="Tempo máximo (em segundos)?" style="padding: 10px; font-size: 0.9rem;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-prev" onclick="prevStep()">Voltar</button>
+                    <button class="btn btn-next" onclick="nextStep()">Continuar</button>
+                </div>
+            </div>
+
+            <!-- PASSO 7: PREFERÊNCIAS -->
+            <div class="step-card" id="step7">
+                <div class="step-header">
+                    <h2>Preferências</h2>
+                    <p>O melhor treino é aquele que você consegue manter.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Quais exercícios ou estilos de treino você MAIS GOSTA?</label>
+                    <textarea id="likes" class="inp" placeholder="Ex: Adoro treinar costas, gosto de exercícios livres, amo calistenia..." style="min-height: 80px;"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Quais exercícios você ODEIA ou prefere evitar?</label>
+                    <textarea id="dislikes" class="inp" placeholder="Ex: Odeio esteira, não gosto de agachamento livre, detesto burpees..." style="min-height: 80px;"></textarea>
+                </div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-prev" onclick="prevStep()">Voltar</button>
+                    <button class="btn btn-next" onclick="nextStep()">Continuar</button>
+                </div>
+            </div>
+
+            <!-- PASSO 8: TERMOS E ENVIO -->
+            <div class="step-card" id="step8">
+                <div class="step-header">
+                    <h2>Regras do Jogo</h2>
+                    <p>Para nossa segurança e transparência, confirme os termos abaixo:</p>
+                </div>
+
+                <div class="terms-box">
+                    <label class="term-item">
+                        <input type="checkbox" id="term_health" class="opt-checkbox" style="margin-top:3px;">
+                        <div class="term-text">
+                            <b>Declaração de Saúde e Responsabilidade:</b>
+                            Confirmo que as informações prestadas são verdadeiras e estou apto(a) para exercícios físicos. Entendo que a prática é de minha responsabilidade e me comprometo a interromper caso sinta dor ou mal-estar.
+                        </div>
+                    </label>
+
+                    <label class="term-item">
+                        <input type="checkbox" id="term_rules" class="opt-checkbox" style="margin-top:3px;">
+                        <div class="term-text">
+                            <b>Validade do Plano:</b>
+                            Estou ciente de que a consultoria tem duração de 30 dias corridos a partir do envio do treino, não havendo "pausa" ou reposição por falta de frequência da minha parte.
+                        </div>
+                    </label>
+
+                    <label class="term-item">
+                        <input type="checkbox" id="term_image" class="opt-checkbox" style="margin-top:3px;">
+                        <div class="term-text">
+                            <b>Uso de Imagem:</b>
+                            Autorizo o uso de meus resultados (fotos de evolução/feedbacks) para divulgação do trabalho do treinador, preservando minha identidade quando solicitado.
+                        </div>
+                    </label>
+                </div>
+
+                <div class="nav-btns">
+                    <button class="btn btn-prev" onclick="prevStep()">Voltar</button>
+                    <button class="btn btn-next" id="btnFinish" onclick="finishForm()">CONCLUIR E ENVIAR</button>
+                </div>
+            </div>
+
+            <!-- TELA DE SUCESSO -->
+            <div class="step-card" id="step9" style="text-align: center;">
+                <div class="success-box">
+                    <div class="success-icon"><i data-lucide="check"></i></div>
+                    <h2>Anamnese Concluída!</h2>
+                    <p>Suas informações foram enviadas com sucesso e já estão em nosso sistema. Entraremos em contato em breve para dar início aos seus treinos!</p>
+                    
+                    <button class="btn" style="background: var(--primary); color: white; margin-top: 20px; width: 100%;" onclick="location.reload()">
+                        Voltar ao Início
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Iframe oculto para receber a resposta do Google sem recarregar a página -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+    <script>
+        const STEPS = 8;
+        let currentStep = 0;
+        let formData = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            // Tenta puxar o nome e email da URL (parâmetros do Asaas ou link manual)
+            // Exemplo: anamnese.html?name=João%20Silva&email=joao@teste.com
+            const urlParams = new URLSearchParams(window.location.search);
+            const nomeAluno = urlParams.get('name') || urlParams.get('nome');
+            const emailAluno = urlParams.get('email');
+            
+            if (nomeAluno) {
+                // Pega apenas o primeiro nome para as boas-vindas
+                const primeiroNome = nomeAluno.split(' ')[0];
+                document.getElementById('welcomeTitle').innerText = `Bem-vindo(a), ${primeiroNome}!`;
+                document.getElementById('name').value = nomeAluno; // Preenche o input de nome
+            }
+            if (emailAluno) {
+                document.getElementById('email').value = emailAluno; // Preenche o input de e-mail
+            }
+        });
+
+        // INICIAR ANAMNESE
+        function startAnamnese() {
+            document.getElementById('step0').classList.remove('active');
+            currentStep = 1;
+            document.getElementById('step1').classList.add('active');
+            document.querySelector('.progress-container').style.display = 'block';
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // WIZARD NAVIGATION
+        function nextStep() {
+            if(!validateStep(currentStep)) return;
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep++;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function prevStep() {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep--;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function updateProgress() {
+            const pct = ((currentStep - 1) / STEPS) * 100;
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('stepCount').innerText = `${currentStep}/${STEPS}`;
+            const labels = ["Dados Pessoais", "Histórico", "Objetivos", "Disponibilidade", "Saúde", "Local", "Preferências", "Termos", "Concluído"];
+            document.getElementById('stepLabel').innerText = labels[currentStep-1] || "Concluído";
+        }
+
+        // VALIDATION
+        function validateStep(step) {
+            if(step === 1) {
+                if(!document.getElementById('name').value.trim()) return error("Preencha seu nome completo!");
+                if(!document.getElementById('email').value.trim()) return error("Preencha seu e-mail da compra!");
+                if(!document.getElementById('whatsapp').value.trim()) return error("Preciso do seu WhatsApp!");
+                if(!document.getElementById('job').value.trim()) return error("Preencha sua ocupação/profissão!");
+            }
+            if(step === 2) {
+                if(!document.getElementById('experience').value) return error("Informe há quanto tempo você treina.");
+            }
+            if(step === 3) {
+                const objs = getCheckedValues('objective');
+                if(objs.length === 0) return error("Selecione pelo menos um objetivo!");
+            }
+            if(step === 4) {
+                const days = getCheckedValues('days');
+                if(days.length === 0) return error("Selecione os dias que pretende treinar!");
+                if(!getRadioVal('time')) return error("Selecione o tempo disponível por treino!");
+            }
+            if(step === 5) {
+                const pain = getRadioVal('has_pain');
+                if(!pain) return error("Informe se possui alguma lesão ou dor.");
+                if(pain === 'sim' && !document.getElementById('pain_desc').value.trim()) {
+                    return error("Por favor, descreva os detalhes da sua dor ou lesão.");
+                }
+            }
+            if(step === 6) {
+                const place = getRadioVal('place');
+                if(!place) return error("Selecione onde você vai treinar!");
+                if(place === 'Casa' && !document.getElementById('equip_desc').value.trim()) {
+                    return error("Por favor, descreva os equipamentos que você tem disponível em casa.");
+                }
+            }
+            if(step === 8) {
+                if(!document.getElementById('term_health').checked) return error("É necessário aceitar a Declaração de Saúde.");
+                if(!document.getElementById('term_rules').checked) return error("É necessário aceitar as Regras de Validade.");
+            }
+            return true;
+        }
+
+        // UI INTERACTIONS
+        function selectRadio(el, groupName) {
+            document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => r.parentElement.classList.remove('selected'));
+            el.classList.add('selected'); 
+            el.querySelector('input').checked = true;
+        }
+        function toggleCheckbox(el) {
+            const chk = el.querySelector('input');
+            chk.checked = !chk.checked;
+            if(chk.checked) el.classList.add('selected');
+            else el.classList.remove('selected');
+        }
+        function togglePain(show, el) {
+            document.getElementById('painDetails').style.display = show ? 'block' : 'none';
+            selectRadio(el, 'has_pain');
+        }
+        function togglePlace(place) {
+            if(place === 'Casa') {
+                document.getElementById('equip_casa').style.display = 'block';
+            } else {
+                document.getElementById('equip_casa').style.display = 'none';
+            }
+        }
+        function toggleCalistenia(id, showQtd, el) {
+            selectRadio(el, 'cal_' + id + '_radio');
+            document.getElementById('cal_' + id + '_qtd_box').style.display = showQtd ? 'block' : 'none';
+        }
+        function addTag(text) {
+            const textarea = document.getElementById('equip_desc');
+            const currentVal = textarea.value.trim();
+            if(currentVal) {
+                textarea.value = currentVal + ", " + text;
+            } else {
+                textarea.value = text;
+            }
+            textarea.focus();
+        }
+        function error(msg) {
+            Swal.fire({ icon: 'warning', title: 'Atenção', text: msg, confirmButtonColor: '#f97316' });
+            return false;
+        }
+
+        // DATA GATHERING
+        function getRadioVal(name) { 
+            const el = document.querySelector(`input[name="${name}"]:checked`); 
+            return el ? el.value : ''; 
+        }
+        function getCheckedValues(name) {
+            const els = document.querySelectorAll(`input[name="${name}"]:checked`);
+            return Array.from(els).map(el => el.value);
+        }
+        function getCalisteniaVal(id) {
+            const radio = getRadioVal('cal_' + id + '_radio');
+            if (!radio) return 'Não informado';
+            if (radio === 'Consigo') {
+                const qtd = document.getElementById('cal_' + id + '_qtd').value;
+                return qtd ? `Consigo (${qtd} reps/segs)` : 'Consigo (não informou qtd)';
+            }
+            return radio;
+        }
+
+        // FINISH AND SEND
+        function finishForm() {
+            if(!validateStep(8)) return;
+
+            const btn = document.getElementById('btnFinish');
+            btn.innerHTML = 'Processando...';
+            btn.disabled = true;
+
+            try {
+                const place = getRadioVal('place');
+                
+                // Coleta os dados de forma segura, verificando se o elemento existe
+                const getVal = (id) => {
+                    const el = document.getElementById(id);
+                    return el ? el.value.trim() : '';
+                };
+
+                formData = {
+                    name: getVal('name'),
+                    email: getVal('email'),
+                    dob: getVal('dob'),
+                    job: getVal('job'),
+                    weight: getVal('weight'),
+                    height: getVal('height'),
+                    phone: getVal('whatsapp'),
+                    
+                    experience: getVal('experience'),
+                    sports: getVal('sports') || 'Nenhum',
+                    routine: getVal('routine'),
+                    lifestyle: getVal('lifestyle') || 'Não informado',
+                    
+                    objectives: getCheckedValues('objective').join(', '),
+                    days: getCheckedValues('days').join(', '),
+                    time: getRadioVal('time'),
+                    
+                    medical_conditions: getVal('medical_conditions') || 'Nenhuma',
+                    pain: getRadioVal('has_pain') === 'sim' ? getVal('pain_desc') : 'Nenhuma',
+                    meds: getVal('meds') || 'Nenhuma',
+                    
+                    place: place,
+                    equipment: place === 'Academia' ? 'Academia Completa' : getVal('equip_desc'),
+                    
+                    Calistenia_Flexao: place === 'Casa' ? getCalisteniaVal('flexao') : 'N/A',
+                    Calistenia_Barra: place === 'Casa' ? getCalisteniaVal('barra') : 'N/A',
+                    Calistenia_Mergulho: place === 'Casa' ? getCalisteniaVal('mergulho') : 'N/A',
+                    Calistenia_Agachamento: place === 'Casa' ? getCalisteniaVal('agachamento') : 'N/A',
+                    Calistenia_Pistol: place === 'Casa' ? getCalisteniaVal('pistol') : 'N/A',
+                    Calistenia_Prancha: place === 'Casa' ? getCalisteniaVal('prancha') : 'N/A',
+                    
+                    likes: getVal('likes') || 'Não informado',
+                    dislikes: getVal('dislikes') || 'Não informado'
+                };
+
+                // Envio via formulário oculto (Solução CORS)
+                const form = document.createElement('form');
+                form.method = 'POST';
+                // COLOQUE O SEU LINK DO GOOGLE APPS SCRIPT AQUI ABAIXO
+                form.action = 'https://script.google.com/macros/s/AKfycbyvtgUumvzTdwZxOOSP6eqfZmrRs7mpi7ADIt1BiWTseQqlmDet3abtHwfeBoxOFwoV/exec';
+                form.target = 'hidden_iframe';
+
+                for (const key in formData) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = formData[key];
+                    form.appendChild(input);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+
+                // Avança a tela independentemente da resposta do iframe
+                setTimeout(() => {
+                    document.getElementById(`step${currentStep}`).classList.remove('active');
+                    document.getElementById('step9').classList.add('active');
+                    document.querySelector('.progress-container').style.display = 'none';
+                    
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#f97316', '#001F5B'] });
+                    }
+                    document.body.removeChild(form);
+                }, 1000);
+
+            } catch (error) {
+                console.error("Erro ao processar formulário:", error);
+                alert("Ocorreu um erro ao processar seus dados. Por favor, tente novamente.");
+                btn.innerHTML = 'CONCLUIR E ENVIAR';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
