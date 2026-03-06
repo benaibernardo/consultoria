@@ -580,7 +580,15 @@
 
             <!-- BUILDER MENU -->
             <div class="builder-controls">
-                <div class="builder-header">CONSTRUTOR DE TREINO</div>
+                <div class="builder-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>CONSTRUTOR</span>
+                    <select id="target-stage-select" style="font-size:0.65rem; padding:2px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); outline:none; cursor:pointer;">
+                        <option value="mobilidade">Mobilidade</option>
+                        <option value="ativacao">Ativação</option>
+                        <option value="forca" selected>Força</option>
+                        <option value="desaceleracao">Desaceleração</option>
+                    </select>
+                </div>
                 <div class="b-grid">
                     <button class="b-btn bb-block" onclick="addBlock()"><i class="fa-solid fa-layer-group"></i> NOVO BLOCO</button>
                     
@@ -830,6 +838,14 @@
     const AVAILABLE_ICONS = ['fa-heart-pulse', 'fa-wind', 'fa-stopwatch', 'fa-up-down-left-right', 'fa-layer-group', 'fa-brain', 'fa-fire', 'fa-bolt', 'fa-dumbbell', 'fa-person-running', 'fa-glass-water', 'fa-bed', 'fa-utensils', 'fa-scale-balanced', 'fa-star', 'fa-shield-halved', 'fa-hourglass-half', 'fa-triangle-exclamation', 'fa-arrow-trend-up', 'fa-droplet'];
     const AVAILABLE_COLORS = ['p-red', 'p-cyan', 'p-purple', 'p-blue', 'p-green', 'p-orange', 'p-pink'];
 
+    function haptic(type = 'light') {
+        if (!navigator.vibrate) return;
+        if (type === 'light') navigator.vibrate(10);
+        if (type === 'medium') navigator.vibrate(30);
+        if (type === 'heavy') navigator.vibrate([50, 50, 50]);
+        if (type === 'success') navigator.vibrate([30, 50, 30, 50, 50]);
+    }
+
     // --- INIT ---
     window.onload = () => {
         const local = localStorage.getItem(DB_KEY);
@@ -897,28 +913,78 @@
     function createFullDemo() {
         const id = "demo_" + Date.now();
         const today = new Date().toISOString().split('T')[0];
+        
+        // Data de vencimento para 30 dias no futuro para não cair no bloqueio imediatamente
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 30);
+        const expiry = futureDate.toISOString().split('T')[0];
+
         const demo = {
-            id, name: "Aluno Modelo (Demo)", focus: "Demonstração Completa",
-            startDate: today, expiryDate: "", 
+            id, name: "Aluno Modelo Complexo", focus: "Testes de Funcionalidades",
+            startDate: today, expiryDate: expiry, 
             checkUpDay: "Sex", checkUpTime: "10:00",
             pillars: JSON.parse(JSON.stringify(appData.pillars)),
             blocks: [
                 {
-                    name: "Treino A - Peito & Tríceps", desc: "Foco em Carga", locked: false, collapsed: false,
+                    name: "Treino A - Peito & Tríceps", desc: "Foco em Carga e Isometria", locked: false, collapsed: false,
                     stages: {
                         mobilidade: [
-                            { name: "Mobilidade de Quadril", sets: "2", reps: "10", rest: "30s", restEx: "", method: "Normal", note: "Movimento fluido", link: "" }
+                            { name: "Mobilidade de Quadril", sets: "2", reps: "10", rest: "30s", restEx: "", method: "Normal", note: "Movimento fluido", link: "" },
+                            { name: "Rotação Torácica", sets: "2", reps: "12", rest: "30s", restEx: "", method: "Normal", note: "Acompanhe com a cabeça", link: "" }
                         ],
                         ativacao: [
-                            { name: "Abdominal Supra", sets: "3", reps: "15", rest: "45s", restEx: "", method: "Normal", note: "Contrair bem", link: "" }
+                            { name: "Prancha Frontal", sets: "3", reps: "45s", rest: "45s", restEx: "", method: "Isometria", extra: "Manter o core travado", note: "Respirar", link: "" }
                         ],
                         forca: [
                             { name: "Supino Reto", sets: "4", reps: "6-8", rest: "120s", restEx: "90s", method: "Normal", note: "Progredir carga", link: "https://youtube.com" },
                             { name: "Crucifixo Inclinado", sets: "3", reps: "12", rest: "60s", restEx: "90s", method: "Isometria", extra: "2s embaixo", note: "Segurar 2s embaixo", link: "" },
-                            { name: "Supino Maquina", sets: "3", reps: "10+10", rest: "60s", restEx: "90s", method: "Drop-set", extra: "1 Drop", note: "Reduzir 30% da carga", link: "" }
+                            { name: "Tríceps Polia", sets: "3", reps: "10+10", rest: "60s", restEx: "90s", method: "Drop-set", extra: "1 Drop", note: "Reduzir 30% da carga", link: "" }
                         ],
                         desaceleracao: [
                             { name: "Alongamento de Peitoral", sets: "1", reps: "30s", rest: "0s", restEx: "", method: "Normal", note: "Respirar fundo", link: "" }
+                        ]
+                    }
+                },
+                {
+                    name: "Treino B - Costas & Bíceps", desc: "Foco em Volume e Rest-Pause", locked: true, collapsed: true,
+                    stages: {
+                        mobilidade: [
+                            { name: "Gato-Vaca", sets: "2", reps: "15", rest: "30s", restEx: "", method: "Normal", note: "Articular bem a coluna", link: "" }
+                        ],
+                        ativacao: [
+                            { name: "Puxada Escapular", sets: "3", reps: "15", rest: "45s", restEx: "", method: "Normal", note: "Focar nas escápulas", link: "" }
+                        ],
+                        forca: [
+                            { name: "Puxada Alta", sets: "4", reps: "10", rest: "90s", restEx: "60s", method: "Rest-Pause", extra: "15s pausa", note: "Até a falha", link: "" },
+                            { name: "Remada Curvada", sets: "4", reps: "8-10", rest: "90s", restEx: "90s", method: "Pirâmide", extra: "Aumentar carga", note: "Manter postura", link: "" },
+                            { name: "Rosca Direta", sets: "3", reps: "12", rest: "60s", restEx: "60s", method: "Bi-set", note: "Fazer junto com Rosca Martelo", link: "" },
+                            { name: "Rosca Martelo", sets: "3", reps: "12", rest: "60s", restEx: "90s", method: "Bi-set", note: "Sem descanso após a Direta", link: "" }
+                        ],
+                        desaceleracao: [
+                            { name: "Pendurar na Barra", sets: "2", reps: "30s", rest: "30s", restEx: "", method: "Normal", note: "Relaxar ombros", link: "" }
+                        ]
+                    }
+                },
+                {
+                    name: "Treino C - Pernas Completas", desc: "Foco em Resistência e Calistenia", locked: true, collapsed: true,
+                    stages: {
+                        mobilidade: [
+                            { name: "Cócoras Profunda", sets: "2", reps: "60s", rest: "30s", restEx: "", method: "Normal", note: "Calcanhar no chão", link: "" },
+                            { name: "Mobilidade de Tornozelo", sets: "2", reps: "15", rest: "30s", restEx: "", method: "Normal", note: "Joelho passa a ponta do pé", link: "" }
+                        ],
+                        ativacao: [
+                            { name: "Elevação Pélvica", sets: "3", reps: "20", rest: "45s", restEx: "", method: "Normal", note: "Apertar glúteo no topo", link: "" },
+                            { name: "Abdução com Elástico", sets: "3", reps: "15", rest: "45s", restEx: "", method: "Normal", note: "Passo lateral", link: "" }
+                        ],
+                        forca: [
+                            { name: "Agachamento Livre", sets: "5", reps: "5", rest: "180s", restEx: "120s", method: "Normal", note: "Carga pesada", link: "" },
+                            { name: "Leg Press 45", sets: "4", reps: "12", rest: "90s", restEx: "90s", method: "Drop-set", extra: "2 Drops", note: "Amplitude máxima", link: "" },
+                            { name: "Cadeira Extensora", sets: "3", reps: "15", rest: "60s", restEx: "60s", method: "Isometria", extra: "3s no topo", note: "Pico de contração", link: "" },
+                            { name: "Pistol Squat (Calistenia)", sets: "3", reps: "5", rest: "90s", restEx: "90s", method: "Calistenia", note: "Usar apoio se precisar", link: "" }
+                        ],
+                        desaceleracao: [
+                            { name: "Alongamento de Quadríceps", sets: "2", reps: "45s", rest: "15s", restEx: "", method: "Normal", note: "Puxar o pé atrás", link: "" },
+                            { name: "Respiração Diafragmática", sets: "1", reps: "2min", rest: "0s", restEx: "", method: "Normal", note: "Deitado, olhos fechados", link: "" }
                         ]
                     }
                 }
@@ -926,7 +992,7 @@
         };
         appData.students.unshift(demo);
         saveLocal(); renderStudentList(); loadStudent(id);
-        showToast("Aluno Modelo Criado!");
+        showToast("Aluno Modelo Complexo Criado!");
     }
 
     function renderStudentList(filter="") {
@@ -1182,11 +1248,18 @@
                             
                             const dynamicFields = renderMethodFields(item.method, bIdx, stg.id, iIdx, item.extra, isLocked);
 
+                            const isCollapsed = item.collapsed ? true : false;
+                            const bodyDisplay = isCollapsed ? 'none' : 'grid';
+                            const obsDisplay = isCollapsed ? 'none' : 'flex';
+                            const checkColor = isCollapsed ? 'var(--success)' : 'var(--border)';
+                            const checkIcon = isCollapsed ? 'fa-circle-check' : 'fa-circle';
+
                             itemDiv.innerHTML = `
                                 <div class="ex-drag-handle"><i class="fa-solid fa-grip-vertical"></i></div>
                                 <div class="ex-content-wrap">
                                     <div class="ex-top-row">
-                                        <div style="width:100%; display:flex; align-items:center;">
+                                        <div style="width:100%; display:flex; align-items:center; gap:8px;">
+                                            <i class="fa-regular ${checkIcon}" style="color:${checkColor}; font-size:1.1rem; cursor:pointer; transition:0.2s;" title="Marcar como concluído" onclick="toggleItemCollapse(${bIdx}, '${stg.id}', ${iIdx})"></i>
                                             <input class="ex-title" value="${item.name}" onchange="updItem(${bIdx}, '${stg.id}', ${iIdx}, 'name', this.value)" ${isLocked?'disabled':''}>
                                             ${videoIcon}
                                         </div>
@@ -1196,16 +1269,18 @@
                                         </div>
                                     </div>
 
-                                    <div class="ex-grid">
+                                    <div class="ex-grid" style="display:${bodyDisplay};">
                                         <div class="stat-input-grp"><label class="stat-lbl">Séries</label><input class="stat-inp" type="text" value="${item.sets}" onchange="updItem(${bIdx}, '${stg.id}', ${iIdx}, 'sets', this.value)" ${isLocked?'disabled':''}></div>
                                         <div class="stat-input-grp"><label class="stat-lbl">Reps</label><input class="stat-inp" type="text" value="${item.reps}" onchange="updItem(${bIdx}, '${stg.id}', ${iIdx}, 'reps', this.value)" ${isLocked?'disabled':''}></div>
                                         <div class="stat-input-grp"><label class="stat-lbl">Descanso</label><input class="stat-inp" type="text" value="${item.rest}" onchange="updItem(${bIdx}, '${stg.id}', ${iIdx}, 'rest', this.value)" ${isLocked?'disabled':''}></div>
                                         <div class="stat-input-grp"><label class="stat-lbl">Pós-Ex</label><input class="stat-inp" type="text" value="${item.restEx||''}" onchange="updItem(${bIdx}, '${stg.id}', ${iIdx}, 'restEx', this.value)" ${isLocked?'disabled':''} placeholder="-"></div>
                                     </div>
 
-                                    ${dynamicFields}
+                                    <div style="display:${bodyDisplay};">
+                                        ${dynamicFields}
+                                    </div>
 
-                                    <div class="ex-obs">
+                                    <div class="ex-obs" style="display:${obsDisplay};">
                                         <i class="fa-solid fa-circle-info text-[0.7rem] opacity-50"></i> 
                                         <input placeholder="Observações..." value="${item.note||''}" onchange="updItem(${bIdx}, '${stg.id}', ${iIdx}, 'note', this.value)" ${isLocked?'disabled':''}>
                                     </div>
@@ -1250,19 +1325,29 @@
         return html;
     }
 
+    function toggleItemCollapse(bIdx, stageId, iIdx) {
+        haptic('light');
+        const item = currentStudent.blocks[bIdx].stages[stageId][iIdx];
+        item.collapsed = !item.collapsed;
+        saveLocal();
+        renderEditor();
+    }
+
     function toggleBlockCollapse(bIdx) {
+        haptic('light');
         currentStudent.blocks[bIdx].collapsed = !currentStudent.blocks[bIdx].collapsed;
         saveLocal(); renderEditor();
     }
 
-    function addBlock() { currentStudent.blocks.push({ name: "Bloco " + String.fromCharCode(65 + currentStudent.blocks.length), desc: "", locked: false, collapsed: false, stages: { mobilidade: [], ativacao: [], forca: [], desaceleracao: [] } }); saveLocal(); renderEditor(); }
-    function toggleLock(bIdx) { currentStudent.blocks[bIdx].locked = !currentStudent.blocks[bIdx].locked; saveLocal(); renderEditor(); }
-    function delBlock(bIdx) { if(confirm("Excluir bloco?")) { currentStudent.blocks.splice(bIdx, 1); saveLocal(); renderEditor(); } }
+    function addBlock() { haptic('medium'); currentStudent.blocks.push({ name: "Bloco " + String.fromCharCode(65 + currentStudent.blocks.length), desc: "", locked: false, collapsed: false, stages: { mobilidade: [], ativacao: [], forca: [], desaceleracao: [] } }); saveLocal(); renderEditor(); }
+    function toggleLock(bIdx) { haptic('light'); currentStudent.blocks[bIdx].locked = !currentStudent.blocks[bIdx].locked; saveLocal(); renderEditor(); }
+    function delBlock(bIdx) { haptic('heavy'); if(confirm("Excluir bloco?")) { currentStudent.blocks.splice(bIdx, 1); saveLocal(); renderEditor(); } }
     function updBlock(bIdx, field, val) { currentStudent.blocks[bIdx][field] = val; saveLocal(); }
     function updItem(bIdx, stageId, iIdx, field, val) { currentStudent.blocks[bIdx].stages[stageId][iIdx][field] = val; saveLocal(); }
-    function delItem(bIdx, stageId, iIdx) { if(confirm("Remover exercício?")) { currentStudent.blocks[bIdx].stages[stageId].splice(iIdx, 1); saveLocal(); renderEditor(); } }
-    function moveBlock(oldIdx, newIdx) { const item = currentStudent.blocks.splice(oldIdx, 1)[0]; currentStudent.blocks.splice(newIdx, 0, item); saveLocal(); }
+    function delItem(bIdx, stageId, iIdx) { haptic('heavy'); if(confirm("Remover exercício?")) { currentStudent.blocks[bIdx].stages[stageId].splice(iIdx, 1); saveLocal(); renderEditor(); } }
+    function moveBlock(oldIdx, newIdx) { haptic('light'); const item = currentStudent.blocks.splice(oldIdx, 1)[0]; currentStudent.blocks.splice(newIdx, 0, item); saveLocal(); }
     function moveItem(fromId, toId, oldIdx, newIdx) { 
+        haptic('light');
         const fromMatch = fromId.match(/blk-(\d+)-stage-(.+)/);
         const toMatch = toId.match(/blk-(\d+)-stage-(.+)/);
         if(!fromMatch || !toMatch) return;
@@ -1277,28 +1362,31 @@
 
     // --- ADD METHOD ---
     function addMethod(type) {
+        haptic('medium');
         if(currentStudent.blocks.length === 0) { addBlock(); setTimeout(() => addMethod(type), 50); return; }
         const lastBlock = currentStudent.blocks[currentStudent.blocks.length - 1];
         if(lastBlock.locked) return alert("O último bloco está bloqueado.");
         if(lastBlock.collapsed) { lastBlock.collapsed = false; } 
+
+        const targetStage = document.getElementById('target-stage-select').value;
 
         const createItem = (m, name="Novo Exercício") => ({
             name: name,
             sets: (m==='GVT'?'10':(m==='FST-7'?'7':'3')),
             reps: (m==='GVT'?'10':(m==='FST-7'?'8-12':'10')),
             rest: (m==='FST-7'?'30s':'60s'),
-            restEx: "", method: m, extra: "", note: ""
+            restEx: "", method: m, extra: "", note: "", collapsed: false
         });
 
         if(type === 'Bi-set') {
-            lastBlock.stages.forca.push(createItem('Bi-set', 'Exercício A'));
-            lastBlock.stages.forca.push(createItem('Bi-set', 'Exercício B'));
+            lastBlock.stages[targetStage].push(createItem('Bi-set', 'Exercício A'));
+            lastBlock.stages[targetStage].push(createItem('Bi-set', 'Exercício B'));
         } else if(type === 'Tri-set') {
-            lastBlock.stages.forca.push(createItem('Tri-set', 'Exercício A'));
-            lastBlock.stages.forca.push(createItem('Tri-set', 'Exercício B'));
-            lastBlock.stages.forca.push(createItem('Tri-set', 'Exercício C'));
+            lastBlock.stages[targetStage].push(createItem('Tri-set', 'Exercício A'));
+            lastBlock.stages[targetStage].push(createItem('Tri-set', 'Exercício B'));
+            lastBlock.stages[targetStage].push(createItem('Tri-set', 'Exercício C'));
         } else {
-            lastBlock.stages.forca.push(createItem(type));
+            lastBlock.stages[targetStage].push(createItem(type));
         }
         saveLocal(); renderEditor();
         const cv = document.getElementById('editor-canvas'); setTimeout(() => cv.scrollTop = cv.scrollHeight, 100);
