@@ -1307,7 +1307,8 @@
     // --- RIGHT PANEL (RESTORED & FIXED) ---
     function switchRightTab(tab) {
         document.querySelectorAll('.rp-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('rt-'+tab).classList.add('active');
+        const tabEl = document.getElementById('rt-'+tab);
+        if (tabEl) tabEl.classList.add('active');
         const cont = document.getElementById('right-content');
         if (tab === 'lib') { document.getElementById('lib-controls').style.display = 'block'; renderLibrary(); } 
         else { document.getElementById('lib-controls').style.display = 'none'; renderMethodology(cont); }
@@ -1568,7 +1569,7 @@
             note: "" 
         });
         saveLocal(); 
-        switchRightTab('editor');
+        switchRightTab('method');
         renderEditor(); 
         showToast("Exercício adicionado!");
         
