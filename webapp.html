@@ -86,8 +86,6 @@
         .block-desc { font-size: 0.75rem; color: #64748b; padding-left: 15px; margin-bottom: 5px; font-style: italic; }
         
         .block-actions { display: flex; align-items: center; gap: 15px; }
-        .btn-block-done { background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-        .btn-block-done:active { transform: scale(0.95); }
         
         .chevron-icon { color: var(--accent); font-size: 1.2rem; transition: transform 0.3s ease; animation: bounce-subtle 2s infinite; }
         @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
@@ -288,6 +286,14 @@
 
     <!-- TAB 1: TREINO -->
     <div id="tab-1" class="tab-pane active content">
+        <div id="expired-lock" style="display:none; text-align:center; padding:30px 15px; background:var(--surface); border:1px solid var(--danger); border-radius:12px; margin-top:20px;">
+            <i class="fa-solid fa-lock" style="font-size:3rem; color:var(--danger); margin-bottom:15px;"></i>
+            <h3 style="color:var(--danger); font-weight:900; text-transform:uppercase; font-size:1.4rem; margin-bottom:10px;">Acesso Bloqueado</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:20px;">Seu plano de consultoria expirou. Para continuar acessando seus treinos e mantendo seus resultados, renove seu plano.</p>
+            <button onclick="go(4)" style="width:100%; padding:15px; background:var(--danger); color:white; border:none; border-radius:12px; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
+                <i class="fa-solid fa-star"></i> RENOVAR AGORA
+            </button>
+        </div>
         <div id="wList">
             <div style="text-align:center; padding:50px; color:var(--text-muted);">
                 <i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; color:var(--accent);"></i>
@@ -519,7 +525,6 @@
                             <div class="lock-msg" id="lock-msg-${bIdx}"><i class="fa-solid fa-lock"></i> Conclua a etapa anterior para liberar</div>
                         </div>
                         <div class="block-actions">
-                            <button class="btn-block-done" onclick="markBlockDone(${bIdx}, event)" title="Marcar bloco inteiro como feito"><i class="fa-solid fa-check-double"></i></button>
                             <i class="fas fa-chevron-down chevron-icon" id="icon-${collapseId}"></i>
                         </div>
                     </div>
@@ -531,6 +536,15 @@
         }
         restoreProgress();
         checkBlocksState();
+        
+        // Auto-open first undone exercise
+        const allCards = Array.from(document.querySelectorAll('.ex-card'));
+        const firstUndone = allCards.find(c => !c.classList.contains('done'));
+        if (firstUndone) {
+            firstUndone.classList.remove('collapsed');
+            const icon = firstUndone.querySelector('.ex-header .fa-chevron-down');
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        }
     }
 
     function calculateProgress(startStr, endStr) {
@@ -575,9 +589,21 @@
             warning.style.display = 'block';
             warning.style.color = 'var(--danger)';
             warning.innerText = "Seu plano expirou. Renove para continuar com acesso.";
+            
+            // Bloquear treino
+            const wList = document.getElementById('wList');
+            const expiredLock = document.getElementById('expired-lock');
+            if (wList) wList.style.display = 'none';
+            if (expiredLock) expiredLock.style.display = 'block';
         } else {
             bar.style.background = 'var(--success)';
             warning.style.display = 'none';
+            
+            // Liberar treino
+            const wList = document.getElementById('wList');
+            const expiredLock = document.getElementById('expired-lock');
+            if (wList) wList.style.display = 'block';
+            if (expiredLock) expiredLock.style.display = 'none';
         }
     }
 
@@ -690,13 +716,13 @@
         }
         
         return `
-        <div class="ex-card ${mClass}" id="card-${uid}">
+        <div class="ex-card ${mClass} collapsed" id="card-${uid}">
             <div class="ex-header" onclick="toggleExercise('${uid}')">
                 <div class="ex-title ${hasVideo ? 'has-video' : ''}">
                     ${itemName}
                     ${hasVideo ? `<a href="${item.link}" target="_blank" class="ex-video-btn" onclick="event.stopPropagation(); haptic('light');"><i class="fa-solid fa-play"></i> VER VÍDEO</a>` : ''}
                 </div>
-                <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.9rem; transition: 0.3s;"></i>
+                <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.9rem; transition: 0.3s; transform: rotate(-90deg);"></i>
             </div>
             
             <div class="ex-body" id="ex-body-${uid}">
@@ -730,50 +756,6 @@
         </div>`;
     }
 
-    function markBlockDone(bIdx, event) {
-        event.stopPropagation(); // Prevent toggling the accordion
-        haptic('success');
-        
-        if(!currentData || !currentData.blocks || !currentData.blocks[bIdx]) return;
-        
-        const blk = currentData.blocks[bIdx];
-        
-        const markStageItems = (stageId, items) => {
-            items.forEach((item, iIdx) => {
-                const uid = `${bIdx}-${stageId}-${iIdx}`;
-                const card = document.getElementById(`card-${uid}`);
-                if(card && !card.classList.contains('done')) {
-                    card.classList.add('done');
-                    card.classList.add('collapsed');
-                    const icon = card.querySelector('.ex-header .fa-chevron-down');
-                    if(icon) icon.style.transform = 'rotate(-90deg)';
-                    localStorage.setItem(`done_${uid}`, '1');
-                }
-            });
-        };
-
-        if (blk.stages) {
-            ['mobilidade', 'ativacao', 'forca', 'desaceleracao'].forEach(stg => {
-                if(blk.stages[stg]) markStageItems(stg, blk.stages[stg]);
-            });
-        } else {
-            const items = blk.items || [];
-            markStageItems('forca', items);
-        }
-        
-        // Collapse the block itself
-        const collapseId = `blk-${bIdx}`;
-        const contentArea = document.getElementById(collapseId);
-        const blockIcon = document.getElementById(`icon-${collapseId}`);
-        if(contentArea) {
-            contentArea.style.maxHeight = '0px';
-            contentArea.style.opacity = '0';
-            contentArea.parentElement.classList.add('is-closed');
-        }
-        
-        checkBlocksState();
-    }
-
     function toggleDone(uid, restTime) {
         haptic('medium');
         const card = document.getElementById(`card-${uid}`);
@@ -791,6 +773,23 @@
             if(icon) icon.style.transform = 'rotate(-90deg)';
             localStorage.setItem(`done_${uid}`, '1');
             
+            // Auto-open next exercise
+            const allCards = Array.from(document.querySelectorAll('.ex-card'));
+            const currentIndex = allCards.indexOf(card);
+            if (currentIndex !== -1 && currentIndex + 1 < allCards.length) {
+                const nextCard = allCards[currentIndex + 1];
+                if (!nextCard.classList.contains('done')) {
+                    nextCard.classList.remove('collapsed');
+                    const nextIcon = nextCard.querySelector('.ex-header .fa-chevron-down');
+                    if(nextIcon) nextIcon.style.transform = 'rotate(0deg)';
+                    
+                    // Scroll to next card smoothly after a tiny delay
+                    setTimeout(() => {
+                        nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
+            }
+
             // Force timer if there is rest time
             if(restTime > 0) {
                 openTimer(restTime, true);
@@ -895,6 +894,8 @@
             if(localStorage.getItem(`done_${uid}`)) {
                 card.classList.add('done');
                 card.classList.add('collapsed');
+                const icon = card.querySelector('.ex-header .fa-chevron-down');
+                if(icon) icon.style.transform = 'rotate(-90deg)';
             }
             
             const pseEl = document.getElementById(`pse-${uid}`);
