@@ -62,9 +62,14 @@
         <p class="text-[10px] md:text-xs font-medium text-slate-500 tracking-[0.2em] uppercase">Consultoria de Treinamento</p>
     </header>
 
+    <div class="fixed bottom-24 right-4 z-50 animate-bounce">
+        <div class="bg-white text-slate-800 text-xs font-bold px-4 py-2 rounded-2xl shadow-lg border border-slate-200 relative">
+            Dúvidas? Fale comigo!
+            <div class="absolute -bottom-2 right-6 w-4 h-4 bg-white border-b border-r border-slate-200 transform rotate-45"></div>
+        </div>
+    </div>
     <a href="https://wa.me/5541997222664?text=Ol%C3%A1%20Benai%2C%20vi%20a%20sua%20p%C3%A1gina%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20consultoria." target="_blank" class="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 hover:scale-110 hover:shadow-green-500/40 transition-all duration-300 z-50 group flex items-center justify-center">
         <i class="fab fa-whatsapp text-3xl"></i>
-        <span class="absolute right-14 bg-slate-900 text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Fale comigo</span>
     </a>
 
     <section class="relative min-h-[70vh] flex flex-col justify-center items-center text-center p-6 bg-gradient-to-b from-slate-50 to-blue-50/50 overflow-hidden rounded-b-[3rem] border-b border-blue-100 pt-10">
@@ -123,73 +128,101 @@
         </div>
     </section>
 
-    <section class="py-24 px-6 bg-brand-navy text-white relative">
-        <div class="max-w-5xl mx-auto text-center reveal">
-            <h2 class="text-3xl md:text-4xl font-heading font-bold text-white mb-6">Tecnologia a favor do seu corpo</h2>
-            <p class="text-slate-300 leading-relaxed mb-12 max-w-2xl mx-auto">
-                Para garantir que você não fique perdido, desenvolvi um Web App próprio. Lá, você terá acesso ao seu treino completo, com vídeos demonstrativos de cada exercício para garantir a execução correta.
-            </p>
+    <section class="py-24 px-6 bg-brand-navy text-white relative border-b border-slate-800">
+        <div class="max-w-6xl mx-auto reveal">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-3xl mx-auto">
-                <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
-                    <div class="w-10 h-10 bg-brand-cyan/20 text-brand-cyan rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-mobile-screen"></i>
+            <!-- PARTE 1: TECNOLOGIA (APP) -->
+            <div class="text-center mb-12">
+                <span class="inline-block px-3 py-1 bg-brand-cyan/20 text-brand-cyan text-xs font-bold uppercase tracking-wider rounded-full mb-3">Tecnologia</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-white mb-4">Adeus, PDF genérico.</h2>
+                <p class="text-slate-300 leading-relaxed max-w-2xl mx-auto text-base">
+                    Para garantir a sua segurança e a execução perfeita dos movimentos, você recebe acesso a um Web App exclusivo para guiar seu treino.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-6 mb-20 max-w-5xl mx-auto">
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300 w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                    <div class="w-12 h-12 bg-brand-cyan/20 text-brand-cyan rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-cloud text-xl"></i>
                     </div>
-                    <h3 class="font-heading font-bold text-lg mb-2">Direto no Navegador</h3>
-                    <p class="text-sm text-slate-400">Não precisa baixar nada. Acesse seu treino de qualquer celular, a qualquer momento.</p>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">Sem Downloads</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">O Web App roda direto no navegador do seu celular. Leve, rápido e não ocupa espaço na memória.</p>
                 </div>
-                <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
-                    <div class="w-10 h-10 bg-brand-cyan/20 text-brand-cyan rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-chart-line"></i>
+
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300 delay-100 w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                    <div class="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-mobile-screen text-xl"></i>
                     </div>
-                    <h3 class="font-heading font-bold text-lg mb-2">Registro de Progresso</h3>
-                    <p class="text-sm text-slate-400">Anote suas cargas e percepção de esforço diretamente no app para acompanharmos sua evolução.</p>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">App Exclusivo</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Nada de planilhas estáticas. Um ambiente desenhado para guiar seu treino em tempo real.</p>
+                </div>
+
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300 delay-200 w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                    <div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-play text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">Vídeos Guiados</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Cada exercício possui um vídeo demonstrativo. Você nunca mais terá dúvidas sobre a execução correta.</p>
+                </div>
+
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300 w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                    <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-stopwatch text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">Timer Integrado</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">O app controla seu tempo de recuperação entre as séries, mantendo a intensidade ideal do treino.</p>
+                </div>
+
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300 delay-100 w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                    <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">Evolução Real</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Anote suas cargas e percepção de esforço (PSE). Ajusto seu treino com base em dados precisos.</p>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <section class="py-24 px-6 bg-slate-100 border-b border-slate-200">
-        <div class="max-w-6xl mx-auto text-center mb-16 reveal">
-            <h2 class="text-3xl md:text-4xl font-heading font-bold text-brand-navy">A base da nossa sessão</h2>
-            <p class="mt-4 text-slate-600 text-base max-w-2xl mx-auto">Uma metodologia pensada para o longo prazo, estruturada em 4 passos lógicos e sequenciais.</p>
-        </div>
-
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 reveal hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
-                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                    <i class="fas fa-child-reaching text-xl"></i>
-                </div>
-                <h3 class="text-xl font-heading font-bold mb-2 text-slate-800">Mobilidade</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">Liberamos suas articulações para que o seu corpo se mova sem restrições ou dores.</p>
+            <!-- PARTE 2: METODOLOGIA -->
+            <div class="text-center mb-12 border-t border-slate-700 pt-16">
+                <span class="inline-block px-3 py-1 bg-orange-500/20 text-orange-400 text-xs font-bold uppercase tracking-wider rounded-full mb-3">Metodologia</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-white mb-4">Os 4 Pilares da Sessão</h2>
+                <p class="text-slate-300 leading-relaxed max-w-2xl mx-auto text-base">
+                    A estrutura passo a passo que roda dentro do seu app, garantindo evolução com segurança e longevidade.
+                </p>
             </div>
 
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 reveal delay-100 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
-                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                    <i class="fas fa-bolt text-xl"></i>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-child-reaching text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">Mobilidade</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Libero suas articulações para que o seu corpo se mova sem restrições ou dores.</p>
                 </div>
-                <h3 class="text-xl font-heading font-bold mb-2 text-slate-800">Ativação</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">Ensinamos a sua musculatura a "acordar" da forma correta antes do esforço.</p>
-            </div>
 
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 reveal delay-200 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-rose-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
-                <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                    <i class="fas fa-dumbbell text-xl"></i>
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300 delay-100">
+                    <div class="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-bolt text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">Ativação</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Ensino a sua musculatura a "acordar" da forma correta antes do esforço.</p>
                 </div>
-                <h3 class="text-xl font-heading font-bold mb-2 text-slate-800">Força & Carga</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">O momento de desafiar o corpo com progressão gradual e foco em hipertrofia.</p>
-            </div>
 
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 reveal delay-300 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-sky-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
-                <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center mb-6 shadow-sm">
-                    <i class="fas fa-leaf text-xl"></i>
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300 delay-200">
+                    <div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-dumbbell text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">Força & Carga</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">O momento de desafiar o corpo com progressão gradual e foco em hipertrofia.</p>
                 </div>
-                <h3 class="text-xl font-heading font-bold mb-2 text-slate-800">Desaceleração</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">O cuidado final. Baixamos a frequência cardíaca para otimizar a recuperação.</p>
+
+                <div class="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:-translate-y-2 transition-transform duration-300 delay-300">
+                    <div class="w-12 h-12 bg-sky-500/20 text-sky-400 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-leaf text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-heading font-bold mb-2 text-white">Desaceleração</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">O cuidado final. Baixo a frequência cardíaca para otimizar a sua recuperação.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -319,7 +352,7 @@
     <section id="planos" class="py-16 px-6 bg-slate-50 max-w-7xl mx-auto rounded-[3rem] mb-20 border border-slate-200 reveal">
         <div class="text-center mb-16">
             <span class="inline-block px-3 py-1 bg-brand-navy/10 text-brand-navy text-xs font-bold uppercase tracking-wider rounded-full mb-3">Vagas Limitadas</span>
-            <h2 class="text-3xl md:text-4xl font-heading font-bold text-brand-navy">Valores da Consultoria</h2>
+            <h2 class="text-3xl md:text-4xl font-heading font-bold text-brand-navy">Consultoria Online</h2>
             <p class="mt-4 text-slate-600">Acesso exclusivo mediante convite ou indicação.</p>
         </div>
 
@@ -362,89 +395,122 @@
             </div>
         </div>
 
-        <div class="text-center mb-8">
-            <h3 class="text-2xl font-heading font-bold text-brand-navy">Planos para Casais</h3>
+        <div class="text-center mb-8 mt-16">
+            <h3 class="text-2xl font-heading font-bold text-brand-navy">Planos para Casais (Online)</h3>
             <p class="mt-2 text-slate-600">Treinem juntos com um valor especial.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-8 max-w-6xl mx-auto">
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col hover:-translate-y-1 transition-transform">
-                <h3 class="text-xl font-heading font-bold text-brand-navy mb-1">Mensal Casal</h3>
-                <p class="text-slate-500 text-sm mb-6 pb-6 border-b border-slate-100">Acesso para duas pessoas.</p>
-                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 250<span class="text-sm text-slate-500 font-body font-normal">/mês</span></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-16 max-w-6xl mx-auto">
+            <div class="bg-orange-50 p-8 rounded-3xl shadow-sm border border-orange-200 flex flex-col hover:-translate-y-1 transition-transform">
+                <h3 class="text-xl font-heading font-bold text-orange-900 mb-1">Mensal Casal</h3>
+                <p class="text-orange-700/70 text-sm mb-6 pb-6 border-b border-orange-200/50">Acesso para duas pessoas.</p>
+                <div class="text-3xl font-heading font-extrabold text-orange-600 mb-2">R$ 250<span class="text-sm text-orange-700/70 font-body font-normal">/mês</span></div>
                 <p class="text-xs text-transparent mb-6 select-none" aria-hidden="true">Espaçador</p>
-                <ul class="space-y-3 mb-8 text-slate-600 text-sm flex-grow">
-                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>2 Acessos ao Web App</li>
-                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Economia de R$ 50/mês</li>
+                <ul class="space-y-3 mb-8 text-orange-800 text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-orange-500"></div>2 Acessos ao Web App</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-orange-500"></div>Economia de R$ 50/mês</li>
                 </ul>
-                <a href="https://www.asaas.com/c/1t1rlw6rouetzdh0" target="_blank" class="block text-center w-full py-3 text-brand-navy font-medium border border-slate-300 rounded-xl hover:border-brand-cyan hover:text-brand-cyan transition-colors">Selecionar</a>
+                <a href="https://www.asaas.com/c/1t1rlw6rouetzdh0" target="_blank" class="block text-center w-full py-3 text-orange-900 font-medium border border-orange-300 rounded-xl hover:border-orange-500 hover:text-orange-600 transition-colors">Selecionar</a>
             </div>
             
-            <div class="bg-brand-navy p-8 rounded-3xl shadow-xl flex flex-col hover:-translate-y-1 transition-transform relative overflow-hidden">
-                <div class="absolute top-0 inset-x-0 h-1.5 bg-brand-cyan"></div>
+            <div class="bg-gradient-to-b from-orange-500 to-orange-600 p-8 rounded-3xl shadow-xl flex flex-col hover:-translate-y-1 transition-transform relative overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-1.5 bg-orange-300"></div>
                 <h3 class="text-xl font-heading font-bold text-white mb-1">Trimestral Casal</h3>
-                <p class="text-slate-300 text-sm mb-6 pb-6 border-b border-slate-700">Comprometimento a dois.</p>
-                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 230<span class="text-sm text-slate-400 font-body font-normal">/mês</span></div>
-                <p class="text-xs text-slate-400 mb-6">Total de R$ 690 no trimestre</p>
-                <ul class="space-y-3 mb-8 text-slate-200 text-sm flex-grow">
-                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>2 Acessos ao Web App</li>
-                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Economia de R$ 60 no plano</li>
+                <p class="text-orange-100 text-sm mb-6 pb-6 border-b border-orange-400">Comprometimento a dois.</p>
+                <div class="text-3xl font-heading font-extrabold text-white mb-2">R$ 230<span class="text-sm text-orange-200 font-body font-normal">/mês</span></div>
+                <p class="text-xs text-orange-200 mb-6">Total de R$ 690 no trimestre</p>
+                <ul class="space-y-3 mb-8 text-white text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-orange-300"></div>2 Acessos ao Web App</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-orange-300"></div>Economia de R$ 60 no plano</li>
                 </ul>
-                <a href="https://www.asaas.com/c/gwsg9k3021hu4dwn" target="_blank" class="block text-center w-full py-3 text-brand-navy font-bold bg-brand-cyan rounded-xl hover:bg-cyan-400 transition-colors">Selecionar</a>
+                <a href="https://www.asaas.com/c/gwsg9k3021hu4dwn" target="_blank" class="block text-center w-full py-3 text-orange-900 font-bold bg-white rounded-xl hover:bg-orange-50 transition-colors">Selecionar</a>
             </div>
 
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col hover:-translate-y-1 transition-transform">
-                <h3 class="text-xl font-heading font-bold text-brand-navy mb-1">Semestral Casal</h3>
-                <p class="text-slate-500 text-sm mb-6 pb-6 border-b border-slate-100">Para quem pensa a longo prazo.</p>
-                <div class="text-3xl font-heading font-extrabold text-brand-cyan mb-2">R$ 210<span class="text-sm text-slate-500 font-body font-normal">/mês</span></div>
-                <p class="text-xs text-slate-400 mb-6">Total de R$ 1.260 no semestre</p>
-                <ul class="space-y-3 mb-8 text-slate-600 text-sm flex-grow">
-                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>2 Acessos ao Web App</li>
-                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></div>Maior custo-benefício</li>
+            <div class="bg-orange-50 p-8 rounded-3xl shadow-sm border border-orange-200 flex flex-col hover:-translate-y-1 transition-transform">
+                <h3 class="text-xl font-heading font-bold text-orange-900 mb-1">Semestral Casal</h3>
+                <p class="text-orange-700/70 text-sm mb-6 pb-6 border-b border-orange-200/50">Para quem pensa a longo prazo.</p>
+                <div class="text-3xl font-heading font-extrabold text-orange-600 mb-2">R$ 210<span class="text-sm text-orange-700/70 font-body font-normal">/mês</span></div>
+                <p class="text-xs text-orange-700/70 mb-6">Total de R$ 1.260 no semestre</p>
+                <ul class="space-y-3 mb-8 text-orange-800 text-sm flex-grow">
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-orange-500"></div>2 Acessos ao Web App</li>
+                    <li class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-orange-500"></div>Maior custo-benefício</li>
                 </ul>
-                <a href="https://www.asaas.com/c/rxdb4hqlvwen9o3d" target="_blank" class="block text-center w-full py-3 text-brand-navy font-medium border border-slate-300 rounded-xl hover:border-brand-cyan hover:text-brand-cyan transition-colors">Selecionar</a>
-            </div>
-        </div>
-
-        <div class="bg-gradient-to-r from-orange-50 to-white p-8 md:p-10 rounded-[2rem] shadow-lg border border-orange-100 max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-8 mt-12 relative overflow-hidden group hover:shadow-orange-500/10 transition-shadow duration-300">
-            <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-200/40 rounded-full blur-3xl group-hover:bg-orange-300/40 transition-colors pointer-events-none"></div>
-
-            <div class="flex-shrink-0 w-20 h-20 bg-orange-100 rounded-2xl flex items-center justify-center border border-orange-200 shadow-sm rotate-3 group-hover:rotate-0 transition-transform duration-300 z-10">
-                <i class="fas fa-location-dot text-4xl text-orange-600"></i>
-            </div>
-            
-            <div class="flex-grow text-center md:text-left z-10">
-                <span class="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider rounded-full mb-3">Atendimento VIP em Curitiba</span>
-                <h4 class="text-2xl font-heading font-bold text-slate-900">Sessão de Alinhamento Presencial</h4>
-                <p class="text-slate-600 mt-3 text-sm leading-relaxed">Exclusivo para alunos ativos da consultoria online. Um atendimento realizado no conforto e privacidade do seu <strong class="text-slate-800">condomínio ou residência</strong>, focado em avaliar a sua biomecânica e ajustar a execução perfeitamente.</p>
-                <div class="mt-4 inline-flex items-center gap-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-100">
-                    <i class="fas fa-star text-orange-400 text-sm"></i>
-                    <span class="text-xs text-orange-800 font-medium">Em breve: Avaliação Física completa disponível como serviço adicional.</span>
-                </div>
-            </div>
-            
-            <div class="flex-shrink-0 text-center w-full md:w-auto z-10 flex flex-col items-center md:items-end">
-                <div class="mb-4 text-center md:text-right">
-                    <span class="block text-sm text-slate-500 mb-1">Valor avulso (Individual)</span>
-                    <span class="text-3xl font-heading font-extrabold text-slate-900">R$ 100<span class="text-sm text-slate-500 font-body font-normal">/aula</span></span>
-                </div>
-                <div class="mb-4 text-center md:text-right">
-                    <span class="block text-sm text-slate-500 mb-1">Valor avulso (Casal)</span>
-                    <span class="text-3xl font-heading font-extrabold text-slate-900">R$ 160<span class="text-sm text-slate-500 font-body font-normal">/aula</span></span>
-                    <span class="block text-xs text-slate-400 mt-1">(R$ 80,00 por pessoa)</span>
-                </div>
-                <a href="https://wa.me/5541997222664?text=Ol%C3%A1%20Benai%2C%20sou%20aluno%20da%20consultoria%20e%20gostaria%20de%20verificar%20a%20sua%20disponibilidade%20para%20uma%20sess%C3%A3o%20de%20alinhamento%20presencial." target="_blank" class="block w-full md:w-auto text-center px-8 py-3.5 text-white font-medium bg-orange-500 rounded-xl hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 whitespace-nowrap">
-                    Consultar Disponibilidade
-                </a>
-                <span class="block mt-3 text-xs text-orange-600 font-medium">Vagas limitadas por mês</span>
-                <p class="mt-4 text-[10px] text-slate-500 max-w-[250px] text-center md:text-right leading-tight">
-                    * Valores válidos para atendimentos em um raio de até 5 km. Para distâncias maiores, há uma taxa fixa de deslocamento de R$ 25,00 por aula.
-                </p>
+                <a href="https://www.asaas.com/c/rxdb4hqlvwen9o3d" target="_blank" class="block text-center w-full py-3 text-orange-900 font-medium border border-orange-300 rounded-xl hover:border-orange-500 hover:text-orange-600 transition-colors">Selecionar</a>
             </div>
         </div>
     </section>
 
-    <footer class="bg-slate-900 text-slate-400 py-12 px-6 border-t border-slate-800">
+    <section id="presencial" class="py-24 px-6 bg-brand-navy text-white relative overflow-hidden reveal">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-brand-cyan/5 blur-[120px] pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center mb-12">
+                <span class="inline-block px-3 py-1 bg-brand-cyan/20 text-brand-cyan text-xs font-bold uppercase tracking-wider rounded-full mb-3">Atendimento VIP em Curitiba</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-white">Consultoria Presencial</h2>
+                <p class="mt-4 text-slate-300 max-w-2xl mx-auto text-lg">
+                    Atendimento exclusivo realizado no conforto e privacidade do seu condomínio ou residência.
+                </p>
+                <div class="mt-8 max-w-3xl mx-auto bg-slate-800/50 border border-slate-700 p-6 md:p-8 rounded-2xl text-left">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-brand-cyan/20 text-brand-cyan flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg mb-1">Treinamento adaptado à sua realidade</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed">Utilizo o peso do próprio corpo ou os equipamentos que você já tem disponíveis em casa ou na academia do seu condomínio.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-brand-cyan/20 text-brand-cyan flex items-center justify-center flex-shrink-0 mt-1">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg mb-1">Privacidade em primeiro lugar</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed">Para garantir um acompanhamento 100% focado em você, sem distrações ou revezamento de aparelhos, <strong>não realizo atendimentos em academias comerciais</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-12 max-w-5xl mx-auto">
+                <div class="bg-slate-800/80 p-8 rounded-3xl shadow-sm border border-slate-700 flex flex-col hover:-translate-y-1 transition-transform text-center">
+                    <h3 class="text-xl font-heading font-bold text-white mb-1">1x na semana</h3>
+                    <p class="text-slate-400 text-sm mb-6 pb-6 border-b border-slate-700">4 aulas no mês</p>
+                    <div class="text-4xl font-heading font-extrabold text-brand-cyan mb-2">R$ 80<span class="text-sm text-slate-500 font-body font-normal">/hora</span></div>
+                    <p class="text-sm text-slate-300 font-medium mt-4">Total: R$ 320/mês</p>
+                </div>
+
+                <div class="bg-slate-800/80 p-8 rounded-3xl shadow-xl flex flex-col hover:-translate-y-1 transition-transform relative overflow-hidden text-center border border-brand-cyan/30">
+                    <div class="absolute top-0 inset-x-0 h-1.5 bg-brand-cyan"></div>
+                    <h3 class="text-xl font-heading font-bold text-white mb-1">2x na semana</h3>
+                    <p class="text-slate-300 text-sm mb-6 pb-6 border-b border-slate-700/50">8 aulas no mês</p>
+                    <div class="text-4xl font-heading font-extrabold text-brand-cyan mb-2">R$ 70<span class="text-sm text-slate-400 font-body font-normal">/hora</span></div>
+                    <p class="text-sm text-white font-medium mt-4">Total: R$ 560/mês</p>
+                </div>
+
+                <div class="bg-slate-800/80 p-8 rounded-3xl shadow-sm border border-slate-700 flex flex-col hover:-translate-y-1 transition-transform text-center">
+                    <h3 class="text-xl font-heading font-bold text-white mb-1">3x na semana</h3>
+                    <p class="text-slate-400 text-sm mb-6 pb-6 border-b border-slate-700">12 aulas no mês</p>
+                    <div class="text-4xl font-heading font-extrabold text-brand-cyan mb-2">R$ 60<span class="text-sm text-slate-500 font-body font-normal">/hora</span></div>
+                    <p class="text-sm text-slate-300 font-medium mt-4">Total: R$ 720/mês</p>
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-sm text-slate-300 text-center">
+                <p class="mb-2"><i class="fas fa-map-marker-alt text-brand-cyan mr-2"></i> <strong>Área de Atendimento:</strong> Valores válidos para atendimentos em um raio de até 5 km. Acima de 5 km, é cobrada uma taxa fixa de R$ 25,00 por deslocamento.</p>
+                <p><i class="fas fa-star text-orange-400 mr-2"></i> <strong>Em breve:</strong> Avaliação Física completa disponível como serviço adicional.</p>
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="https://wa.me/5541997222664?text=Ol%C3%A1%20Benai%2C%20gostaria%20de%20verificar%20a%20disponibilidade%20para%20a%20consultoria%20presencial." target="_blank" class="inline-flex items-center justify-center gap-3 px-8 py-4 text-white font-bold bg-green-500 rounded-xl hover:bg-green-600 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 text-lg">
+                    <i class="fab fa-whatsapp text-2xl"></i>
+                    Agendar via WhatsApp
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-brand-navy text-slate-400 py-12 px-6">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             
             <div class="text-center md:text-left">
