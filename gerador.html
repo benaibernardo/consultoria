@@ -776,10 +776,21 @@
             </div>
         </div>
 
+        <div style="margin-bottom:20px; padding:15px; background:var(--bg); border:1px solid var(--border); border-radius:12px;">
+            <label style="font-size:0.7rem; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">
+                <i class="fa-solid fa-server"></i> GIST MASTER (BANCO DE DADOS)
+            </label>
+            <div style="display:flex; gap:5px; margin-bottom:10px;">
+                <input type="text" id="master-gist-id" class="search-inp" placeholder="ID do Gist Master..." style="margin:0; font-family:monospace; font-size:0.8rem;">
+                <button class="btn-primary-block" onclick="syncMasterGist()" style="margin:0; width:auto; padding:0 15px; font-size:0.8rem;">Sincronizar</button>
+            </div>
+            <button class="btn-demo-block" onclick="createMasterGist()" style="margin:0; background:var(--success);"><i class="fa-solid fa-plus"></i> Criar Novo Banco de Dados</button>
+        </div>
+
         <div class="cloud-grid">
             <div class="cloud-tile tile-save" onclick="saveToCloud('PATCH')">
                 <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.5rem;"></i>
-                <span>Salvar Nuvem</span>
+                <span>Salvar Aluno</span>
             </div>
             <div class="cloud-tile tile-backup" onclick="backupJSON()">
                 <i class="fa-solid fa-download" style="font-size:1.5rem;"></i>
@@ -809,9 +820,10 @@
     // --- STATE ---
     const DB_KEY = 'BENAI_CRM_V1';
     const TOKEN_KEY = 'BENAI_GLOBAL_TOKEN';
+    const MASTER_GIST_KEY = 'BENAI_MASTER_GIST_ID';
     
     let appData = {
-        students: [],
+        students: [], // Agora será apenas o índice local (cache)
         library: [],
         groups: ['Peito','Costas','Pernas','Ombros','Bíceps','Tríceps','Abdômen','Cardio','Glúteos'],
         equips: ['Barra','Halter','Máquina','Polia','Livre','Elástico'],
@@ -828,6 +840,7 @@
             { title: "Sono e Recuperação", text: "O músculo não cresce no treino, cresce no descanso. Priorize a qualidade do seu sono.", icon: "fa-bed", color: "p-purple" },
             { title: "Aquecimento e Preparação", text: "Prepare suas articulações antes de colocar carga. O aquecimento previne lesões e melhora a performance.", icon: "fa-person-running", color: "p-orange" }
         ],
+        masterGistId: null // Armazena o ID do Gist Master
     };
     
     let currentStudent = null;
@@ -871,6 +884,12 @@
         }
         const t = localStorage.getItem(TOKEN_KEY);
         if(t) document.getElementById('gh-token').value = t;
+        
+        const mGist = localStorage.getItem(MASTER_GIST_KEY);
+        if(mGist) {
+            appData.masterGistId = mGist;
+            document.getElementById('master-gist-id').value = mGist;
+        }
 
         // Init defaults if missing
         if(!appData.groups || appData.groups.length === 0) appData.groups = ['Peito','Costas','Pernas','Ombros','Bíceps','Tríceps','Abdômen','Cardio'];
@@ -880,8 +899,13 @@
         renderStudentList();
         renderLibrary();
         
-        if(appData.students.length) loadStudent(appData.students[0].id);
-        else createStudent();
+        // Auto-sync on load if token and master gist exist
+        if(t && mGist) {
+            syncMasterGist(true); // true = silent load
+        } else {
+            if(appData.students.length) loadStudent(appData.students[0].id);
+            else createStudent();
+        }
     };
 
     // --- ANIMATIONS & TRANSITIONS ---
@@ -1803,19 +1827,170 @@
         } 
     }
 
-    // --- CLOUD & UTILS ---
+    // --- CLOUD & UTILS (MASTER GIST ARCHITECTURE) ---
+    
+    // 1. CREATE MASTER GIST
+    async function createMasterGist() {
+        const t = document.getElementById('gh-token').value;
+        if(!t) return alert("Configure o Token primeiro.");
+        
+        if(!confirm("Isso criará um novo Banco de Dados na sua conta do GitHub. Deseja continuar?")) return;
+        
+        const masterData = {
+            library: appData.library,
+            groups: appData.groups,
+            equips: appData.equips,
+            methods: appData.methods,
+            pillars: appData.pillars,
+            studentIndex: appData.students.map(s => ({ id: s.id, name: s.name, gistId: s.gistId || null }))
+        };
+
+        try {
+            const payload = { 
+                description: `Benai Manager Database`, 
+                public: false, 
+                files: { "benai_master.json": { content: JSON.stringify(masterData) } } 
+            };
+            
+            const res = await fetch('https://api.github.com/gists', { 
+                method: 'POST', 
+                headers:{'Authorization':`token ${t}`}, 
+                body:JSON.stringify(payload)
+            });
+            
+            if(!res.ok) throw new Error("Erro ao criar Master Gist");
+            const j = await res.json();
+            
+            appData.masterGistId = j.id;
+            document.getElementById('master-gist-id').value = j.id;
+            localStorage.setItem(MASTER_GIST_KEY, j.id);
+            saveLocal();
+            
+            showToast("Banco de Dados Criado!");
+        } catch(e){ alert("Erro: " + e.message); }
+    }
+
+    // 2. SYNC MASTER GIST (PULL)
+    async function syncMasterGist(silent = false) {
+        const t = document.getElementById('gh-token').value;
+        const mId = document.getElementById('master-gist-id').value;
+        
+        if(!t || !mId) {
+            if(!silent) alert("Token e ID do Gist Master são necessários.");
+            return;
+        }
+
+        try {
+            if(!silent) showToast("Sincronizando...");
+            const res = await fetch(`https://api.github.com/gists/${mId}`, { headers:{'Authorization':`token ${t}`} });
+            if(!res.ok) throw new Error("Gist Master não encontrado");
+            
+            const j = await res.json();
+            const masterData = JSON.parse(j.files["benai_master.json"].content);
+            
+            // Update local data with Master data
+            appData.library = masterData.library || [];
+            appData.groups = masterData.groups || appData.groups;
+            appData.equips = masterData.equips || appData.equips;
+            appData.methods = masterData.methods || appData.methods;
+            appData.pillars = masterData.pillars || appData.pillars;
+            
+            // Update Student Index (keep local data if it exists, otherwise add from index)
+            if(masterData.studentIndex) {
+                const localIds = appData.students.map(s => s.id);
+                masterData.studentIndex.forEach(idxStudent => {
+                    if(!localIds.includes(idxStudent.id)) {
+                        // Add placeholder student to list
+                        appData.students.push({
+                            id: idxStudent.id,
+                            name: idxStudent.name,
+                            gistId: idxStudent.gistId,
+                            focus: "Carregando...",
+                            blocks: []
+                        });
+                    }
+                });
+            }
+            
+            appData.masterGistId = mId;
+            localStorage.setItem(MASTER_GIST_KEY, mId);
+            saveLocal();
+            
+            renderLibrary();
+            renderStudentList();
+            
+            if(!silent) {
+                showToast("Sincronização Concluída!");
+                closeModal('modal-cloud');
+            }
+            
+            // Load first student if none selected
+            if(!currentStudent && appData.students.length > 0) {
+                loadStudent(appData.students[0].id);
+            }
+            
+        } catch(e){ 
+            if(!silent) alert("Erro ao sincronizar: " + e.message); 
+        }
+    }
+
+    // 3. UPDATE MASTER GIST (PUSH)
+    async function updateMasterGist() {
+        const t = document.getElementById('gh-token').value;
+        const mId = appData.masterGistId;
+        if(!t || !mId) return; // Silent fail if not configured
+
+        const masterData = {
+            library: appData.library,
+            groups: appData.groups,
+            equips: appData.equips,
+            methods: appData.methods,
+            pillars: appData.pillars,
+            studentIndex: appData.students.map(s => ({ id: s.id, name: s.name, gistId: s.gistId || null }))
+        };
+
+        try {
+            const payload = { files: { "benai_master.json": { content: JSON.stringify(masterData) } } };
+            await fetch(`https://api.github.com/gists/${mId}`, { 
+                method: 'PATCH', 
+                headers:{'Authorization':`token ${t}`}, 
+                body:JSON.stringify(payload)
+            });
+            console.log("Master Gist updated successfully");
+        } catch(e){ console.error("Failed to update Master Gist", e); }
+    }
+
+    // 4. SAVE STUDENT TO CLOUD (UPDATED)
     async function saveToCloud(method) {
         const t = document.getElementById('gh-token').value;
         if(!t) return alert("Configure o Token primeiro.");
-        if(method === 'POST' || !currentStudent.gistId) { if(!confirm("Criar novo link?")) return; method = 'POST'; }
+        
+        if(method === 'POST' || !currentStudent.gistId) { 
+            if(!confirm("Criar novo link para este aluno?")) return; 
+            method = 'POST'; 
+        }
+        
         try {
-            const payload = { description: `Treino: ${currentStudent.name}`, public: false, files: { "treino.json": { content: JSON.stringify(currentStudent) } } };
+            showToast("Salvando Aluno...");
+            // Clean up student object before saving (don't save full library in student gist anymore)
+            const studentToSave = JSON.parse(JSON.stringify(currentStudent));
+            
+            const payload = { description: `Treino: ${currentStudent.name}`, public: false, files: { "treino.json": { content: JSON.stringify(studentToSave) } } };
             let url = 'https://api.github.com/gists'; 
             if(method === 'PATCH') url += '/'+currentStudent.gistId;
+            
             const res = await fetch(url, { method, headers:{'Authorization':`token ${t}`}, body:JSON.stringify(payload)});
             if(!res.ok) throw new Error("Erro na nuvem");
+            
             const j = await res.json();
-            if(method === 'POST') { currentStudent.gistId = j.id; saveLocal(); }
+            if(method === 'POST') { 
+                currentStudent.gistId = j.id; 
+                saveLocal(); 
+            }
+            
+            // Update Master Gist to reflect new student/gistId
+            updateMasterGist();
+            
             copyTinyUrlFlow(j.id);
         } catch(e){ alert("Erro: " + e.message); }
     }
@@ -1840,17 +2015,59 @@
         window.open('webapp.html?preview=true', '_blank');
     }
 
+    // 5. IMPORT ID & EXTRACT EXERCISES
     function promptImportID() {
         const id = prompt("Insira o Gist ID do aluno:");
         if(id && document.getElementById('gh-token').value) {
+            showToast("Importando e extraindo...");
             fetch(`https://api.github.com/gists/${id}`, { headers:{'Authorization':`token ${document.getElementById('gh-token').value}`} })
             .then(r => r.json())
             .then(j => {
                 const s = JSON.parse(j.files["treino.json"].content);
                 s.gistId = id;
-                appData.students.unshift(s);
-                saveLocal(); renderStudentList(); loadStudent(s.id);
-                showToast("Aluno Importado!");
+                
+                // Check if student already exists locally
+                const existingIdx = appData.students.findIndex(st => st.id === s.id || st.gistId === id);
+                if(existingIdx >= 0) {
+                    appData.students[existingIdx] = s;
+                } else {
+                    appData.students.unshift(s);
+                }
+                
+                // --- EXERCISE EXTRACTION LOGIC ---
+                let extractedCount = 0;
+                if(s.blocks) {
+                    s.blocks.forEach(blk => {
+                        if(blk.stages) {
+                            Object.values(blk.stages).forEach(stageArray => {
+                                stageArray.forEach(ex => {
+                                    // Check if exercise already exists in library by name
+                                    const exists = appData.library.some(libEx => libEx.name.toLowerCase() === ex.name.toLowerCase());
+                                    if(!exists) {
+                                        appData.library.push({
+                                            name: ex.name,
+                                            group: "Geral", // Default group
+                                            equip: "Livre", // Default equip
+                                            method: ex.method || "Musculação",
+                                            video: ex.link || ""
+                                        });
+                                        extractedCount++;
+                                    }
+                                });
+                            });
+                        }
+                    });
+                }
+                
+                saveLocal(); 
+                renderStudentList(); 
+                renderLibrary();
+                loadStudent(s.id);
+                
+                // Update Master Gist with new student and extracted exercises
+                updateMasterGist();
+                
+                showToast(`Aluno Importado! ${extractedCount} exercícios adicionados à biblioteca.`);
                 closeModal('modal-cloud');
             })
             .catch(e => alert("Erro ao importar: " + e.message));
@@ -1865,6 +2082,10 @@
             saveLocal();
             currentStudent = null;
             renderStudentList();
+            
+            // Update Master Gist to remove student from index
+            updateMasterGist();
+            
             if(appData.students.length > 0) {
                 loadStudent(appData.students[0].id);
             } else {
@@ -1875,7 +2096,15 @@
     }
 
     // --- UTILS ---
-    function saveLocal() { localStorage.setItem(DB_KEY, JSON.stringify(appData)); }
+    function saveLocal() { 
+        localStorage.setItem(DB_KEY, JSON.stringify(appData)); 
+        // Trigger background sync to master gist whenever local data changes significantly
+        // (Debounced to avoid spamming the API)
+        clearTimeout(window.syncTimeout);
+        window.syncTimeout = setTimeout(() => {
+            if(appData.masterGistId) updateMasterGist();
+        }, 3000);
+    }
     function closeModal(id) { document.getElementById(id).style.display='none'; }
     function openCloudModal() { document.getElementById('modal-cloud').style.display='flex'; }
     function saveToken() { localStorage.setItem(TOKEN_KEY, document.getElementById('gh-token').value); showToast("Token Salvo"); }
