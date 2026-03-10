@@ -170,10 +170,10 @@
             transform: scale(1.05);
         }
 
-        [data-theme="light"] .fa-moon { display: none; }
-        [data-theme="dark"] .fa-sun { display: none; }
-        [data-theme="light"] .fa-sun { display: block; }
-        [data-theme="dark"] .fa-moon { display: block; }
+        [data-theme="light"] .dark-hidden { display: block; }
+        [data-theme="light"] .dark-block { display: none; }
+        [data-theme="dark"] .dark-hidden { display: none; }
+        [data-theme="dark"] .dark-block { display: block; }
 
         /* Background Glows */
         .glow-bg {
@@ -201,11 +201,24 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-6 font-body relative" data-theme="dark">
 
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" onclick="toggleTheme()" title="Alternar Tema">
-        <i class="fa-solid fa-sun text-xl text-amber-500"></i>
-        <i class="fa-solid fa-moon text-xl text-blue-400"></i>
-    </button>
+    <!-- Top Right Controls -->
+    <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
+        <!-- Sync Status (Moved to top) -->
+        <div id="sync-status-top" class="hidden items-center gap-2 px-3 py-2 rounded-xl glass-card text-xs font-bold transition-all">
+            <i class="fa-solid fa-arrows-rotate fa-spin text-slate-400"></i> <span class="hidden md:inline" style="color: var(--text-muted);">Conectando...</span>
+        </div>
+        
+        <!-- Backup Button (Moved to top) -->
+        <button onclick="quickBackup()" id="btn-backup-top" class="hidden w-11 h-11 rounded-xl glass-card flex items-center justify-center text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all" title="Backup Rápido">
+            <i class="fa-solid fa-download"></i>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button class="w-11 h-11 rounded-xl glass-card flex items-center justify-center text-amber-500 hover:scale-105 transition-all" onclick="toggleTheme()" title="Alternar Tema" id="theme-btn">
+            <i class="fa-solid fa-sun text-xl block dark-hidden"></i>
+            <i class="fa-solid fa-moon text-xl hidden dark-block text-blue-400"></i>
+        </button>
+    </div>
 
     <!-- Background Ambient Glows -->
     <div class="glow-bg glow-1 w-[500px] h-[500px] top-[-100px] left-[-100px]"></div>
@@ -227,57 +240,68 @@
         <i class="fa-solid fa-triangle-exclamation mr-2"></i> Configure o seu Token no <strong>Gerador de Treinos</strong> para ativar o Dashboard Inteligente.
     </div>
 
-    <div id="dashboard-section" class="w-full max-w-5xl mb-8 hidden flex-col gap-4 stagger-enter" style="animation-delay: 0.15s;">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div id="dashboard-section" class="w-full max-w-5xl mb-12 hidden flex-col gap-6 stagger-enter" style="animation-delay: 0.15s;">
+        
+        <!-- Top Row: Stats & Goals -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Stat: Total Students -->
-            <div class="glass-card rounded-2xl p-5 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-muted);">Alunos Ativos</p>
-                    <h3 class="text-3xl font-heading font-black" style="color: var(--text-main);" id="stat-total-students">-</h3>
+            <div class="glass-card rounded-3xl p-6 flex flex-col justify-between min-h-[140px]">
+                <div class="flex justify-between items-start">
+                    <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-muted);">Total de Alunos</p>
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl border border-blue-500/20">
-                    <i class="fa-solid fa-users"></i>
+                <h3 class="text-5xl font-heading font-black mt-2" style="color: var(--text-main);" id="stat-total-students">-</h3>
+            </div>
+
+            <!-- Goal: Online -->
+            <div class="glass-card rounded-3xl p-6 flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-1 h-full bg-brand-cyan"></div>
+                <div class="flex justify-between items-start">
+                    <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-muted);">Meta Online</p>
+                    <span class="text-xs font-bold px-2 py-1 rounded-md bg-brand-cyan/10 text-brand-cyan" id="goal-online-text">0 / 5</span>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="w-full h-2 bg-slate-800/50 rounded-full overflow-hidden border border-slate-700/50">
+                        <div id="goal-online-bar" class="h-full bg-brand-cyan transition-all duration-1000" style="width: 0%;"></div>
+                    </div>
+                    <p class="text-xs mt-2 font-medium" style="color: var(--text-muted);" id="goal-online-msg">Buscando dados...</p>
                 </div>
             </div>
 
-            <!-- Action: Backup -->
-            <button onclick="quickBackup()" class="glass-card rounded-2xl p-5 flex items-center justify-between group hover:bg-emerald-500/10 transition-colors" style="border-color: rgba(16, 185, 129, 0.2);">
-                <div class="text-left">
-                    <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-1">Segurança</p>
-                    <h3 class="text-lg font-heading font-bold group-hover:text-emerald-400 transition-colors" style="color: var(--text-main);">Backup Rápido</h3>
+            <!-- Goal: Presencial -->
+            <div class="glass-card rounded-3xl p-6 flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-1 h-full bg-orange-500"></div>
+                <div class="flex justify-between items-start">
+                    <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-muted);">Meta Presencial</p>
+                    <span class="text-xs font-bold px-2 py-1 rounded-md bg-orange-500/10 text-orange-500" id="goal-pres-text">0 / 3</span>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-download"></i>
-                </div>
-            </button>
-
-            <!-- Stat: Sync Status -->
-            <div class="glass-card rounded-2xl p-5 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-muted);">Status da Nuvem</p>
-                    <h3 class="text-sm font-bold mt-2" style="color: var(--text-main);" id="sync-status">
-                        <i class="fa-solid fa-arrows-rotate fa-spin text-slate-400 mr-2"></i> Conectando...
-                    </h3>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-slate-500/10 text-slate-500 flex items-center justify-center text-xl border border-slate-500/20">
-                    <i class="fa-solid fa-cloud"></i>
+                
+                <div class="mt-4">
+                    <div class="w-full h-2 bg-slate-800/50 rounded-full overflow-hidden border border-slate-700/50">
+                        <div id="goal-pres-bar" class="h-full bg-orange-500 transition-all duration-1000" style="width: 0%;"></div>
+                    </div>
+                    <p class="text-xs mt-2 font-medium" style="color: var(--text-muted);" id="goal-pres-msg">Controle manual em breve</p>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Bottom Row: Recents & Philosophy -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Recent Students -->
-            <div class="glass-card rounded-2xl p-5">
-                <h3 class="text-xs font-bold text-brand-cyan uppercase tracking-wider mb-3"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Últimos Alunos</h3>
-                <div id="recent-students-list" class="flex flex-col gap-2">
+            <div class="glass-card rounded-3xl p-6">
+                <h3 class="text-xs font-bold text-brand-cyan uppercase tracking-wider mb-4"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Últimos Alunos Atendidos</h3>
+                <div id="recent-students-list" class="flex flex-col gap-3">
                     <!-- Injected via JS -->
                 </div>
             </div>
 
             <!-- Daily Pillar -->
-            <div class="glass-card rounded-2xl p-5">
-                <h3 class="text-xs font-bold text-purple-500 uppercase tracking-wider mb-3"><i class="fa-solid fa-lightbulb mr-2"></i> Filosofia do Dia</h3>
-                <div id="daily-pillar" class="mt-2">
+            <div class="glass-card rounded-3xl p-6 flex flex-col justify-center">
+                <h3 class="text-xs font-bold text-purple-500 uppercase tracking-wider mb-4"><i class="fa-solid fa-lightbulb mr-2"></i> Filosofia do Dia</h3>
+                <div id="daily-pillar" class="mt-2 bg-slate-800/20 p-5 rounded-2xl border border-slate-700/30">
                     <!-- Injected via JS -->
                 </div>
             </div>
@@ -371,7 +395,14 @@
             
             try {
                 document.getElementById('dashboard-section').classList.remove('hidden');
+                document.getElementById('dashboard-section').classList.add('flex');
                 document.getElementById('setup-warning').classList.add('hidden');
+                
+                // Show top controls
+                document.getElementById('sync-status-top').classList.remove('hidden');
+                document.getElementById('sync-status-top').classList.add('flex');
+                document.getElementById('btn-backup-top').classList.remove('hidden');
+                document.getElementById('btn-backup-top').classList.add('flex');
                 
                 const res = await fetch(`https://api.github.com/gists/${masterId}`, {
                     headers: { 'Authorization': `token ${token}` }
@@ -386,29 +417,42 @@
                 const total = masterData.studentIndex ? masterData.studentIndex.length : 0;
                 document.getElementById('stat-total-students').innerText = total;
                 
+                // Populate Goals (Assuming all current are Online for now)
+                const goalOnline = 5;
+                const currentOnline = total; // In the future, you can filter by type
+                const pctOnline = Math.min(100, (currentOnline / goalOnline) * 100);
+                
+                document.getElementById('goal-online-text').innerText = `${currentOnline} / ${goalOnline}`;
+                document.getElementById('goal-online-bar').style.width = `${pctOnline}%`;
+                
+                if(currentOnline >= goalOnline) {
+                    document.getElementById('goal-online-msg').innerHTML = '<span class="text-emerald-500"><i class="fa-solid fa-check-circle"></i> Meta atingida!</span>';
+                    document.getElementById('goal-online-bar').classList.replace('bg-brand-cyan', 'bg-emerald-500');
+                } else {
+                    document.getElementById('goal-online-msg').innerText = `Faltam ${goalOnline - currentOnline} alunos para a meta.`;
+                }
+
                 // Populate Recent Students
                 if(masterData.studentIndex && masterData.studentIndex.length > 0) {
-                    const recent = masterData.studentIndex.slice(0, 3); // Get first 3 (newest are usually at the top based on our unshift logic)
+                    const recent = masterData.studentIndex.slice(0, 3);
                     document.getElementById('recent-students-list').innerHTML = recent.map(s => 
-                        `<div class="flex items-center justify-between p-3 bg-slate-800/20 hover:bg-brand-cyan/10 border border-transparent hover:border-brand-cyan/20 rounded-xl transition-all cursor-pointer" onclick="window.location.href='gerador.html'">
-                            <span class="font-bold text-sm" style="color: var(--text-main);">${s.name}</span>
-                            <i class="fa-solid fa-chevron-right text-xs" style="color: var(--text-muted);"></i>
+                        `<div class="flex items-center justify-between p-4 bg-slate-800/30 hover:bg-brand-cyan/10 border border-slate-700/30 hover:border-brand-cyan/30 rounded-2xl transition-all cursor-pointer group" onclick="window.location.href='gerador.html'">
+                            <span class="font-bold text-sm group-hover:text-brand-cyan transition-colors" style="color: var(--text-main);">${s.name}</span>
+                            <i class="fa-solid fa-arrow-right text-xs opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-cyan"></i>
                         </div>`
                     ).join('');
                 } else {
-                    document.getElementById('recent-students-list').innerHTML = `<p class="text-sm italic" style="color: var(--text-muted);">Nenhum aluno cadastrado ainda.</p>`;
+                    document.getElementById('recent-students-list').innerHTML = `<p class="text-sm italic p-4" style="color: var(--text-muted);">Nenhum aluno cadastrado ainda.</p>`;
                 }
                 
                 // Populate Daily Pillar
                 if(masterData.pillars && masterData.pillars.length > 0) {
-                    // Use today's date to pick a consistent random pillar for the day
                     const today = new Date().toDateString();
                     let hash = 0;
                     for (let i = 0; i < today.length; i++) hash += today.charCodeAt(i);
                     const pIdx = hash % masterData.pillars.length;
                     const p = masterData.pillars[pIdx];
                     
-                    // Map color class to hex for inline style
                     const colorMap = {
                         'p-red': '#ef4444', 'p-cyan': '#06b6d4', 'p-purple': '#a855f7',
                         'p-blue': '#3b82f6', 'p-green': '#10b981', 'p-orange': '#f97316', 'p-pink': '#ec4899'
@@ -416,21 +460,26 @@
                     const iconColor = colorMap[p.color] || '#00A8E8';
 
                     document.getElementById('daily-pillar').innerHTML = `
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: ${iconColor}20; color: ${iconColor};">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style="background: ${iconColor}20; color: ${iconColor}; border: 1px solid ${iconColor}40;">
                                 <i class="fa-solid ${p.icon}"></i>
                             </div>
-                            <h4 class="font-bold text-sm" style="color: var(--text-main);">${p.title}</h4>
+                            <h4 class="font-bold text-base" style="color: var(--text-main);">${p.title}</h4>
                         </div>
                         <p class="text-sm leading-relaxed" style="color: var(--text-muted);">${p.text}</p>
                     `;
                 }
                 
-                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-cloud-check text-emerald-500 mr-2"></i> Sincronizado';
+                // Update Top Sync Status
+                const syncEl = document.getElementById('sync-status-top');
+                syncEl.innerHTML = '<i class="fa-solid fa-cloud-check text-emerald-500"></i> <span class="hidden md:inline text-emerald-500">Sincronizado</span>';
+                syncEl.classList.add('border', 'border-emerald-500/20', 'bg-emerald-500/5');
                 
             } catch(e) {
                 console.error(e);
-                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-cloud-xmark text-red-500 mr-2"></i> Erro de Conexão';
+                const syncEl = document.getElementById('sync-status-top');
+                syncEl.innerHTML = '<i class="fa-solid fa-cloud-xmark text-red-500"></i> <span class="hidden md:inline text-red-500">Erro</span>';
+                syncEl.classList.add('border', 'border-red-500/20', 'bg-red-500/5');
             }
         }
 
