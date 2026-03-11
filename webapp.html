@@ -10,6 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root {
@@ -344,16 +345,69 @@
 
     <!-- TAB 5: FEEDBACK -->
     <div id="tab-5" class="tab-pane content">
-        <div style="padding:15px; border:1px solid var(--border); border-radius:12px; background:var(--surface); text-align:center;">
+        <div style="padding:15px; border:1px solid var(--border); border-radius:12px; background:var(--surface); text-align:center; margin-bottom: 20px;">
             <i class="fa-solid fa-comment-dots" style="font-size:2.5rem; color:var(--primary); margin-bottom:15px;"></i>
             <h3 style="color:var(--primary); font-weight:800; margin-bottom:10px;">Avalie a Consultoria</h3>
-            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Seu feedback é fundamental para melhorarmos sempre.</p>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Seu feedback é fundamental e nos ajuda a inspirar outras pessoas.</p>
             
-            <div style="margin-top:20px; padding:20px; background:var(--bg); border-radius:8px; border:1px dashed var(--border); color:var(--text-muted); font-size:1.2rem; font-weight:800;">
-                <i class="fa-solid fa-person-digging" style="margin-bottom:10px; font-size:2rem;"></i><br>
-                Em breve
+            <!-- FORMULÁRIO -->
+            <div style="text-align: left; margin-top: 15px;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; display: block;">Sua Foto (Opcional)</label>
+                <input type="file" id="fb-photo" accept="image/*" onchange="previewFeedbackPhoto(event)" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); margin-bottom: 15px; font-size: 0.85rem; color: var(--text);">
+
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; display: block;">Sua Nota</label>
+                <div id="fb-stars" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; font-size: 2rem; color: var(--border); cursor: pointer;">
+                    <i class="fa-solid fa-star" onclick="setFeedbackRating(1)"></i>
+                    <i class="fa-solid fa-star" onclick="setFeedbackRating(2)"></i>
+                    <i class="fa-solid fa-star" onclick="setFeedbackRating(3)"></i>
+                    <i class="fa-solid fa-star" onclick="setFeedbackRating(4)"></i>
+                    <i class="fa-solid fa-star" onclick="setFeedbackRating(5)"></i>
+                </div>
+                <input type="hidden" id="fb-rating" value="0">
+
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; display: block;">Seu Depoimento</label>
+                <textarea id="fb-text" rows="4" placeholder="O que você diria para alguém que está pensando em começar a consultoria comigo?" oninput="updateFeedbackPreview()" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: var(--font-ui); font-size: 0.95rem; resize: none; margin-bottom: 20px;"></textarea>
             </div>
         </div>
+
+        <!-- PREVIEW DO CARD -->
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; display: block; text-align: center;">Preview do seu Depoimento</label>
+            
+            <div id="fb-card-preview" style="background: white; border: 3px solid #00A8E8; border-radius: 16px; padding: 25px; box-shadow: 0 10px 25px rgba(0,168,232,0.15); position: relative; overflow: hidden; color: #1f2937; font-family: 'Plus Jakarta Sans', sans-serif;">
+                <!-- Aspas decorativas -->
+                <i class="fa-solid fa-quote-left" style="position: absolute; top: 15px; left: 15px; font-size: 3rem; color: rgba(0,168,232,0.1);"></i>
+                
+                <div style="display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2;">
+                    <!-- Foto -->
+                    <div id="fb-preview-img-container" style="width: 70px; height: 70px; border-radius: 50%; background: #f1f5f9; border: 2px solid #00A8E8; margin-bottom: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-user" style="font-size: 2rem; color: #cbd5e1;" id="fb-preview-img-icon"></i>
+                        <img id="fb-preview-img" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    </div>
+                    
+                    <!-- Estrelas -->
+                    <div id="fb-preview-stars" style="color: #f59e0b; font-size: 1.1rem; margin-bottom: 15px; letter-spacing: 2px;">
+                        <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                    </div>
+                    
+                    <!-- Texto -->
+                    <div id="fb-preview-text" style="font-size: 1.05rem; line-height: 1.5; text-align: center; font-style: italic; color: #374151; margin-bottom: 20px; min-height: 40px;">
+                        "Seu depoimento aparecerá aqui..."
+                    </div>
+                    
+                    <!-- Nome -->
+                    <div style="text-align: center;">
+                        <div id="fb-preview-name" style="font-weight: 800; font-size: 1.1rem; color: #001F5B; text-transform: uppercase; letter-spacing: 0.5px;">Nome do Aluno</div>
+                        <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 2px;">Aluno(a) Benai Consultoria</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-send-feedback" onclick="sendFeedback()" style="width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,168,232,0.3); transition: 0.3s;">
+            <i class="fa-solid fa-paper-plane"></i> ENVIAR DEPOIMENTO
+        </button>
+        <div style="height: 30px;"></div>
     </div>
 </div>
 
@@ -1340,6 +1394,138 @@
         document.querySelectorAll('.nav-btn')[n-1].classList.add('active');
         
         if(n === 3) renderHistory();
+        if(n === 5) initFeedbackTab();
+    }
+
+    // --- FEEDBACK SYSTEM ---
+    let feedbackPhotoBase64 = "";
+
+    function initFeedbackTab() {
+        if (currentData && currentData.name) {
+            document.getElementById('fb-preview-name').innerText = currentData.name;
+        }
+        // Load saved photo if exists
+        const savedPhoto = localStorage.getItem('benai_student_photo');
+        if (savedPhoto) {
+            feedbackPhotoBase64 = savedPhoto;
+            document.getElementById('fb-preview-img').src = savedPhoto;
+            document.getElementById('fb-preview-img').style.display = 'block';
+            document.getElementById('fb-preview-img-icon').style.display = 'none';
+        }
+    }
+
+    function setFeedbackRating(stars) {
+        haptic('light');
+        document.getElementById('fb-rating').value = stars;
+        const starEls = document.getElementById('fb-stars').children;
+        const previewStarEls = document.getElementById('fb-preview-stars').children;
+        
+        for(let i=0; i<5; i++) {
+            if(i < stars) {
+                starEls[i].style.color = '#f59e0b';
+                previewStarEls[i].className = 'fa-solid fa-star';
+            } else {
+                starEls[i].style.color = 'var(--border)';
+                previewStarEls[i].className = 'fa-regular fa-star';
+            }
+        }
+    }
+
+    function updateFeedbackPreview() {
+        const text = document.getElementById('fb-text').value;
+        const previewText = document.getElementById('fb-preview-text');
+        if (text.trim() === '') {
+            previewText.innerText = '"Seu depoimento aparecerá aqui..."';
+            previewText.style.opacity = '0.5';
+        } else {
+            previewText.innerText = `"${text}"`;
+            previewText.style.opacity = '1';
+        }
+    }
+
+    function previewFeedbackPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                feedbackPhotoBase64 = e.target.result;
+                localStorage.setItem('benai_student_photo', feedbackPhotoBase64); // Save locally
+                document.getElementById('fb-preview-img').src = feedbackPhotoBase64;
+                document.getElementById('fb-preview-img').style.display = 'block';
+                document.getElementById('fb-preview-img-icon').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function sendFeedback() {
+        const rating = document.getElementById('fb-rating').value;
+        const text = document.getElementById('fb-text').value;
+        const btn = document.getElementById('btn-send-feedback');
+
+        if (rating == 0) {
+            alert('Por favor, selecione uma nota em estrelas.');
+            return;
+        }
+        if (text.trim() === '') {
+            alert('Por favor, escreva seu depoimento.');
+            return;
+        }
+
+        haptic('medium');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> GERANDO CARD...';
+
+        try {
+            // 1. Generate Image from Card Preview
+            const cardEl = document.getElementById('fb-card-preview');
+            const canvas = await html2canvas(cardEl, {
+                scale: 2, // High resolution
+                backgroundColor: null,
+                useCORS: true
+            });
+            const base64Image = canvas.toDataURL('image/png');
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> ENVIANDO...';
+
+            // 2. Send to Google Apps Script
+            const payload = {
+                tipo: "feedback",
+                nomeAluno: currentData ? currentData.name : "Aluno Desconhecido",
+                nota: rating,
+                texto: text,
+                imagemBase64: base64Image
+            };
+
+            const url = "https://script.google.com/macros/s/AKfycbx5f06kJ7-rJwtG0HOaP_FDYKjqicLdZknE7fa6NCrpo7ZbQM0UHwgvuJ6k4NlLyi25/exec";
+            
+            const req = await fetch(url, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            // As we use no-cors, we assume success if it doesn't throw
+            haptic('success');
+            
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> ENVIADO COM SUCESSO!';
+            btn.style.background = 'var(--success)';
+            
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ENVIAR DEPOIMENTO';
+                btn.style.background = 'var(--accent)';
+                document.getElementById('fb-text').value = '';
+                updateFeedbackPreview();
+            }, 4000);
+
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao enviar depoimento. Tente novamente.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ENVIAR DEPOIMENTO';
+        }
     }
 
     function initTheme() {
