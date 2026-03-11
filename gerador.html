@@ -556,6 +556,7 @@
             <div class="app-tabs">
                 <div class="app-tab active" id="tab-train" onclick="switchView('train')"><i class="fa-solid fa-dumbbell"></i></div>
                 <div class="app-tab" id="tab-logic" onclick="switchView('logic')"><i class="fa-solid fa-brain"></i></div>
+                <div class="app-tab" id="tab-history" onclick="switchView('history')"><i class="fa-solid fa-clock-rotate-left"></i></div>
             </div>
 
             <!-- CANVAS -->
@@ -566,6 +567,11 @@
             <!-- METHODOLOGY CANVAS (NEW) -->
             <div id="method-canvas" class="editor-content" style="display:none">
                 <!-- Methodology rendered here -->
+            </div>
+
+            <!-- HISTORY CANVAS (NEW) -->
+            <div id="history-canvas" class="editor-content" style="display:none; padding: 15px;">
+                <!-- History rendered here -->
             </div>
         </div>
 
@@ -2111,21 +2117,145 @@
     function backupJSON() { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(appData)],{type:'application/json'})); a.download='benai_manager_backup.json'; a.click(); }
     function restoreJSON(inp) { const r=new FileReader(); r.onload=e=>{ try{ appData=JSON.parse(e.target.result); saveLocal(); location.reload(); }catch(e){alert("Erro arquivo");} }; r.readAsText(inp.files[0]); }
     function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+    // --- HISTORY LOGIC ---
+    async function loadHistory() {
+        const container = document.getElementById('history-canvas');
+        if(!currentStudent) {
+            container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">Selecione um aluno primeiro.</div>';
+            return;
+        }
+        
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; color:var(--accent); margin-bottom:10px;"></i><br>Buscando histórico na nuvem...</div>';
+        
+        try {
+            // URL do seu Google Apps Script
+            const url = "https://script.google.com/macros/s/AKfycbx5f06kJ7-rJwtG0HOaP_FDYKjqicLdZknE7fa6NCrpo7ZbQM0UHwgvuJ6k4NlLyi25/exec";
+            const res = await fetch(url + "?t=" + Date.now());
+            const data = await res.json();
+            
+            // Filtra pelo nome do aluno atual (ignorando maiúsculas/minúsculas e espaços extras)
+            const studentHistory = data.filter(row => 
+                row['Nome do Aluno'] && 
+                row['Nome do Aluno'].trim().toLowerCase() === currentStudent.name.trim().toLowerCase()
+            );
+            
+            if(studentHistory.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);"><i class="fa-solid fa-folder-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5;"></i><br>Nenhum histórico encontrado para este aluno.</div>';
+                return;
+            }
+            
+            // Agrupa por Data (assumindo formato ISO ou similar que vem do Google Sheets)
+            const grouped = {};
+            studentHistory.forEach(row => {
+                let fullDate = row['Data/Hora'] || 'Data Desconhecida';
+                
+                // Formata a data se vier no formato ISO (ex: 2026-03-11T17:37:44.000Z)
+                if (fullDate.includes('T') && fullDate.includes('Z')) {
+                    const d = new Date(fullDate);
+                    const dia = String(d.getDate()).padStart(2, '0');
+                    const mes = String(d.getMonth() + 1).padStart(2, '0');
+                    const ano = d.getFullYear();
+                    const hora = String(d.getHours()).padStart(2, '0');
+                    const min = String(d.getMinutes()).padStart(2, '0');
+                    fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
+                }
+                
+                // Agrupa pela data formatada
+                if(!grouped[fullDate]) grouped[fullDate] = [];
+                grouped[fullDate].push(row);
+            });
+            
+            // Ordena as datas da mais recente para a mais antiga
+            const sortedDates = Object.keys(grouped).sort((a, b) => {
+                if(a === 'Data Desconhecida') return 1;
+                if(b === 'Data Desconhecida') return -1;
+                
+                // Extrai as partes da data formatada (DD/MM/YYYY às HH:MM)
+                try {
+                    const [dataPart, horaPart] = a.split(' às ');
+                    const [d1, m1, y1] = dataPart.split('/');
+                    const [h1, min1] = horaPart ? horaPart.split(':') : [0,0];
+                    
+                    const [dataPart2, horaPart2] = b.split(' às ');
+                    const [d2, m2, y2] = dataPart2.split('/');
+                    const [h2, min2] = horaPart2 ? horaPart2.split(':') : [0,0];
+                    
+                    return new Date(y2, m2-1, d2, h2, min2) - new Date(y1, m1-1, d1, h1, min1);
+                } catch(e) {
+                    return 0; // Fallback se o formato for inesperado
+                }
+            });
+            
+            let html = '';
+            sortedDates.forEach((date, index) => {
+                const items = grouped[date];
+                // Pega o nome do treino do primeiro exercício desse dia
+                const treinoNome = items[0]['Treino'] || 'Treino';
+                
+                html += `
+                <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:10px; overflow:hidden;">
+                    <div onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.querySelector('.fa-chevron-down').style.transform = this.nextElementSibling.style.display === 'none' ? 'rotate(-90deg)' : 'rotate(0deg)';" style="padding:15px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; background:rgba(0,168,232,0.05);">
+                        <div style="font-weight:800; color:var(--primary); font-size:0.9rem;">
+                            <i class="fa-regular fa-calendar" style="color:var(--accent); margin-right:8px;"></i> ${date} 
+                            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600; margin-left:8px; padding-left:8px; border-left:1px solid var(--border);">${treinoNome}</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); transition:0.3s; transform:rotate(-90deg);"></i>
+                    </div>
+                    <div style="display:none; padding:15px; border-top:1px solid var(--border);">
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%; text-align:left; border-collapse:collapse; font-size:0.8rem;">
+                                <thead>
+                                    <tr style="border-bottom:2px solid var(--border); color:var(--text-muted);">
+                                        <th style="padding:8px 4px;">Exercício</th>
+                                        <th style="padding:8px 4px;">Carga/Reps</th>
+                                        <th style="padding:8px 4px;">RPE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${items.map(item => `
+                                    <tr style="border-bottom:1px solid var(--border);">
+                                        <td style="padding:10px 4px; font-weight:700; color:var(--text);">${item['Exercício'] || '-'}</td>
+                                        <td style="padding:10px 4px; font-family:var(--font-mono); color:var(--success); font-weight:700;">${item['Carga/Reps'] || '-'}</td>
+                                        <td style="padding:10px 4px; color:var(--warning); font-weight:700;">${item['RPE'] || '-'}</td>
+                                    </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+            
+        } catch(e) {
+            console.error(e);
+            container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--danger);"><i class="fa-solid fa-triangle-exclamation" style="font-size:2rem; margin-bottom:10px;"></i><br>Erro ao carregar histórico. Verifique a conexão ou se a aba da planilha está correta.</div>';
+        }
+    }
+
     function switchView(v) { 
         document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active')); 
         const trainCanvas = document.getElementById('editor-canvas');
         const methodCanvas = document.getElementById('method-canvas');
+        const historyCanvas = document.getElementById('history-canvas');
+        
+        trainCanvas.style.display = 'none';
+        methodCanvas.style.display = 'none';
+        historyCanvas.style.display = 'none';
         
         if(v === 'train') {
             document.getElementById('tab-train').classList.add('active');
             trainCanvas.style.display = 'block';
-            methodCanvas.style.display = 'none';
         } else if (v === 'logic') {
             document.getElementById('tab-logic').classList.add('active');
-            trainCanvas.style.display = 'none';
             methodCanvas.style.display = 'block';
             renderPhoneMethodology();
             switchRightTab('method');
+        } else if (v === 'history') {
+            document.getElementById('tab-history').classList.add('active');
+            historyCanvas.style.display = 'block';
+            loadHistory();
         }
     }
     function toggleTheme() { const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark'); }
