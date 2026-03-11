@@ -318,14 +318,13 @@
 
     <!-- TAB 3: HISTÓRICO (NOVO) -->
     <div id="tab-3" class="tab-pane content">
-        <div style="padding:15px; border:1px solid var(--border); border-radius:12px; background:var(--surface); text-align:center;">
+        <div style="padding:15px; border:1px solid var(--border); border-radius:12px; background:var(--surface); text-align:center; margin-bottom: 15px;">
             <i class="fa-solid fa-calendar-check" style="font-size:2.5rem; color:var(--accent); margin-bottom:15px;"></i>
             <h3 style="color:var(--primary); font-weight:800; margin-bottom:10px;">Seu Histórico</h3>
             <p style="color:var(--text-muted); font-size:0.85rem;">Aqui você verá os dias treinados e a evolução das suas cargas.</p>
-            <div style="margin-top:20px; padding:20px; background:var(--bg); border-radius:8px; border:1px dashed var(--border); color:var(--text-muted); font-size:1.2rem; font-weight:800;">
-                <i class="fa-solid fa-person-digging" style="margin-bottom:10px; font-size:2rem;"></i><br>
-                Em breve
-            </div>
+        </div>
+        <div id="history-list" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- JS Populated -->
         </div>
     </div>
 
@@ -708,10 +707,9 @@
         let setsHtml = '';
         for(let s=1; s<=numSets; s++) {
             setsHtml += `
-            <div class="set-row ${usesLoad ? '' : 'no-load'}">
+            <div class="set-row no-load">
                 <div class="set-lbl">Série ${s}</div>
-                <input type="number" class="s-input" id="s-reps-${uid}-${s}" placeholder="Reps" onchange="saveLocalInput(this.id, this.value)">
-                ${usesLoad ? `<input type="number" class="s-input" id="load-${uid}-${s}" placeholder="kg" onchange="saveLocalInput(this.id, this.value)">` : ''}
+                <input type="text" class="s-input" id="carga-reps-${uid}-${s}" placeholder="Carga/Reps" onchange="saveLocalInput(this.id, this.value)">
             </div>`;
         }
         
@@ -773,6 +771,9 @@
             if(icon) icon.style.transform = 'rotate(-90deg)';
             localStorage.setItem(`done_${uid}`, '1');
             
+            // ENVIA OS DADOS PARA O GOOGLE SHEETS
+            sendHistoryData(uid);
+            
             // Auto-open next exercise
             const allCards = Array.from(document.querySelectorAll('.ex-card'));
             const currentIndex = allCards.indexOf(card);
@@ -799,6 +800,60 @@
         }
     }
     
+    function sendHistoryData(uid) {
+        try {
+            const parts = uid.split('-');
+            const bIdx = parseInt(parts[0]);
+            const stageId = parts[1];
+            const iIdx = parseInt(parts[2]);
+            
+            let item;
+            if (currentData.blocks[bIdx].stages) {
+                item = currentData.blocks[bIdx].stages[stageId][iIdx];
+            } else {
+                item = currentData.blocks[bIdx].items[iIdx];
+            }
+            
+            const numSets = parseInt(item.sets) || 1;
+            let cargaRepsArr = [];
+            for(let s=1; s<=numSets; s++) {
+                const val = document.getElementById(`carga-reps-${uid}-${s}`)?.value || '';
+                if(val) {
+                    let formattedVal = val;
+                    if (!isNaN(val) && val.trim() !== '') {
+                        formattedVal = `${val} repetições`;
+                    }
+                    cargaRepsArr.push(`Série ${s}, ${formattedVal}`);
+                }
+            }
+            const cargaRepsStr = cargaRepsArr.join(' | ');
+            
+            const rpeVal = document.getElementById(`pse-${uid}`)?.value || '5';
+            const rpeText = pseData[rpeVal - 1].text;
+            
+            const payload = {
+                tipo: "historico",
+                nomeAluno: currentData.name || "Aluno",
+                nomeTreino: currentData.blocks[bIdx].name || "Treino",
+                exercicio: item.name || "",
+                cargaReps: cargaRepsStr,
+                rpe: `${rpeVal} - ${rpeText}`,
+                notas: ""
+            };
+            
+            fetch("https://script.google.com/macros/s/AKfycbx5f06kJ7-rJwtG0HOaP_FDYKjqicLdZknE7fa6NCrpo7ZbQM0UHwgvuJ6k4NlLyi25/exec", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(d => console.log("Histórico salvo:", d)).catch(e => console.error(e));
+            
+        } catch(e) {
+            console.error("Erro ao enviar histórico:", e);
+        }
+    }
+
     function checkBlocksState() {
         if(!currentData || !currentData.blocks) return;
         let allPreviousDone = true;
@@ -853,9 +908,33 @@
     }
 
     function finishWorkout() {
+        if(!confirm("Deseja finalizar este treino? Isso salvará seu progresso no histórico e limpará as marcações atuais.")) return;
+        
         haptic('success');
         playCheers();
         document.getElementById('congrats-overlay').style.display = 'flex';
+        
+        const doneCards = document.querySelectorAll('.ex-card.done');
+        if(doneCards.length > 0) {
+            doneCards.forEach(card => {
+                const uid = card.id.replace('card-', '');
+                sendHistoryData(uid); // Re-envia para garantir (Upsert vai atualizar/confirmar)
+            });
+        }
+
+        // 2. Clear current progress (mantém carga-reps e pse para o próximo treino)
+        Object.keys(localStorage).forEach(key => {
+            if(key.startsWith('done_')) {
+                localStorage.removeItem(key);
+            }
+        });
+        
+        document.querySelectorAll('.ex-card').forEach(c => {
+            c.classList.remove('done');
+            c.classList.add('collapsed');
+            const icon = c.querySelector('.ex-header .fa-chevron-down');
+            if(icon) icon.style.transform = 'rotate(-90deg)';
+        });
         
         document.querySelectorAll('.block-content-area').forEach(el => {
             el.style.maxHeight = '0px';
@@ -865,9 +944,11 @@
             el.style.transform = 'rotate(-90deg)';
         });
         
+        checkBlocksState();
+        
         setTimeout(() => {
             document.getElementById('congrats-overlay').style.display = 'none';
-            window.scrollTo({top: 0, behavior: 'smooth'});
+            go(3); // Go to history tab
         }, 3500);
     }
 
@@ -934,6 +1015,251 @@
             el.style.maxHeight = '0px';
             el.style.opacity = '0';
             container.classList.add('is-closed');
+        }
+    }
+
+    let cachedHistoryData = [];
+    let currentCalMonth = new Date().getMonth();
+    let currentCalYear = new Date().getFullYear();
+
+    async function renderHistory() {
+        const list = document.getElementById('history-list');
+        if(!list) return;
+        
+        if(!currentData || !currentData.name) {
+            list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Carregando...</div>';
+            return;
+        }
+
+        list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; color:var(--accent); margin-bottom:10px;"></i><br>Buscando seu histórico...</div>';
+
+        try {
+            const url = "https://script.google.com/macros/s/AKfycbx5f06kJ7-rJwtG0HOaP_FDYKjqicLdZknE7fa6NCrpo7ZbQM0UHwgvuJ6k4NlLyi25/exec";
+            const res = await fetch(url + "?t=" + Date.now());
+            const data = await res.json();
+            
+            cachedHistoryData = data.filter(row => 
+                row['Nome do Aluno'] && 
+                row['Nome do Aluno'].trim().toLowerCase() === currentData.name.trim().toLowerCase()
+            );
+
+            renderHistoryUI();
+
+        } catch(e) {
+            console.error(e);
+            list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger);">Erro ao carregar histórico. Tente novamente mais tarde.</div>';
+        }
+    }
+
+    function renderHistoryUI() {
+        const list = document.getElementById('history-list');
+        if(cachedHistoryData.length === 0) {
+            list.innerHTML = `
+            <div style="padding:30px 20px; background:var(--surface); border:1px dashed var(--border); border-radius:12px; text-align:center; color:var(--text-muted);">
+                <i class="fa-solid fa-dumbbell" style="font-size:2rem; margin-bottom:10px; opacity:0.5;"></i>
+                <div style="font-weight:800; font-size:1.1rem; color:var(--primary);">Nenhum treino salvo</div>
+                <div style="font-size:0.85rem; margin-top:5px;">Finalize um treino para ver seu histórico aqui.</div>
+            </div>`;
+            return;
+        }
+
+        const grouped = {};
+        cachedHistoryData.forEach(row => {
+            let fullDate = row['Data/Hora'] || 'Data Desconhecida';
+            
+            if (fullDate.includes('T') && fullDate.includes('Z')) {
+                const d = new Date(fullDate);
+                const dia = String(d.getDate()).padStart(2, '0');
+                const mes = String(d.getMonth() + 1).padStart(2, '0');
+                const ano = d.getFullYear();
+                const hora = String(d.getHours()).padStart(2, '0');
+                const min = String(d.getMinutes()).padStart(2, '0');
+                fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
+            }
+            
+            if(!grouped[fullDate]) grouped[fullDate] = [];
+            grouped[fullDate].push(row);
+        });
+
+        const sortedDates = Object.keys(grouped).sort((a, b) => {
+            if(a === 'Data Desconhecida') return 1;
+            if(b === 'Data Desconhecida') return -1;
+            try {
+                const [dataPart, horaPart] = a.split(' às ');
+                const [d1, m1, y1] = dataPart.split('/');
+                const [h1, min1] = horaPart ? horaPart.split(':') : [0,0];
+                
+                const [dataPart2, horaPart2] = b.split(' às ');
+                const [d2, m2, y2] = dataPart2.split('/');
+                const [h2, min2] = horaPart2 ? horaPart2.split(':') : [0,0];
+                
+                return new Date(y2, m2-1, d2, h2, min2) - new Date(y1, m1-1, d1, h1, min1);
+            } catch(e) { return 0; }
+        });
+
+        let html = buildCalendarHTML(cachedHistoryData);
+        html += '<div class="history-feed">';
+        
+        sortedDates.forEach(date => {
+            const dateOnly = date.split(' às ')[0];
+            const items = grouped[date];
+            const treinoNome = items[0]['Treino'] || 'Treino';
+            
+            let exHtml = '';
+            items.forEach(item => {
+                const rpeVal = parseInt(item['RPE']) || 5;
+                const pseEmoji = ['🥱','😌','🙂','😐','🤔','😅','🥵','😫','🤬','💀'][rpeVal-1] || '';
+                const cargaReps = item['Carga/Reps'] || '-';
+                
+                // Format S1: 10 | S2: 10 into nice badges
+                const setsArr = cargaReps.split('|').map(s => s.trim()).filter(s => s);
+                let setsHtml = `<div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:4px;">`;
+                setsArr.forEach(s => {
+                    setsHtml += `<span style="font-size:0.7rem; background:var(--bg); padding:2px 6px; border-radius:4px; border:1px solid var(--border); color:var(--text-muted); font-weight:600;">${s}</span>`;
+                });
+                setsHtml += `</div>`;
+
+                exHtml += `
+                <div style="padding:10px 0; border-bottom:1px solid var(--border); font-size:0.85rem;">
+                    <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--text); margin-bottom:4px;">
+                        <span>${item['Exercício'] || '-'}</span>
+                        <span title="${item['RPE']}">${pseEmoji}</span>
+                    </div>
+                    ${setsHtml}
+                </div>`;
+            });
+
+            html += `
+            <div id="hist-card-${dateOnly}" class="history-card" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:10px; scroll-margin-top: 20px;">
+                <div class="hc-header" onclick="this.nextElementSibling.classList.toggle('collapsed'); this.querySelector('.fa-chevron-down').style.transform = this.nextElementSibling.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(0deg)';" style="padding:15px; background:rgba(0,168,232,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <div>
+                        <div style="font-weight:800; color:var(--primary); font-size:0.95rem;">${treinoNome}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"><i class="fa-regular fa-calendar" style="color:var(--accent);"></i> ${date}</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.8rem; transition:0.3s; transform:rotate(-90deg);"></i>
+                </div>
+                <div class="hc-body collapsed" style="padding:0 15px; transition: max-height 0.3s ease-in-out, padding 0.3s; max-height: 2000px; overflow: hidden;">
+                    ${exHtml}
+                    <div style="height:10px;"></div>
+                </div>
+            </div>`;
+        });
+        html += '</div>'; // close history-feed
+
+        list.innerHTML = html;
+        
+        if(!document.getElementById('history-css')) {
+            const style = document.createElement('style');
+            style.id = 'history-css';
+            style.innerHTML = `
+            .hc-body.collapsed { max-height: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; }
+            .calendar-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+            .cal-header { display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--primary); margin-bottom: 15px; text-transform: uppercase; font-size: 1.1rem; }
+            .cal-nav-btn { background: none; border: none; font-size: 1.2rem; color: var(--primary); cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: 0.2s; }
+            .cal-nav-btn:hover { background: var(--bg); }
+            .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+            .cal-day-name { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+            .cal-day { height: 36px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; }
+            .cal-day.empty { cursor: default; }
+            .cal-day:not(.empty):hover { background: var(--bg); }
+            .cal-day.today { border: 2px solid var(--accent); color: var(--accent); }
+            .cal-day.trained { background: var(--success); color: white; border: none; box-shadow: 0 2px 5px rgba(16,185,129,0.3); }
+            .cal-day.trained.today { border: 2px solid #064e3b; }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    function buildCalendarHTML(historyData) {
+        const today = new Date();
+        const month = currentCalMonth;
+        const year = currentCalYear;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+        const trainedDays = new Set();
+        historyData.forEach(row => {
+            let dStr = row['Data/Hora'];
+            if(dStr) {
+                if (dStr.includes('T') && dStr.includes('Z')) {
+                    const d = new Date(dStr);
+                    if(d.getMonth() === month && d.getFullYear() === year) {
+                        trainedDays.add(d.getDate());
+                    }
+                } else {
+                    const parts = dStr.split(' ')[0].split('/');
+                    if(parts.length === 3) {
+                        if(parseInt(parts[1]) - 1 === month && parseInt(parts[2]) === year) {
+                            trainedDays.add(parseInt(parts[0]));
+                        }
+                    }
+                }
+            }
+        });
+
+        let html = `<div class="calendar-container">
+            <div class="cal-header">
+                <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <span>${monthNames[month]} ${year}</span>
+                <button class="cal-nav-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="cal-grid">
+                <div class="cal-day-name">Dom</div><div class="cal-day-name">Seg</div><div class="cal-day-name">Ter</div>
+                <div class="cal-day-name">Qua</div><div class="cal-day-name">Qui</div><div class="cal-day-name">Sex</div><div class="cal-day-name">Sáb</div>`;
+
+        for(let i=0; i<firstDay; i++) {
+            html += `<div class="cal-day empty"></div>`;
+        }
+
+        for(let i=1; i<=daysInMonth; i++) {
+            const isTrained = trainedDays.has(i);
+            const isToday = (i === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+            let classes = "cal-day";
+            if(isTrained) classes += " trained";
+            if(isToday) classes += " today";
+            
+            const dayStr = String(i).padStart(2, '0');
+            const monthStr = String(month + 1).padStart(2, '0');
+            const dateId = `${dayStr}/${monthStr}/${year}`;
+
+            html += `<div class="${classes}" onclick="scrollToDate('${dateId}')">${i}</div>`;
+        }
+
+        html += `</div></div>`;
+        return html;
+    }
+
+    window.changeMonth = function(dir) {
+        currentCalMonth += dir;
+        if(currentCalMonth < 0) {
+            currentCalMonth = 11;
+            currentCalYear--;
+        } else if(currentCalMonth > 11) {
+            currentCalMonth = 0;
+            currentCalYear++;
+        }
+        renderHistoryUI();
+    };
+
+    window.scrollToDate = function(dateStr) {
+        const el = document.getElementById('hist-card-' + dateStr);
+        if(el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.style.transition = 'box-shadow 0.3s';
+            el.style.boxShadow = '0 0 0 3px var(--accent)';
+            setTimeout(() => el.style.boxShadow = 'none', 1500);
+            
+            const body = el.querySelector('.hc-body');
+            const icon = el.querySelector('.fa-chevron-down');
+            if(body && body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                if(icon) icon.style.transform = 'rotate(0deg)';
+            }
+        } else {
+            alert('Nenhum treino encontrado neste dia.');
         }
     }
 
@@ -1012,6 +1338,8 @@
         document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
         document.getElementById(`tab-${n}`).classList.add('active');
         document.querySelectorAll('.nav-btn')[n-1].classList.add('active');
+        
+        if(n === 3) renderHistory();
     }
 
     function initTheme() {
