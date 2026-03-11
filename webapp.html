@@ -1121,14 +1121,30 @@
         cachedHistoryData.forEach(row => {
             let fullDate = row['Data/Hora'] || 'Data Desconhecida';
             
-            if (fullDate.includes('T') && fullDate.includes('Z')) {
-                const d = new Date(fullDate);
-                const dia = String(d.getDate()).padStart(2, '0');
-                const mes = String(d.getMonth() + 1).padStart(2, '0');
-                const ano = d.getFullYear();
-                const hora = String(d.getHours()).padStart(2, '0');
-                const min = String(d.getMinutes()).padStart(2, '0');
-                fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
+            try {
+                if (typeof fullDate === 'string' && fullDate.includes('T') && fullDate.includes('Z')) {
+                    const d = new Date(fullDate);
+                    if (!isNaN(d.getTime())) {
+                        const dia = String(d.getDate()).padStart(2, '0');
+                        const mes = String(d.getMonth() + 1).padStart(2, '0');
+                        const ano = d.getFullYear();
+                        const hora = String(d.getHours()).padStart(2, '0');
+                        const min = String(d.getMinutes()).padStart(2, '0');
+                        fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
+                    }
+                } else if (fullDate instanceof Date || (typeof fullDate === 'string' && !isNaN(Date.parse(fullDate)) && !fullDate.includes('/'))) {
+                     const d = new Date(fullDate);
+                     if (!isNaN(d.getTime())) {
+                        const dia = String(d.getDate()).padStart(2, '0');
+                        const mes = String(d.getMonth() + 1).padStart(2, '0');
+                        const ano = d.getFullYear();
+                        const hora = String(d.getHours()).padStart(2, '0');
+                        const min = String(d.getMinutes()).padStart(2, '0');
+                        fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
+                     }
+                }
+            } catch (e) {
+                // Keep original if parsing fails
             }
             
             if(!grouped[fullDate]) grouped[fullDate] = [];
@@ -1238,18 +1254,32 @@
         historyData.forEach(row => {
             let dStr = row['Data/Hora'];
             if(dStr) {
-                if (dStr.includes('T') && dStr.includes('Z')) {
-                    const d = new Date(dStr);
-                    if(d.getMonth() === month && d.getFullYear() === year) {
-                        trainedDays.add(d.getDate());
-                    }
-                } else {
-                    const parts = dStr.split(' ')[0].split('/');
-                    if(parts.length === 3) {
-                        if(parseInt(parts[1]) - 1 === month && parseInt(parts[2]) === year) {
-                            trainedDays.add(parseInt(parts[0]));
+                try {
+                    if (typeof dStr === 'string' && dStr.includes('T') && dStr.includes('Z')) {
+                        const d = new Date(dStr);
+                        if (!isNaN(d.getTime())) {
+                            if(d.getMonth() === month && d.getFullYear() === year) {
+                                trainedDays.add(d.getDate());
+                            }
+                        }
+                    } else if (dStr instanceof Date || (typeof dStr === 'string' && !isNaN(Date.parse(dStr)) && !dStr.includes('/'))) {
+                        const d = new Date(dStr);
+                        if (!isNaN(d.getTime())) {
+                            if(d.getMonth() === month && d.getFullYear() === year) {
+                                trainedDays.add(d.getDate());
+                            }
+                        }
+                    } else {
+                        // Fallback for non-standard formats like DD/MM/YYYY
+                        const parts = dStr.split(' ')[0].split('/');
+                        if(parts.length === 3) {
+                            if(parseInt(parts[1]) - 1 === month && parseInt(parts[2]) === year) {
+                                trainedDays.add(parseInt(parts[0]));
+                            }
                         }
                     }
+                } catch (e) {
+                    // Ignore parsing errors
                 }
             }
         });
