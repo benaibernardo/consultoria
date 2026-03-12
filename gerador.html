@@ -528,6 +528,15 @@
                         <input type="date" id="ed-end" class="hb-input" onchange="updateStudent('expiryDate', this.value)">
                     </div>
                     
+                    <!-- PLANO ATUAL BOX -->
+                    <div class="header-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                        <label class="hb-label" style="color: var(--accent);"><i class="fa-solid fa-star"></i> Plano Atual</label>
+                        <select id="ed-plano" class="chk-select" style="width: 100%; margin-top: 5px;" onchange="updateStudent('planoAtual', this.value)">
+                            <option value="individual">Individual</option>
+                            <option value="casal">Casal</option>
+                        </select>
+                    </div>
+                    
                     <!-- RESTORED CHECK-UP BOX -->
                     <div class="header-box checkup-box">
                         <label class="hb-label checkup-label">
@@ -872,6 +881,23 @@
     }
 
     // --- INIT ---
+    function updateDatalist() {
+        let dl = document.getElementById('library-exercises');
+        if (!dl) {
+            dl = document.createElement('datalist');
+            dl.id = 'library-exercises';
+            document.body.appendChild(dl);
+        }
+        dl.innerHTML = '';
+        if (appData.library) {
+            appData.library.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex.name;
+                dl.appendChild(opt);
+            });
+        }
+    }
+
     window.onload = () => {
         const local = localStorage.getItem(DB_KEY);
         if(local) {
@@ -910,6 +936,7 @@
 
         renderStudentList();
         renderLibrary();
+        updateDatalist();
         
         // Auto-sync on load if token and master gist exist
         if(t && mGist) {
@@ -940,6 +967,7 @@
             id, name: "Novo Aluno", focus: "Hipertrofia", 
             startDate: today, expiryDate: "", 
             checkUpDay: "", checkUpTime: "",
+            planoAtual: "individual",
             pillars: JSON.parse(JSON.stringify(appData.pillars)), // Clone default pillars
             blocks: []
         });
@@ -959,6 +987,7 @@
             id, name: "Aluno Modelo Complexo", focus: "Testes de Funcionalidades",
             startDate: today, expiryDate: expiry, 
             checkUpDay: "Sex", checkUpTime: "10:00",
+            planoAtual: "individual",
             pillars: JSON.parse(JSON.stringify(appData.pillars)),
             blocks: [
                 {
@@ -1041,9 +1070,13 @@
             let statusColor = "var(--success)";
             
             if(s.startDate && s.expiryDate) {
-                const start = new Date(s.startDate);
-                const end = new Date(s.expiryDate);
+                const [sy, sm, sd] = s.startDate.split('-');
+                const [ey, em, ed] = s.expiryDate.split('-');
+                const start = new Date(sy, sm-1, sd);
+                const end = new Date(ey, em-1, ed);
                 const now = new Date();
+                now.setHours(0,0,0,0);
+                
                 const total = end - start;
                 const elapsed = now - start;
                 daysLeft = Math.ceil((end - now)/(1000*60*60*24));
@@ -1055,12 +1088,13 @@
 
             const activeClass = currentStudent && currentStudent.id === s.id ? 'active' : '';
             const checkInfo = (s.checkUpDay && s.checkUpTime) ? `📅 ${s.checkUpDay} • ${s.checkUpTime}` : '';
+            const daysDisplay = daysLeft < 0 ? 'Expirado' : `${daysLeft}d`;
 
             l.innerHTML += `
             <div class="s-item ${activeClass}" onclick="loadStudent('${s.id}')">
                 <div class="s-header">
                     <span class="s-name">${s.name}</span>
-                    <span class="s-days" style="color:${statusColor}; background:color-mix(in srgb, ${statusColor} 10%, white);">${daysLeft}d</span>
+                    <span class="s-days" style="color:${statusColor}; background:color-mix(in srgb, ${statusColor} 10%, white);">${daysDisplay}</span>
                 </div>
                 <div class="progress-track"><div class="progress-fill" style="width:${progress}%; background:${statusColor}"></div></div>
                 <div class="s-footer">
@@ -1129,6 +1163,7 @@
             document.getElementById('ed-focus').value = currentStudent.focus;
             document.getElementById('ed-start').value = currentStudent.startDate;
             document.getElementById('ed-end').value = currentStudent.expiryDate;
+            document.getElementById('ed-plano').value = currentStudent.planoAtual || "individual";
             
             // Check-up Restore
             document.getElementById('ed-check-day').value = currentStudent.checkUpDay || "";
@@ -1335,6 +1370,7 @@
                     <div class="blk-tools">
                         <div class="bt-icon min ${isCollapsed?'active':''}" onclick="toggleBlockCollapse(${bIdx})"><i class="fa-solid ${collapseIcon}"></i></div>
                         <div class="bt-icon lock ${lockedClass}" onclick="toggleLock(${bIdx})"><i class="fa-solid ${lockIcon}"></i></div>
+                        <div class="bt-icon" onclick="duplicateBlock(${bIdx})" style="color:var(--accent);" title="Duplicar Bloco"><i class="fa-solid fa-copy"></i></div>
                         <div class="bt-icon del" onclick="delBlock(${bIdx})"><i class="fa-solid fa-trash"></i></div>
                     </div>
                 </div>
@@ -1398,7 +1434,7 @@
                                     <div class="ex-top-row">
                                         <div style="width:100%; display:flex; align-items:center; gap:8px;">
                                             <i class="fa-regular ${checkIcon}" style="color:${checkColor}; font-size:1.1rem; cursor:pointer; transition:0.2s;" title="Marcar como concluído" onclick="toggleItemCollapse(${bIdx}, '${stg.id}', ${iIdx})"></i>
-                                            <input class="ex-title" value="${item.name}" onchange="updItem(${bIdx}, '${stg.id}', ${iIdx}, 'name', this.value)" ${isLocked?'disabled':''}>
+                                            <input class="ex-title" list="library-exercises" value="${item.name}" onchange="handleExerciseNameChange(${bIdx}, '${stg.id}', ${iIdx}, this.value)" ${isLocked?'disabled':''}>
                                             ${videoIcon}
                                         </div>
                                         <span class="method-badge" style="background:#94a3b8">${item.method}</span>
@@ -1480,8 +1516,34 @@
     function addBlock() { haptic('medium'); currentStudent.blocks.push({ name: "Bloco " + String.fromCharCode(65 + currentStudent.blocks.length), desc: "", locked: false, collapsed: false, stages: { mobilidade: [], ativacao: [], forca: [], desaceleracao: [] } }); saveLocal(); renderEditor(); }
     function toggleLock(bIdx) { haptic('light'); currentStudent.blocks[bIdx].locked = !currentStudent.blocks[bIdx].locked; saveLocal(); renderEditor(); }
     function delBlock(bIdx) { haptic('heavy'); if(confirm("Excluir bloco?")) { currentStudent.blocks.splice(bIdx, 1); saveLocal(); renderEditor(); } }
+    function duplicateBlock(bIdx) {
+        haptic('medium');
+        const blockToCopy = JSON.parse(JSON.stringify(currentStudent.blocks[bIdx]));
+        blockToCopy.name += " (Cópia)";
+        currentStudent.blocks.splice(bIdx + 1, 0, blockToCopy);
+        saveLocal();
+        renderEditor();
+        showToast("Bloco duplicado!");
+    }
     function updBlock(bIdx, field, val) { currentStudent.blocks[bIdx][field] = val; saveLocal(); }
     function updItem(bIdx, stageId, iIdx, field, val) { currentStudent.blocks[bIdx].stages[stageId][iIdx][field] = val; saveLocal(); }
+
+    function handleExerciseNameChange(bIdx, stageId, iIdx, newName) {
+        if (!currentStudent || !currentStudent.blocks[bIdx]) return;
+        const item = currentStudent.blocks[bIdx].stages[stageId][iIdx];
+        
+        const libEx = appData.library.find(ex => ex.name.toLowerCase() === newName.toLowerCase());
+        if (libEx) {
+            item.name = libEx.name;
+            item.method = libEx.method || 'Normal';
+            item.link = libEx.video || '';
+            showToast("Preenchido da biblioteca!");
+        } else {
+            item.name = newName;
+        }
+        saveLocal();
+        renderEditor();
+    }
     function delItem(bIdx, stageId, iIdx) { haptic('heavy'); if(confirm("Remover exercício?")) { currentStudent.blocks[bIdx].stages[stageId].splice(iIdx, 1); saveLocal(); renderEditor(); } }
     function moveBlock(oldIdx, newIdx) { haptic('light'); const item = currentStudent.blocks.splice(oldIdx, 1)[0]; currentStudent.blocks.splice(newIdx, 0, item); saveLocal(); }
     function moveItem(fromId, toId, oldIdx, newIdx) { 
@@ -1808,6 +1870,7 @@
             appData.library.splice(idx, 1);
             saveLocal();
             renderLibrary();
+            updateDatalist();
         }
     }
 
@@ -1855,7 +1918,7 @@
         if(id === 'NEW') appData.library.push(item); 
         else appData.library[id] = item;
         
-        saveLocal(); closeModal('modal-lib'); renderLibrary();
+        saveLocal(); closeModal('modal-lib'); renderLibrary(); updateDatalist();
     }
 
     // --- CAT MANAGER ---
@@ -2031,6 +2094,7 @@
             saveLocal();
             
             renderLibrary();
+            updateDatalist();
             renderStudentList();
             
             if(!silent) {
