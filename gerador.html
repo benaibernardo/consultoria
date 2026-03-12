@@ -1074,9 +1074,32 @@
     let targetBlockIdx = null;
     let targetStageId = null;
 
-    function loadStudent(id) {
-        const newStudent = appData.students.find(s => String(s.id) === String(id));
+    async function loadStudent(id) {
+        let newStudent = appData.students.find(s => String(s.id) === String(id));
         if(!newStudent) return;
+
+        // Se for um aluno placeholder (sincronizado do Master Gist mas sem os dados locais)
+        if (newStudent.focus === "Carregando..." && newStudent.gistId) {
+            const t = document.getElementById('gh-token').value;
+            if (!t) return alert("Configure o Token do GitHub para baixar os dados deste aluno.");
+            
+            try {
+                showToast("Baixando treino do aluno...");
+                const res = await fetch(`https://api.github.com/gists/${newStudent.gistId}`, { headers:{'Authorization':`token ${t}`} });
+                if (!res.ok) throw new Error("Falha ao baixar do GitHub");
+                const j = await res.json();
+                const studentData = JSON.parse(j.files["treino.json"].content);
+                
+                // Substitui o placeholder pelos dados reais
+                const idx = appData.students.findIndex(s => String(s.id) === String(id));
+                appData.students[idx] = studentData;
+                newStudent = studentData;
+                saveLocal();
+            } catch (e) {
+                alert("Erro ao carregar aluno: " + e.message);
+                return;
+            }
+        }
 
         // Data migration check for old students without pillars/logic structure
         if (!newStudent.logic || typeof newStudent.logic === 'string') newStudent.logic = [];
