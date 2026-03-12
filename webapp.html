@@ -287,12 +287,21 @@
 
     <!-- TAB 1: TREINO -->
     <div id="tab-1" class="tab-pane active content">
-        <div id="expired-lock" style="display:none; text-align:center; padding:30px 15px; background:var(--surface); border:1px solid var(--danger); border-radius:12px; margin-top:20px;">
-            <i class="fa-solid fa-lock" style="font-size:3rem; color:var(--danger); margin-bottom:15px;"></i>
-            <h3 style="color:var(--danger); font-weight:900; text-transform:uppercase; font-size:1.4rem; margin-bottom:10px;">Acesso Bloqueado</h3>
-            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:20px;">Seu plano de consultoria expirou. Para continuar acessando seus treinos e mantendo seus resultados, renove seu plano.</p>
-            <button onclick="go(4)" style="width:100%; padding:15px; background:var(--danger); color:white; border:none; border-radius:12px; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
-                <i class="fa-solid fa-star"></i> RENOVAR AGORA
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-location-dot" style="color: var(--accent); font-size: 1.2rem;"></i>
+                <span style="font-weight: 700; color: var(--primary); font-size: 0.95rem;">Aula Presencial?</span>
+            </div>
+            <button onclick="go(4)" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s;">
+                Saiba mais
+            </button>
+        </div>
+        <div id="expired-lock" style="display:none; text-align:center; padding:40px; background:var(--surface); border-radius:20px; border:1px solid var(--border); margin-bottom:20px;">
+            <i class="fa-solid fa-rocket" style="font-size:3rem; color:var(--accent); margin-bottom:15px;"></i>
+            <h3 style="color:var(--primary); font-weight:900; text-transform:uppercase; font-size:1.4rem; margin-bottom:10px;">Seu ciclo atual foi concluído! 🚀</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:20px;">Parabéns pela dedicação até aqui. Para continuarmos evoluindo e acessar seus próximos treinos, renove seu plano.</p>
+            <button onclick="go(4)" style="width:100%; padding:15px; background:var(--accent); color:white; border:none; border-radius:12px; font-weight:800; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
+                <i class="fa-solid fa-star"></i> RENOVAR PLANO
             </button>
         </div>
         <div id="wList">
@@ -336,9 +345,62 @@
             <h3 style="color:var(--primary); font-weight:800; margin-bottom:10px;">Seu Plano</h3>
             <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Gerencie sua assinatura e garanta a continuidade dos seus resultados.</p>
             
-            <div style="margin-top:20px; padding:20px; background:var(--bg); border-radius:8px; border:1px dashed var(--border); color:var(--text-muted); font-size:1.2rem; font-weight:800;">
-                <i class="fa-solid fa-person-digging" style="margin-bottom:10px; font-size:2rem;"></i><br>
-                Em breve
+            <div style="margin-bottom: 20px; text-align: left;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- Plano Individual -->
+                <div id="plan-individual" style="border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: left; background: var(--bg);">
+                    <div style="font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 5px;">Plano Individual</div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button onclick="openPayment('https://www.asaas.com/c/ipcsin79y1wwgxgk')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s;">
+                            Mensal<br><span style="color: var(--accent); font-size: 1rem;">R$ 150</span>
+                        </button>
+                        <button onclick="openPayment('https://www.asaas.com/c/oonjexsbw08fh8va')" style="flex: 1; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,168,232,0.3);">
+                            Trimestral<br><span style="font-size: 1rem;">R$ 417</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plano Casal -->
+                <div id="plan-casal" style="border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: left; background: var(--bg);">
+                    <div style="font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 5px;">Plano Casal</div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button onclick="openPayment('https://www.asaas.com/c/1t1rlw6rouetzdh0')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s;">
+                            Mensal<br><span style="color: var(--accent); font-size: 1rem;">R$ 280</span>
+                        </button>
+                        <button onclick="openPayment('https://www.asaas.com/c/gwsg9k3021hu4dwn')" style="flex: 1; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,168,232,0.3);">
+                            Trimestral<br><span style="font-size: 1rem;">R$ 780</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Aula Presencial -->
+                <div style="border: 1px solid var(--accent); border-radius: 12px; padding: 20px 15px; text-align: center; background: var(--surface); margin-top: 10px; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0,168,232,0.1);">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--accent);"></div>
+                    
+                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,168,232,0.1); color: var(--accent); font-size: 1.5rem; margin-bottom: 15px;">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    
+                    <div style="font-weight: 900; color: var(--primary); font-size: 1.3rem; margin-bottom: 5px;">Aula Presencial</div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <span style="font-size: 0.7rem; font-weight: 700; color: var(--accent); background: rgba(0,168,232,0.1); padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">Exclusivo para alunos</span>
+                    </div>
+                    
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; max-width: 90%; margin-left: auto; margin-right: auto;">Sessão dedicada ao refinamento da técnica, correção de postura, ajustes biomecânicos e aprimoramento da consciência corporal. Focada em otimizar a execução dos movimentos e potencializar os resultados do seu treino.</p>
+                    
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border);">
+                        <div style="font-weight: 900; font-size: 1.5rem; color: var(--primary);">R$ 100 <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">/ sessão</span></div>
+                        <a href="https://wa.me/5541997222664?text=Ol%C3%A1%20Benai%2C%20sou%20aluno%20da%20consultoria%20e%20gostaria%20de%20agendar%20uma%20Aula%20Presencial." target="_blank" style="background: #25D366; color: white; padding: 12px 25px; border-radius: 8px; font-weight: 800; font-size: 0.95rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; width: 100%; justify-content: center; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); transition: 0.2s;"><i class="fa-brands fa-whatsapp" style="font-size: 1.2rem;"></i> Agendar Sessão</a>
+                    </div>
+                    
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-align: left; background: var(--bg); padding: 10px 12px; border-radius: 8px; border: 1px dashed var(--border); display: flex; gap: 8px; align-items: flex-start;">
+                        <i class="fa-solid fa-circle-info" style="color: var(--accent); margin-top: 2px;"></i> 
+                        <span><strong>Nota de Deslocamento:</strong> Para distâncias superiores a 5 km, há uma taxa adicional de R$ 20.</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -484,6 +546,19 @@
         
         calculateProgress(data.startDate, data.expiryDate);
         
+        // Filter plans
+        const planIndividual = document.getElementById('plan-individual');
+        const planCasal = document.getElementById('plan-casal');
+        if (planIndividual && planCasal) {
+            if (data.planoAtual === 'casal') {
+                planIndividual.style.display = 'none';
+                planCasal.style.display = 'block';
+            } else {
+                planIndividual.style.display = 'block';
+                planCasal.style.display = 'none';
+            }
+        }
+        
         // Pillars Tab
         const pillarsContainer = document.getElementById('pillars-container');
         pillarsContainer.innerHTML = '';
@@ -603,8 +678,10 @@
     function calculateProgress(startStr, endStr) {
         if(!startStr || !endStr) return;
         
-        const start = new Date(startStr);
-        const end = new Date(endStr);
+        const [sy, sm, sd] = startStr.split('-');
+        const [ey, em, ed] = endStr.split('-');
+        const start = new Date(sy, sm-1, sd);
+        const end = new Date(ey, em-1, ed);
         const today = new Date();
         
         // Normalize times
@@ -612,7 +689,7 @@
         
         const totalDays = (end - start) / (1000 * 60 * 60 * 24);
         const daysPassed = (today - start) / (1000 * 60 * 60 * 24);
-        const daysLeft = (end - today) / (1000 * 60 * 60 * 24);
+        const daysLeft = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
         
         let percent = (daysPassed / totalDays) * 100;
         if(percent < 0) percent = 0;
@@ -631,30 +708,26 @@
         }
 
         // Color logic
-        if(daysLeft <= 5 && daysLeft > 0) {
-            bar.style.background = 'var(--warning)';
-            warning.style.display = 'block';
-            warning.style.color = 'var(--warning)';
-            if(daysLeft <= 3) warning.innerText = "Faltam poucos dias para o fim do plano!";
-            if(daysLeft <= 1) warning.innerText = "Seu plano expira amanhã! Renove na aba PLANO.";
-        } else if (daysLeft <= 0) {
+        const expiredLock = document.getElementById('expired-lock');
+        const wList = document.getElementById('wList');
+        
+        if(daysLeft <= 0) {
             bar.style.background = 'var(--danger)';
             warning.style.display = 'block';
             warning.style.color = 'var(--danger)';
-            warning.innerText = "Seu plano expirou. Renove para continuar com acesso.";
-            
-            // Bloquear treino
-            const wList = document.getElementById('wList');
-            const expiredLock = document.getElementById('expired-lock');
+            warning.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Seu plano expirou! Renove para continuar.`;
             if (wList) wList.style.display = 'none';
             if (expiredLock) expiredLock.style.display = 'block';
+        } else if(daysLeft <= 5) {
+            bar.style.background = 'var(--warning)';
+            warning.style.display = 'block';
+            warning.style.color = 'var(--warning)';
+            warning.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Seu plano acaba em ${Math.ceil(daysLeft)} dias! Prepare-se para renovar.`;
+            if (wList) wList.style.display = 'block';
+            if (expiredLock) expiredLock.style.display = 'none';
         } else {
             bar.style.background = 'var(--success)';
             warning.style.display = 'none';
-            
-            // Liberar treino
-            const wList = document.getElementById('wList');
-            const expiredLock = document.getElementById('expired-lock');
             if (wList) wList.style.display = 'block';
             if (expiredLock) expiredLock.style.display = 'none';
         }
@@ -906,6 +979,17 @@
         } catch(e) {
             console.error("Erro ao enviar histórico:", e);
         }
+    }
+
+    function openPayment(url) {
+        const emailInput = document.getElementById('renovacao-email');
+        const email = emailInput ? emailInput.value.trim() : '';
+        if (!email) {
+            alert("Por favor, preencha seu e-mail de cadastro antes de escolher um plano.");
+            if(emailInput) emailInput.focus();
+            return;
+        }
+        window.open(url + '?email=' + encodeURIComponent(email), '_blank');
     }
 
     function checkBlocksState() {
