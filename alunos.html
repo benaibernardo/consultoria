@@ -222,7 +222,7 @@
 
     <script>
         // URL do seu Google Apps Script (Web App)
-        const API_URL = 'https://script.google.com/macros/s/AKfycbx5f06kJ7-rJwtG0HOaP_FDYKjqicLdZknE7fa6NCrpo7ZbQM0UHwgvuJ6k4NlLyi25/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxxzYPeyU9xwRznGW81iGxA_21e_sDszYmXGWiiZTxtxDo9IC0duL7UuaYy6BIDZ_DC/exec';
         
         let studentsData = [];
         let currentStudent = null;
@@ -245,7 +245,7 @@
             document.getElementById('controlsBar').classList.add('hidden');
 
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(API_URL + '?tipo=anamnese');
                 const data = await response.json();
                 
                 // Inverte o array para mostrar os mais recentes primeiro
