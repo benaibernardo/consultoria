@@ -596,6 +596,7 @@
             <button class="pa-btn-wide pa-tiny" onclick="copyTinyUrlFlow()"><i class="fa-solid fa-link"></i> <span>Gerar Link</span></button>
             <button class="pa-btn-wide" onclick="previewWorkout()" style="background: #f59e0b;"><i class="fa-solid fa-eye"></i> <span>Preview</span></button>
             <button class="pa-btn-wide pa-update" onclick="saveToCloud('PATCH')"><i class="fa-solid fa-cloud-arrow-up"></i> <span>Salvar na Nuvem</span></button>
+            <button class="pa-btn-wide" onclick="duplicateStudent()" style="background: var(--accent);"><i class="fa-solid fa-copy"></i> <span>Duplicar Aluno</span></button>
             <button class="pa-btn-wide" onclick="deleteCurrentStudent()" style="background: var(--danger);"><i class="fa-solid fa-trash"></i> <span>Excluir Aluno</span></button>
 
             <!-- BUILDER MENU -->
@@ -971,6 +972,25 @@
             blocks: []
         });
         saveLocal(); renderStudentList(); loadStudent(id);
+    }
+
+    function duplicateStudent() {
+        if (!currentStudent) return;
+        if (!confirm(`Deseja duplicar o aluno "${currentStudent.name}"?\nIsso criará uma cópia exata do treino, mas sem vínculo com a nuvem (um novo link será gerado ao salvar).`)) return;
+
+        const id = Date.now().toString();
+        const duplicatedStudent = JSON.parse(JSON.stringify(currentStudent));
+        
+        // Reset IDs and cloud links
+        duplicatedStudent.id = id;
+        duplicatedStudent.name = `${currentStudent.name} (Cópia)`;
+        delete duplicatedStudent.gistId; // CRITICAL: Remove the cloud link so it generates a new one
+
+        appData.students.unshift(duplicatedStudent);
+        saveLocal(); 
+        renderStudentList(); 
+        loadStudent(id);
+        showToast("Aluno duplicado com sucesso!");
     }
 
     function createFullDemo() {
