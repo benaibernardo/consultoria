@@ -595,8 +595,7 @@
             <h4 style="margin:0 0 10px 0; color:var(--primary); font-size:0.9rem;">Ações</h4>
             <button class="pa-btn-wide pa-tiny" onclick="copyTinyUrlFlow()"><i class="fa-solid fa-link"></i> <span>Gerar Link</span></button>
             <button class="pa-btn-wide" onclick="previewWorkout()" style="background: #f59e0b;"><i class="fa-solid fa-eye"></i> <span>Preview</span></button>
-            <button class="pa-btn-wide pa-update" onclick="saveToCloud('PATCH')"><i class="fa-solid fa-cloud-arrow-up"></i> <span>Salvar Alterações</span></button>
-            <button class="pa-btn-wide pa-link" onclick="generateOffline()"><i class="fa-solid fa-wifi"></i> <span>Link Offline</span></button>
+            <button class="pa-btn-wide pa-update" onclick="saveToCloud('PATCH')"><i class="fa-solid fa-cloud-arrow-up"></i> <span>Salvar na Nuvem</span></button>
             <button class="pa-btn-wide" onclick="deleteCurrentStudent()" style="background: var(--danger);"><i class="fa-solid fa-trash"></i> <span>Excluir Aluno</span></button>
 
             <!-- BUILDER MENU -->
@@ -851,7 +850,7 @@
         methods: ['Musculação','Calistenia','Híbrido'],
         pillars: [
             { title: "Respiração Tática", text: "O ar é seu aliado. INSPIRE na fase fácil (descida). EXPIRE na fase de força (subida). Não prenda a respiração!", icon: "fa-wind", color: "p-cyan" },
-            { title: "Estabilidade e Proteção", text: "Mantenha o abdômen contraído em todos os exercícios. Imagine que vai levar um soco na barriga: essa rigidez protege sua coluna.", icon: "fa-shield-halved", color: "p-purple" },
+            { title: "Estabilidade e Proteção", text: "Mantenha o abdômen contraído em todos os exercícios. Ative a musculatura do core como um cinturão de força: essa rigidez protege sua coluna e melhora a postura.", icon: "fa-shield-halved", color: "p-purple" },
             { title: "Controle do Movimento", text: "O músculo cresce sob tensão. Descida sempre lenta e controlada (3s). Subida explosiva, porém controlada.", icon: "fa-stopwatch", color: "p-blue" },
             { title: "Intervalo Estratégico", text: "O descanso é parte do treino. Use o cronômetro. Em Bi-Set/Tri-Set, descanse apenas após o último exercício do grupo.", icon: "fa-hourglass-half", color: "p-orange" },
             { title: "Dor Articular é Sinal Vermelho", text: "Dor muscular é normal, articular NUNCA. Sentiu dor na articulação? PARE na hora, reduza a carga ou avise o treinador.", icon: "fa-triangle-exclamation", color: "p-red" },
@@ -908,7 +907,7 @@
             if (!appData.pillars || appData.pillars.length === 0) {
                 appData.pillars = [
                     { title: "Respiração Tática", text: "O ar é seu aliado. INSPIRE na fase fácil (descida). EXPIRE na fase de força (subida). Não prenda a respiração!", icon: "fa-wind", color: "p-cyan" },
-                    { title: "Estabilidade e Proteção", text: "Mantenha o abdômen contraído em todos os exercícios. Imagine que vai levar um soco na barriga: essa rigidez protege sua coluna.", icon: "fa-shield-halved", color: "p-purple" },
+                    { title: "Estabilidade e Proteção", text: "Mantenha o abdômen contraído em todos os exercícios. Ative a musculatura do core como um cinturão de força: essa rigidez protege sua coluna e melhora a postura.", icon: "fa-shield-halved", color: "p-purple" },
                     { title: "Controle do Movimento", text: "O músculo cresce sob tensão. Descida sempre lenta e controlada (3s). Subida explosiva, porém controlada.", icon: "fa-stopwatch", color: "p-blue" },
                     { title: "Intervalo Estratégico", text: "O descanso é parte do treino. Use o cronômetro. Em Bi-Set/Tri-Set, descanse apenas após o último exercício do grupo.", icon: "fa-hourglass-half", color: "p-orange" },
                     { title: "Dor Articular é Sinal Vermelho", text: "Dor muscular é normal, articular NUNCA. Sentiu dor na articulação? PARE na hora, reduza a carga ou avise o treinador.", icon: "fa-triangle-exclamation", color: "p-red" },
@@ -1535,7 +1534,9 @@
         const libEx = appData.library.find(ex => ex.name.toLowerCase() === newName.toLowerCase());
         if (libEx) {
             item.name = libEx.name;
-            item.method = libEx.method || 'Normal';
+            if (!item.method || item.method === 'Normal') {
+                item.method = libEx.method || 'Normal';
+            }
             item.link = libEx.video || '';
             showToast("Preenchido da biblioteca!");
         } else {
@@ -1545,7 +1546,7 @@
         renderEditor();
     }
     function delItem(bIdx, stageId, iIdx) { haptic('heavy'); if(confirm("Remover exercício?")) { currentStudent.blocks[bIdx].stages[stageId].splice(iIdx, 1); saveLocal(); renderEditor(); } }
-    function moveBlock(oldIdx, newIdx) { haptic('light'); const item = currentStudent.blocks.splice(oldIdx, 1)[0]; currentStudent.blocks.splice(newIdx, 0, item); saveLocal(); }
+    function moveBlock(oldIdx, newIdx) { haptic('light'); const item = currentStudent.blocks.splice(oldIdx, 1)[0]; currentStudent.blocks.splice(newIdx, 0, item); saveLocal(); renderEditor(); }
     function moveItem(fromId, toId, oldIdx, newIdx) { 
         haptic('light');
         const fromMatch = fromId.match(/blk-(\d+)-stage-(.+)/);
@@ -1558,6 +1559,7 @@
         const item = currentStudent.blocks[fromBIdx].stages[fromStage].splice(oldIdx, 1)[0]; 
         currentStudent.blocks[toBIdx].stages[toStage].splice(newIdx, 0, item); 
         saveLocal(); 
+        renderEditor();
     }
 
     // --- ADD METHOD ---
@@ -1857,12 +1859,8 @@
             note: "" 
         });
         saveLocal(); 
-        switchRightTab('method');
         renderEditor(); 
         showToast("Exercício adicionado!");
-        
-        targetBlockIdx = null;
-        targetStageId = null;
     }
     
     function deleteLibItem(idx) {
@@ -2158,7 +2156,10 @@
             if(method === 'PATCH') url += '/'+currentStudent.gistId;
             
             const res = await fetch(url, { method, headers:{'Authorization':`token ${t}`}, body:JSON.stringify(payload)});
-            if(!res.ok) throw new Error("Erro na nuvem");
+            if(!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || `Erro HTTP: ${res.status}`);
+            }
             
             const j = await res.json();
             if(method === 'POST') { 
@@ -2180,12 +2181,6 @@
         navigator.clipboard.writeText(longUrl).then(() => {
             if(confirm("Link original copiado!\n\nAbrir TinyURL?")) window.open("https://tinyurl.com/app", "_blank");
         });
-    }
-
-    function generateOffline() {
-        const c = LZString.compressToEncodedURIComponent(JSON.stringify(currentStudent));
-        const url = `${window.location.origin}${window.location.pathname.replace('gerador.html','webapp.html')}?data=${c}`;
-        navigator.clipboard.writeText(url).then(() => showToast("Link Offline Copiado!"));
     }
 
     function previewWorkout() {
