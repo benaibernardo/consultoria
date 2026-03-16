@@ -612,6 +612,7 @@
                 </div>
                 <div class="b-grid">
                     <button class="b-btn bb-block" onclick="addBlock()"><i class="fa-solid fa-layer-group"></i> NOVO BLOCO</button>
+                    <button class="b-btn" onclick="pasteBlockFromClipboard()" style="background: #10b981; color: white;"><i class="fa-solid fa-clipboard-check"></i> COLAR BLOCO</button>
                     
                     <button class="b-btn bb-iso" onclick="addMethod('Normal')"><i class="fa-solid fa-dumbbell"></i> Isolado</button>
                     <button class="b-btn bb-bi" onclick="addMethod('Bi-set')"><i class="fa-solid fa-link"></i> Bi-set</button>
@@ -1389,6 +1390,7 @@
                     <div class="blk-tools">
                         <div class="bt-icon min ${isCollapsed?'active':''}" onclick="toggleBlockCollapse(${bIdx})"><i class="fa-solid ${collapseIcon}"></i></div>
                         <div class="bt-icon lock ${lockedClass}" onclick="toggleLock(${bIdx})"><i class="fa-solid ${lockIcon}"></i></div>
+                        <div class="bt-icon" onclick="copyBlockToClipboard(${bIdx})" style="color:#3b82f6;" title="Copiar Bloco"><i class="fa-solid fa-clipboard"></i></div>
                         <div class="bt-icon" onclick="duplicateBlock(${bIdx})" style="color:var(--accent);" title="Duplicar Bloco"><i class="fa-solid fa-copy"></i></div>
                         <div class="bt-icon del" onclick="delBlock(${bIdx})"><i class="fa-solid fa-trash"></i></div>
                     </div>
@@ -1544,6 +1546,30 @@
         renderEditor();
         showToast("Bloco duplicado!");
     }
+
+    function copyBlockToClipboard(bIdx) {
+        haptic('light');
+        const blockToCopy = JSON.parse(JSON.stringify(currentStudent.blocks[bIdx]));
+        localStorage.setItem('copied_block', JSON.stringify(blockToCopy));
+        showToast("Bloco copiado! Vá para outro aluno e clique em Colar.");
+    }
+
+    function pasteBlockFromClipboard() {
+        haptic('medium');
+        const copiedData = localStorage.getItem('copied_block');
+        if (!copiedData) {
+            alert("Nenhum bloco copiado. Copie um bloco primeiro.");
+            return;
+        }
+        const blockToPaste = JSON.parse(copiedData);
+        // Rename slightly to indicate it's pasted
+        blockToPaste.name += " (Colado)";
+        currentStudent.blocks.push(blockToPaste);
+        saveLocal();
+        renderEditor();
+        showToast("Bloco colado com sucesso!");
+    }
+
     function updBlock(bIdx, field, val) { currentStudent.blocks[bIdx][field] = val; saveLocal(); }
     function updItem(bIdx, stageId, iIdx, field, val) { currentStudent.blocks[bIdx].stages[stageId][iIdx][field] = val; saveLocal(); }
 
