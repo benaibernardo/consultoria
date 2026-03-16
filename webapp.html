@@ -36,10 +36,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: var(--font-ui); }
         body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s; }
 
-        .container { max-width: 480px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; height: 100%; background: var(--bg); box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .container { max-width: 480px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; height: 100%; background: var(--bg); box-shadow: 0 0 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
 
         /* HEADER */
-        .header { background: #001F5B; padding: 20px; flex-shrink: 0; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 10px 30px -10px rgba(0,31,91,0.3); z-index: 10; display: flex; justify-content: space-between; align-items: flex-start; color: white; transition: background 0.3s; }
+        .header { background: #001F5B; padding: 20px; flex-shrink: 0; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 10px 30px -10px rgba(0,31,91,0.3); z-index: 100; display: flex; justify-content: space-between; align-items: flex-start; color: white; transition: background 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; position: absolute; top: 0; left: 0; right: 0; width: 100%; }
+        .header.hidden { transform: translateY(-110%); opacity: 0; pointer-events: none; }
         [data-theme="dark"] .header { background: #1e293b; box-shadow: none; border-bottom: 1px solid var(--border); }
 
         .h-info { flex: 1; padding-right: 10px; }
@@ -63,7 +64,8 @@
         .wa-btn { background: #25D366 !important; border-color: #20b858 !important; color: white !important; }
         
         /* CONTENT */
-        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; scroll-behavior: smooth; }
+        .content { flex: 1; overflow-y: auto; padding: 0 20px 100px 20px; scroll-behavior: smooth; }
+        .content::before { content: ''; display: block; height: calc(var(--header-height, 180px) + 20px); flex-shrink: 0; }
         .tab-pane { display: none; animation: fade 0.3s; }
         .tab-pane.active { display: block; }
 
@@ -236,10 +238,10 @@
         .nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 420px; height: 65px; background: var(--surface); border-radius: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: flex; justify-content: space-around; align-items: center; z-index: 90; border: 1px solid rgba(0,0,0,0.05); padding: 0 5px; }
         [data-theme="dark"] .nav { border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #cbd5e1; font-size: 0.55rem; font-weight: 800; cursor: pointer; transition: 0.2s; position: relative; text-transform: uppercase; }
-        .nav-btn.active { color: var(--primary); transform: translateY(-3px); }
+        .nav-btn.active { transform: translateY(-3px); }
         [data-theme="dark"] .nav-btn.active { color: var(--accent); }
         .nav-btn.active::after { content: ''; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; position: absolute; bottom: -6px; }
-        .nav-btn i { font-size: 1.3rem; }
+        .nav-btn i { font-size: 1.5rem; }
 
         @keyframes fade { from{opacity:0} to{opacity:1} }
     </style>
@@ -489,11 +491,11 @@
 </div>
 
 <div class="nav">
-    <div class="nav-btn active" onclick="go(1)"><i class="fa-solid fa-dumbbell"></i> TREINO</div>
-    <div class="nav-btn" onclick="go(2)"><i class="fa-solid fa-brain"></i> MÉTODO</div>
-    <div class="nav-btn" onclick="go(3)"><i class="fa-solid fa-calendar-check"></i> HISTÓRICO</div>
-    <div class="nav-btn" onclick="go(4)"><i class="fa-solid fa-star"></i> PLANO</div>
-    <div class="nav-btn" onclick="go(5)"><i class="fa-solid fa-comment-dots"></i> FEEDBACK</div>
+    <div class="nav-btn active" onclick="go(1)" style="color: #3b82f6;"><i class="fa-solid fa-dumbbell"></i></div>
+    <div class="nav-btn" onclick="go(2)" style="color: #8b5cf6;"><i class="fa-solid fa-brain"></i></div>
+    <div class="nav-btn" onclick="go(3)" style="color: #10b981;"><i class="fa-solid fa-calendar-check"></i></div>
+    <div class="nav-btn" onclick="go(4)" style="color: #f59e0b;"><i class="fa-solid fa-star"></i></div>
+    <div class="nav-btn" onclick="go(5)" style="color: #ec4899;"><i class="fa-solid fa-comment-dots"></i></div>
 </div>
 
 <script>
@@ -633,6 +635,18 @@
         const list = document.getElementById('wList');
         list.innerHTML = '';
 
+        // Add Expand/Collapse All button
+        list.innerHTML += `
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:10px;">
+                <button onclick="toggleAllBlocks(false)" title="Recolher Tudo" style="background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.05); transition:0.2s;">
+                    <i class="fa-solid fa-angles-up"></i>
+                </button>
+                <button onclick="toggleAllBlocks(true)" title="Expandir Tudo" style="background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.05); transition:0.2s;">
+                    <i class="fa-solid fa-angles-down"></i>
+                </button>
+            </div>
+        `;
+
         if(data.blocks) {
             data.blocks.forEach((blk, bIdx) => {
                 // Migration check
@@ -657,16 +671,24 @@
                     stagesDef.forEach(stg => {
                         const stageItems = blk.stages[stg.id] || [];
                         if (stageItems.length > 0) {
+                            const stageCollapsed = blk.stages[stg.id].collapsed !== false; // Default collapsed
+                            
+                            let stageItemsHtml = '';
+                            stageItems.forEach((item, iIdx) => {
+                                stageItemsHtml += renderExercise(bIdx, stg.id, iIdx, item);
+                            });
+                            
                             itemsHtml += `
-                                <div style="margin-top: 15px; margin-bottom: 10px; padding: 10px; background: ${stg.color}; border-left: 4px solid ${stg.text}; border-radius: 8px;">
-                                    <h4 style="margin:0; color:${stg.text}; font-size:0.95rem; font-weight:700; display:flex; align-items:center; gap:8px;">
-                                        <i class="fa-solid ${stg.icon}"></i> ${stg.name}
-                                    </h4>
+                                <div class="stage-container" style="margin-top:10px; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                                    <div class="stage-header" onclick="toggleStage(${bIdx}, '${stg.id}')" style="padding:10px; background:${stg.color}; color:${stg.text}; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                                        <div style="font-weight:700; font-size:0.85rem;"><i class="fa-solid ${stg.icon}"></i> ${stg.name}</div>
+                                        <i id="stage-icon-${bIdx}-${stg.id}" class="fa-solid fa-chevron-down chevron-icon" style="transition:transform 0.3s; transform:rotate(${stageCollapsed ? '-90deg' : '0deg'});"></i>
+                                    </div>
+                                    <div id="stage-content-${bIdx}-${stg.id}" class="stage-content" style="padding:10px; display:${stageCollapsed ? 'none' : 'block'};">
+                                        ${stageItemsHtml}
+                                    </div>
                                 </div>
                             `;
-                            stageItems.forEach((item, iIdx) => {
-                                itemsHtml += renderExercise(bIdx, stg.id, iIdx, item);
-                            });
                         }
                     });
                 } else {
@@ -678,17 +700,17 @@
 
                 const collapseId = `blk-${bIdx}`;
                 list.innerHTML += `
-                <div id="blk-container-${bIdx}" style="margin-bottom:15px; transition: 0.3s;">
-                    <div class="section-header" onclick="toggleBlock('${collapseId}')">
+                <div id="blk-container-${bIdx}" class="${blk.collapsed !== false ? 'is-closed' : ''}" style="margin-bottom:15px; transition: 0.3s;">
+                    <div class="section-header" onclick="toggleBlock(${bIdx})">
                         <div style="flex:1;">
                             <h3 class="section-title">${blk.name || 'Bloco'}</h3>
                             ${blk.note ? `<div class="block-desc">${blk.note}</div>` : (blk.desc ? `<div class="block-desc">${blk.desc}</div>` : '')}
                         </div>
                         <div class="block-actions">
-                            <i class="fas fa-chevron-down chevron-icon" id="icon-${collapseId}"></i>
+                            <i class="fas fa-chevron-down chevron-icon" id="icon-blk-${bIdx}"></i>
                         </div>
                     </div>
-                    <div id="${collapseId}" class="block-content-area">${itemsHtml}</div>
+                    <div id="blk-${bIdx}" class="block-content-area">${itemsHtml}</div>
                 </div>`;
             });
             
@@ -705,6 +727,8 @@
             const icon = firstUndone.querySelector('.ex-header .fa-chevron-down');
             if (icon) icon.style.transform = 'rotate(0deg)';
         }
+        
+        setTimeout(updateHeaderHeight, 50);
     }
 
     function calculateProgress(startStr, endStr) {
@@ -1118,23 +1142,6 @@
         });
     }
 
-    function toggleBlock(id) {
-        haptic('light');
-        const el = document.getElementById(id);
-        const icon = document.getElementById(`icon-${id}`);
-        const container = el.parentElement;
-        
-        if(el.style.maxHeight === '0px' || el.style.maxHeight === '') {
-            el.style.maxHeight = '3000px';
-            el.style.opacity = '1';
-            container.classList.remove('is-closed');
-        } else {
-            el.style.maxHeight = '0px';
-            el.style.opacity = '0';
-            container.classList.add('is-closed');
-        }
-    }
-
     let cachedHistoryData = [];
     let currentCalMonth = new Date().getMonth();
     let currentCalYear = new Date().getFullYear();
@@ -1486,6 +1493,14 @@
         document.getElementById(`tab-${n}`).classList.add('active');
         document.querySelectorAll('.nav-btn')[n-1].classList.add('active');
         
+        // Always show header when switching tabs
+        const headerEl = document.querySelector('.header');
+        if (headerEl) {
+            headerEl.classList.remove('hidden');
+            const activeTab = document.getElementById(`tab-${n}`);
+            if (window.resetHeaderScroll) window.resetHeaderScroll(activeTab ? activeTab.scrollTop : 0);
+        }
+        
         if(n === 3) renderHistory();
         if(n === 5) initFeedbackTab();
     }
@@ -1621,6 +1636,75 @@
         }
     }
 
+    function toggleAllBlocks(expand) {
+        haptic('medium');
+        currentData.blocks.forEach((blk, bIdx) => {
+            blk.collapsed = !expand;
+            const container = document.getElementById(`blk-container-${bIdx}`);
+            if(container) {
+                if(blk.collapsed !== false) container.classList.add('is-closed');
+                else container.classList.remove('is-closed');
+            }
+            
+            if (blk.stages) {
+                Object.keys(blk.stages).forEach(stageId => {
+                    const stage = blk.stages[stageId];
+                    stage.collapsed = !expand;
+                    const content = document.getElementById(`stage-content-${bIdx}-${stageId}`);
+                    const icon = document.getElementById(`stage-icon-${bIdx}-${stageId}`);
+                    if(content && icon) {
+                        if(stage.collapsed !== false) {
+                            content.style.display = 'none';
+                            icon.style.transform = 'rotate(-90deg)';
+                        } else {
+                            content.style.display = 'block';
+                            icon.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+            }
+        });
+    }
+    
+    function toggleBlock(bIdx) {
+        haptic('light');
+        const blk = currentData.blocks[bIdx];
+        if (blk.collapsed === undefined) {
+            blk.collapsed = false;
+        } else {
+            blk.collapsed = !blk.collapsed;
+        }
+        
+        const container = document.getElementById(`blk-container-${bIdx}`);
+        if(container) {
+            if(blk.collapsed !== false) container.classList.add('is-closed');
+            else container.classList.remove('is-closed');
+        }
+    }
+    
+    function toggleStage(bIdx, stageId) {
+        haptic('light');
+        const stage = currentData.blocks[bIdx].stages[stageId];
+        if (stage.collapsed === undefined) {
+            stage.collapsed = false;
+        } else {
+            stage.collapsed = !stage.collapsed;
+        }
+        
+        const content = document.getElementById(`stage-content-${bIdx}-${stageId}`);
+        const icon = document.getElementById(`stage-icon-${bIdx}-${stageId}`);
+        
+        if(content && icon) {
+            if(stage.collapsed !== false) {
+                content.style.display = 'none';
+                icon.style.transform = 'rotate(-90deg)';
+            } else {
+                content.style.display = 'block';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+    }
+
     function initTheme() {
         if(localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
     }
@@ -1629,6 +1713,50 @@
         document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
         localStorage.setItem('theme', isDark ? 'light' : 'dark');
     }
+
+    function updateHeaderHeight() {
+        const headerEl = document.querySelector('.header');
+        if (headerEl) {
+            document.documentElement.style.setProperty('--header-height', headerEl.offsetHeight + 'px');
+        }
+    }
+
+    function initHeaderScroll() {
+        let lastScrollY = 0;
+        let headerHidden = false;
+        const headerEl = document.querySelector('.header');
+
+        window.resetHeaderScroll = (currentScrollTop = 0) => {
+            headerHidden = false;
+            lastScrollY = currentScrollTop;
+        };
+
+        document.querySelectorAll('.content').forEach(contentEl => {
+            contentEl.addEventListener('scroll', (e) => {
+                const currentScrollY = e.target.scrollTop;
+                
+                if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                    if (!headerHidden) {
+                        headerEl.classList.add('hidden');
+                        headerHidden = true;
+                    }
+                } else if (currentScrollY < lastScrollY) {
+                    if (headerHidden) {
+                        headerEl.classList.remove('hidden');
+                        headerHidden = false;
+                    }
+                }
+                lastScrollY = currentScrollY;
+            }, { passive: true });
+        });
+    }
+
+    // Initialize header logic
+    window.addEventListener('resize', updateHeaderHeight);
+    setTimeout(() => {
+        updateHeaderHeight();
+        initHeaderScroll();
+    }, 100);
 </script>
 </body>
 </html>
