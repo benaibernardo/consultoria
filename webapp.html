@@ -105,12 +105,23 @@
 
         /* Method Colors */
         .m-Normal { border-left-color: #cbd5e1; }
-        .m-Drop { border-left-color: var(--danger); background: #fff5f5; }
-        .m-RNP { border-left-color: var(--warning); background: #fffbeb; }
-        .m-Iso { border-left-color: var(--accent); background: #f0f9ff; }
-        [data-theme="dark"] .m-Drop { background: rgba(239, 68, 68, 0.1); }
-        [data-theme="dark"] .m-RNP { background: rgba(245, 158, 11, 0.1); }
-        [data-theme="dark"] .m-Iso { background: rgba(14, 165, 233, 0.1); }
+        .m-Drop-set { border-left-color: var(--danger); background: #fff5f5; }
+        .m-Rest-Pause { border-left-color: var(--warning); background: #fffbeb; }
+        .m-Isometria { border-left-color: var(--accent); background: #f0f9ff; }
+        .m-Bi-set { border-left-color: #8b5cf6; background: #f5f3ff; }
+        .m-Tri-set { border-left-color: #d946ef; background: #fdf4ff; }
+        .m-Pirâmide { border-left-color: #10b981; background: #ecfdf5; }
+        .m-GVT { border-left-color: #f97316; background: #fff7ed; }
+        .m-FST-7 { border-left-color: #ec4899; background: #fdf2f8; }
+        
+        [data-theme="dark"] .m-Drop-set { background: rgba(239, 68, 68, 0.1); }
+        [data-theme="dark"] .m-Rest-Pause { background: rgba(245, 158, 11, 0.1); }
+        [data-theme="dark"] .m-Isometria { background: rgba(14, 165, 233, 0.1); }
+        [data-theme="dark"] .m-Bi-set { background: rgba(139, 92, 246, 0.1); }
+        [data-theme="dark"] .m-Tri-set { background: rgba(217, 70, 239, 0.1); }
+        [data-theme="dark"] .m-Pirâmide { background: rgba(16, 185, 129, 0.1); }
+        [data-theme="dark"] .m-GVT { background: rgba(249, 115, 22, 0.1); }
+        [data-theme="dark"] .m-FST-7 { background: rgba(236, 72, 153, 0.1); }
 
         .ex-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         .ex-title { font-weight: 800; color: var(--text); font-size: 0.95rem; font-family: var(--font-num); width: 100%; display: flex; align-items: center; gap: 5px; }
@@ -266,6 +277,10 @@
             <div class="h-sub-brand">Consultoria de Treinamento</div>
             <div class="h-title" id="sName">Olá!</div>
             <div class="h-sub" id="sFocus">Carregando...</div>
+            <div class="h-sub" id="sCheckup" style="display:none; margin-top: 6px; font-weight: 500; color: #e2e8f0; font-size: 0.85rem; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-calendar-check" style="color: #facc15; font-size: 1.1rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i> 
+                <span>Check-up: <span id="val-checkup" style="font-weight: 800; color: #ffffff;"></span></span>
+            </div>
             
             <div class="progress-container">
                 <div class="h-dates">
@@ -531,9 +546,27 @@
     }
 
     function render(data) {
-        const firstName = data.name ? data.name.split(' ')[0] : 'Aluno';
-        document.getElementById('sName').innerText = `Olá, ${firstName}!`;
+        const fullName = data.name || 'Aluno';
+        document.getElementById('sName').innerText = `Olá, ${fullName}!`;
         document.getElementById('sFocus').innerText = data.focus || '';
+        
+        const checkupEl = document.getElementById('sCheckup');
+        if (data.checkUpDay && data.checkUpTime) {
+            const dayMap = {
+                'Dom': 'Domingo',
+                'Seg': 'Segunda-feira',
+                'Ter': 'Terça-feira',
+                'Qua': 'Quarta-feira',
+                'Qui': 'Quinta-feira',
+                'Sex': 'Sexta-feira',
+                'Sáb': 'Sábado'
+            };
+            const fullDay = dayMap[data.checkUpDay] || data.checkUpDay;
+            document.getElementById('val-checkup').innerText = `${fullDay} às ${data.checkUpTime}`;
+            checkupEl.style.display = 'flex';
+        } else {
+            checkupEl.style.display = 'none';
+        }
         
         // Dates & Progress Bar
         const fmt = d => d ? d.split('-').reverse().slice(0,2).join('/') : '--';
@@ -650,7 +683,6 @@
                         <div style="flex:1;">
                             <h3 class="section-title">${blk.name || 'Bloco'}</h3>
                             ${blk.note ? `<div class="block-desc">${blk.note}</div>` : (blk.desc ? `<div class="block-desc">${blk.desc}</div>` : '')}
-                            <div class="lock-msg" id="lock-msg-${bIdx}"><i class="fa-solid fa-lock"></i> Conclua a etapa anterior para liberar</div>
                         </div>
                         <div class="block-actions">
                             <i class="fas fa-chevron-down chevron-icon" id="icon-${collapseId}"></i>
@@ -817,12 +849,14 @@
     function renderExercise(bIdx, stageId, iIdx, item) {
         const uid = `${bIdx}-${stageId}-${iIdx}`;
         let mClass = 'm-Normal';
-        if(item.method === 'Drop-set') mClass = 'm-Drop';
-        if(item.method === 'Rest-Pause') mClass = 'm-RNP';
-        if(item.method === 'Isometria') mClass = 'm-Iso';
+        if(item.method && item.method !== 'Normal') {
+            mClass = `m-${item.method.replace(' ','-')}`;
+        }
 
         const hasVideo = item.link && item.link.length > 5;
         const restTime = parseInt(item.rest) || 0;
+        
+        const methodBadge = (item.method && item.method !== 'Normal') ? `<span style="font-size: 0.6rem; background: var(--border); padding: 2px 6px; border-radius: 4px; color: var(--text-muted); font-weight: 700; margin-left: 5px;">${item.method}</span>` : '';
         
         // Determine if this exercise uses load (kg)
         // For now, we infer it from the method or name, or assume true if not explicitly disabled.
@@ -844,7 +878,7 @@
         <div class="ex-card ${mClass} collapsed" id="card-${uid}">
             <div class="ex-header" onclick="toggleExercise('${uid}')">
                 <div class="ex-title ${hasVideo ? 'has-video' : ''}">
-                    ${itemName}
+                    ${itemName} ${methodBadge}
                     ${hasVideo ? `<a href="${item.link}" target="_blank" class="ex-video-btn" onclick="event.stopPropagation(); haptic('light');"><i class="fa-solid fa-play"></i> VER VÍDEO</a>` : ''}
                 </div>
                 <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.9rem; transition: 0.3s; transform: rotate(-90deg);"></i>
@@ -993,56 +1027,7 @@
     }
 
     function checkBlocksState() {
-        if(!currentData || !currentData.blocks) return;
-        let allPreviousDone = true;
-        
-        currentData.blocks.forEach((blk, bIdx) => {
-            const blockEl = document.getElementById(`blk-container-${bIdx}`);
-            const lockMsg = document.getElementById(`lock-msg-${bIdx}`);
-            const contentArea = document.getElementById(`blk-${bIdx}`);
-            const icon = document.getElementById(`icon-blk-${bIdx}`);
-            
-            if(bIdx === 0) {
-                blockEl.classList.remove('locked-block');
-                if(lockMsg) lockMsg.style.display = 'none';
-            } else {
-                if(allPreviousDone) {
-                    blockEl.classList.remove('locked-block');
-                    if(lockMsg) lockMsg.style.display = 'none';
-                } else {
-                    blockEl.classList.add('locked-block');
-                    if(lockMsg) lockMsg.style.display = 'flex';
-                    // Auto close locked blocks
-                    if(contentArea && contentArea.style.maxHeight !== '0px') {
-                        contentArea.style.maxHeight = '0px';
-                        contentArea.style.opacity = '0';
-                        if(icon) icon.style.transform = 'rotate(-90deg)';
-                    }
-                }
-            }
-            
-            // Check if current block is fully done
-            let blockDone = true;
-            
-            const checkStageItems = (stageId, items) => {
-                items.forEach((item, iIdx) => {
-                    if(!localStorage.getItem(`done_${bIdx}-${stageId}-${iIdx}`)) {
-                        blockDone = false;
-                    }
-                });
-            };
-
-            if (blk.stages) {
-                ['mobilidade', 'ativacao', 'forca', 'desaceleracao'].forEach(stg => {
-                    if(blk.stages[stg]) checkStageItems(stg, blk.stages[stg]);
-                });
-            } else {
-                const items = blk.items || [];
-                checkStageItems('forca', items);
-            }
-            
-            if(!blockDone) allPreviousDone = false;
-        });
+        // Function disabled: all blocks are unlocked by default.
     }
 
     function finishWorkout() {
@@ -1138,12 +1123,6 @@
         const el = document.getElementById(id);
         const icon = document.getElementById(`icon-${id}`);
         const container = el.parentElement;
-        
-        // Prevent opening if locked
-        if(container.classList.contains('locked-block')) {
-            haptic('heavy'); // Error feedback
-            return;
-        }
         
         if(el.style.maxHeight === '0px' || el.style.maxHeight === '') {
             el.style.maxHeight = '3000px';
