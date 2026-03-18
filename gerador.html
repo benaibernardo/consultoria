@@ -7,7 +7,7 @@
     <title>Benai Manager | Studio CRM</title>
     <script>
         window.onerror = function(msg, url, lineNo, columnNo, error) {
-            alert('Error: ' + msg + '\nLine: ' + lineNo + '\nColumn: ' + columnNo);
+            customAlert('Error: ' + msg + '\nLine: ' + lineNo + '\nColumn: ' + columnNo);
             return false;
         };
     </script>
@@ -835,6 +835,26 @@
     </div>
 </div>
 
+<!-- CUSTOM MODALS -->
+<div id="custom-alert-modal" class="modal" style="z-index: 10000;">
+    <div class="modal-box" style="max-width: 400px; text-align: center;">
+        <div style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"><i class="fa-solid fa-circle-exclamation"></i></div>
+        <div id="custom-alert-msg" style="font-size: 1rem; color: var(--text); margin-bottom: 25px; white-space: pre-wrap; line-height: 1.5;"></div>
+        <button class="btn-primary-block" onclick="closeCustomAlert()">OK</button>
+    </div>
+</div>
+
+<div id="custom-confirm-modal" class="modal" style="z-index: 10000;">
+    <div class="modal-box" style="max-width: 400px; text-align: center;">
+        <div style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-circle-question"></i></div>
+        <div id="custom-confirm-msg" style="font-size: 1rem; color: var(--text); margin-bottom: 25px; white-space: pre-wrap; line-height: 1.5;"></div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-demo-block" id="custom-confirm-no" style="margin: 0; background: var(--surface); color: var(--text); border: 1px solid var(--border);">Cancelar</button>
+            <button class="btn-primary-block" id="custom-confirm-yes" style="margin: 0;">Confirmar</button>
+        </div>
+    </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast" class="toast">Ação Realizada!</div>
 
@@ -975,9 +995,9 @@
         saveLocal(); renderStudentList(); loadStudent(id);
     }
 
-    function duplicateStudent() {
+    async function duplicateStudent() {
         if (!currentStudent) return;
-        if (!confirm(`Deseja duplicar o aluno "${currentStudent.name}"?\nIsso criará uma cópia exata do treino, mas sem vínculo com a nuvem (um novo link será gerado ao salvar).`)) return;
+        if (!await customConfirm(`Deseja duplicar o aluno "${currentStudent.name}"?\nIsso criará uma cópia exata do treino, mas sem vínculo com a nuvem (um novo link será gerado ao salvar).`)) return;
 
         const id = Date.now().toString();
         const duplicatedStudent = JSON.parse(JSON.stringify(currentStudent));
@@ -1135,7 +1155,7 @@
         // Se for um aluno placeholder (sincronizado do Master Gist mas sem os dados locais)
         if (newStudent.focus === "Carregando..." && newStudent.gistId) {
             const t = document.getElementById('gh-token').value;
-            if (!t) return alert("Configure o Token do GitHub para baixar os dados deste aluno.");
+            if (!t) return customAlert("Configure o Token do GitHub para baixar os dados deste aluno.");
             
             try {
                 showToast("Baixando treino do aluno...");
@@ -1150,7 +1170,7 @@
                 newStudent = studentData;
                 saveLocal();
             } catch (e) {
-                alert("Erro ao carregar aluno: " + e.message);
+                customAlert("Erro ao carregar aluno: " + e.message);
                 return;
             }
         }
@@ -1536,7 +1556,7 @@
 
     function addBlock() { haptic('medium'); currentStudent.blocks.push({ name: "Bloco " + String.fromCharCode(65 + currentStudent.blocks.length), desc: "", locked: false, collapsed: false, stages: { mobilidade: [], ativacao: [], forca: [], desaceleracao: [] } }); saveLocal(); renderEditor(); }
     function toggleLock(bIdx) { haptic('light'); currentStudent.blocks[bIdx].locked = !currentStudent.blocks[bIdx].locked; saveLocal(); renderEditor(); }
-    function delBlock(bIdx) { haptic('heavy'); if(confirm("Excluir bloco?")) { currentStudent.blocks.splice(bIdx, 1); saveLocal(); renderEditor(); } }
+    async function delBlock(bIdx) { haptic('heavy'); if(await customConfirm("Excluir bloco?")) { currentStudent.blocks.splice(bIdx, 1); saveLocal(); renderEditor(); } }
     function duplicateBlock(bIdx) {
         haptic('medium');
         const blockToCopy = JSON.parse(JSON.stringify(currentStudent.blocks[bIdx]));
@@ -1558,7 +1578,7 @@
         haptic('medium');
         const copiedData = localStorage.getItem('copied_block');
         if (!copiedData) {
-            alert("Nenhum bloco copiado. Copie um bloco primeiro.");
+            customAlert("Nenhum bloco copiado. Copie um bloco primeiro.");
             return;
         }
         const blockToPaste = JSON.parse(copiedData);
@@ -1591,7 +1611,7 @@
         saveLocal();
         renderEditor();
     }
-    function delItem(bIdx, stageId, iIdx) { haptic('heavy'); if(confirm("Remover exercício?")) { currentStudent.blocks[bIdx].stages[stageId].splice(iIdx, 1); saveLocal(); renderEditor(); } }
+    async function delItem(bIdx, stageId, iIdx) { haptic('heavy'); if(await customConfirm("Remover exercício?")) { currentStudent.blocks[bIdx].stages[stageId].splice(iIdx, 1); saveLocal(); renderEditor(); } }
     function moveBlock(oldIdx, newIdx) { haptic('light'); const item = currentStudent.blocks.splice(oldIdx, 1)[0]; currentStudent.blocks.splice(newIdx, 0, item); saveLocal(); renderEditor(); }
     function moveItem(fromId, toId, oldIdx, newIdx) { 
         haptic('light');
@@ -1613,7 +1633,7 @@
         haptic('medium');
         if(currentStudent.blocks.length === 0) { addBlock(); setTimeout(() => addMethod(type), 50); return; }
         const lastBlock = currentStudent.blocks[currentStudent.blocks.length - 1];
-        if(lastBlock.locked) return alert("O último bloco está bloqueado.");
+        if(lastBlock.locked) return customAlert("O último bloco está bloqueado.");
         if(lastBlock.collapsed) { lastBlock.collapsed = false; } 
 
         const targetStage = document.getElementById('target-stage-select').value;
@@ -1702,8 +1722,8 @@
     }
 
     // --- METHODOLOGY ACTIONS ---
-    function resetPillars() {
-        if(confirm("Deseja restaurar os pilares para o padrão do sistema? Isso substituirá os atuais.")) {
+    async function resetPillars() {
+        if(await customConfirm("Deseja restaurar os pilares para o padrão do sistema? Isso substituirá os atuais.")) {
             currentStudent.pillars = JSON.parse(JSON.stringify(appData.pillars));
             saveLocal();
             switchRightTab('method');
@@ -1789,7 +1809,7 @@
         const title = document.getElementById('pillar-title').value;
         const text = document.getElementById('pillar-text').value;
 
-        if (!title) return alert("Título obrigatório");
+        if (!title) return customAlert("Título obrigatório");
 
         const newPillar = { title, text, icon: selectedPillarIcon, color: selectedPillarColor };
 
@@ -1809,8 +1829,8 @@
         }
     }
 
-    function deletePillar(idx) {
-        if(confirm("Remover este pilar?")) {
+    async function deletePillar(idx) {
+        if(await customConfirm("Remover este pilar?")) {
             currentStudent.pillars.splice(idx, 1);
             saveLocal();
             switchRightTab('method');
@@ -1885,13 +1905,13 @@
     }
 
     function addFromLib(idx) {
-        if(currentStudent.blocks.length === 0) return alert("Crie um bloco de treino primeiro.");
+        if(currentStudent.blocks.length === 0) return customAlert("Crie um bloco de treino primeiro.");
         
         let bIdx = targetBlockIdx !== null ? targetBlockIdx : currentStudent.blocks.length - 1;
         let sId = targetStageId !== null ? targetStageId : 'forca';
         
         const targetBlock = currentStudent.blocks[bIdx];
-        if(targetBlock.locked) return alert("O bloco está bloqueado.");
+        if(targetBlock.locked) return customAlert("O bloco está bloqueado.");
         
         const ex = appData.library[idx];
         targetBlock.stages[sId].push({ 
@@ -1909,8 +1929,8 @@
         showToast("Exercício adicionado!");
     }
     
-    function deleteLibItem(idx) {
-        if(confirm("Excluir este exercício da biblioteca?")) {
+    async function deleteLibItem(idx) {
+        if(await customConfirm("Excluir este exercício da biblioteca?")) {
             appData.library.splice(idx, 1);
             saveLocal();
             renderLibrary();
@@ -1957,7 +1977,7 @@
             video: document.getElementById('lib-video').value 
         };
         
-        if(!item.name) return alert("Nome obrigatório");
+        if(!item.name) return customAlert("Nome obrigatório");
         
         if(id === 'NEW') appData.library.push(item); 
         else appData.library[id] = item;
@@ -2039,8 +2059,8 @@
             refreshSelects(editingCatType);
         }
     }
-    function delCategory(type, idx) { 
-        if(confirm("Remover esta opção da lista?")) { 
+    async function delCategory(type, idx) { 
+        if(await customConfirm("Remover esta opção da lista?")) { 
             appData[type].splice(idx, 1); 
             saveLocal(); 
             renderCatList(); 
@@ -2053,9 +2073,9 @@
     // 1. CREATE MASTER GIST
     async function createMasterGist() {
         const t = document.getElementById('gh-token').value;
-        if(!t) return alert("Configure o Token primeiro.");
+        if(!t) return customAlert("Configure o Token primeiro.");
         
-        if(!confirm("Isso criará um novo Banco de Dados na sua conta do GitHub. Deseja continuar?")) return;
+        if(!await customConfirm("Isso criará um novo Banco de Dados na sua conta do GitHub. Deseja continuar?")) return;
         
         const masterData = {
             library: appData.library,
@@ -2088,7 +2108,7 @@
             saveLocal();
             
             showToast("Banco de Dados Criado!");
-        } catch(e){ alert("Erro: " + e.message); }
+        } catch(e){ customAlert("Erro: " + e.message); }
     }
 
     // 2. SYNC MASTER GIST (PULL)
@@ -2097,7 +2117,7 @@
         const mId = document.getElementById('master-gist-id').value;
         
         if(!t || !mId) {
-            if(!silent) alert("Token e ID do Gist Master são necessários.");
+            if(!silent) customAlert("Token e ID do Gist Master são necessários.");
             return;
         }
 
@@ -2152,7 +2172,7 @@
             }
             
         } catch(e){ 
-            if(!silent) alert("Erro ao sincronizar: " + e.message); 
+            if(!silent) customAlert("Erro ao sincronizar: " + e.message); 
         }
     }
 
@@ -2184,16 +2204,30 @@
 
     // 4. SAVE STUDENT TO CLOUD (UPDATED)
     async function saveToCloud(method) {
-        const t = document.getElementById('gh-token').value;
-        if(!t) return alert("Configure o Token primeiro.");
+        const t = document.getElementById('gh-token').value.trim();
+        if(!t) return customAlert("Configure o Token primeiro.");
         
         if(method === 'POST' || !currentStudent.gistId) { 
-            if(!confirm("Criar novo link para este aluno?")) return; 
+            if(!await customConfirm("Criar novo link para este aluno?")) return; 
             method = 'POST'; 
         }
         
         try {
             showToast("Salvando Aluno...");
+            
+            // Fix potentially corrupted gistId
+            if (currentStudent.gistId) {
+                let cleanId = currentStudent.gistId.trim();
+                if (cleanId.includes('?id=')) cleanId = cleanId.split('?id=')[1].split('&')[0];
+                else if (cleanId.includes('/')) cleanId = cleanId.split('/').pop();
+                
+                if (!/^[a-f0-9]{32}$/i.test(cleanId)) {
+                    customAlert("O ID salvo neste aluno é inválido (" + cleanId + ").\n\nIsso acontece se você preencheu o ID com um link do TinyURL ou um nome em vez do código de 32 caracteres.\n\nPara corrigir: Exclua este aluno, clique em 'Importar ID' e cole o ID longo correto (que você pega abrindo o TinyURL no navegador).");
+                    return;
+                }
+                currentStudent.gistId = cleanId;
+            }
+
             // Clean up student object before saving (don't save full library in student gist anymore)
             const studentToSave = JSON.parse(JSON.stringify(currentStudent));
             
@@ -2216,17 +2250,20 @@
             // Update Master Gist to reflect new student/gistId
             updateMasterGist();
             
-            copyTinyUrlFlow(j.id);
-        } catch(e){ alert("Erro: " + e.message); }
+            if (method === 'POST') {
+                copyTinyUrlFlow(j.id);
+            } else {
+                showToast("Treino atualizado com sucesso!");
+            }
+        } catch(e){ customAlert("Erro: " + e.message); }
     }
 
-    function copyTinyUrlFlow(gistId) {
+    async function copyTinyUrlFlow(gistId) {
         const id = gistId || currentStudent.gistId;
-        if(!id) return alert("Salve na nuvem primeiro.");
+        if(!id) return customAlert("Salve na nuvem primeiro.");
         const longUrl = `${window.location.origin}${window.location.pathname.replace('gerador.html','webapp.html')}?id=${id}`;
-        navigator.clipboard.writeText(longUrl).then(() => {
-            if(confirm("Link original copiado!\n\nAbrir TinyURL?")) window.open("https://tinyurl.com/app", "_blank");
-        });
+        await navigator.clipboard.writeText(longUrl);
+        if(await customConfirm("Link original copiado!\n\nAbrir TinyURL?")) window.open("https://tinyurl.com/app", "_blank");
     }
 
     function previewWorkout() {
@@ -2236,22 +2273,45 @@
 
     // 5. IMPORT ID & EXTRACT EXERCISES
     function promptImportID() {
-        const id = prompt("Insira o Gist ID do aluno:");
-        if(id && document.getElementById('gh-token').value) {
-            showToast("Importando e extraindo...");
-            fetch(`https://api.github.com/gists/${id}`, { headers:{'Authorization':`token ${document.getElementById('gh-token').value}`} })
-            .then(r => r.json())
-            .then(j => {
-                const s = JSON.parse(j.files["treino.json"].content);
-                s.gistId = id;
-                
-                // Check if student already exists locally
-                const existingIdx = appData.students.findIndex(st => st.id === s.id || st.gistId === id);
-                if(existingIdx >= 0) {
-                    appData.students[existingIdx] = s;
-                } else {
-                    appData.students.unshift(s);
-                }
+        let rawId = prompt("Insira o Gist ID do aluno (ou o link completo do WebApp):");
+        if(!rawId) return;
+        
+        let id = rawId.trim();
+        if (id.includes('?id=')) {
+            id = id.split('?id=')[1].split('&')[0];
+        } else if (id.includes('/')) {
+            id = id.split('/').pop();
+        }
+
+        // Validate Gist ID format (usually 32 hex characters)
+        if (!/^[a-f0-9]{32}$/i.test(id)) {
+            customAlert("ID inválido!\n\nVocê inseriu: " + id + "\n\nO Gist ID correto é um código de 32 letras e números.\nSe você tem um link do TinyURL (ex: tinyurl.com/Erondi), abra ele no navegador, espere carregar o WebApp, e copie o ID longo que aparece lá em cima na barra de endereços (?id=...).");
+            return;
+        }
+
+        const token = document.getElementById('gh-token').value.trim();
+        if(!token) return customAlert("Configure o Token primeiro.");
+
+        showToast("Importando e extraindo...");
+        fetch(`https://api.github.com/gists/${id}`, { headers:{'Authorization':`token ${token}`} })
+        .then(async r => {
+            if (!r.ok) {
+                const err = await r.json().catch(()=>({}));
+                throw new Error(err.message || `Erro HTTP: ${r.status}`);
+            }
+            return r.json();
+        })
+        .then(j => {
+            const s = JSON.parse(j.files["treino.json"].content);
+            s.gistId = id;
+            
+            // Check if student already exists locally
+            const existingIdx = appData.students.findIndex(st => st.id === s.id || st.gistId === id);
+            if(existingIdx >= 0) {
+                appData.students[existingIdx] = s;
+            } else {
+                appData.students.unshift(s);
+            }
                 
                 // --- EXERCISE EXTRACTION LOGIC ---
                 let extractedCount = 0;
@@ -2289,14 +2349,13 @@
                 showToast(`Aluno Importado! ${extractedCount} exercícios adicionados à biblioteca.`);
                 closeModal('modal-cloud');
             })
-            .catch(e => alert("Erro ao importar: " + e.message));
-        } else { alert("Token necessário"); }
+            .catch(e => customAlert("Erro ao importar: " + e.message));
     }
 
     // --- DELETE STUDENT ---
-    function deleteCurrentStudent() {
+    async function deleteCurrentStudent() {
         if(!currentStudent) return;
-        if(confirm(`Tem certeza que deseja excluir o aluno "${currentStudent.name}"?\nEsta ação não pode ser desfeita.`)) {
+        if(await customConfirm(`Tem certeza que deseja excluir o aluno "${currentStudent.name}"?\nEsta ação não pode ser desfeita.`)) {
             appData.students = appData.students.filter(s => s.id !== currentStudent.id);
             saveLocal();
             currentStudent = null;
@@ -2328,8 +2387,42 @@
     function openCloudModal() { document.getElementById('modal-cloud').style.display='flex'; }
     function saveToken() { localStorage.setItem(TOKEN_KEY, document.getElementById('gh-token').value); showToast("Token Salvo"); }
     function backupJSON() { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(appData)],{type:'application/json'})); a.download='benai_manager_backup.json'; a.click(); }
-    function restoreJSON(inp) { const r=new FileReader(); r.onload=e=>{ try{ appData=JSON.parse(e.target.result); saveLocal(); location.reload(); }catch(e){alert("Erro arquivo");} }; r.readAsText(inp.files[0]); }
+    function restoreJSON(inp) { const r=new FileReader(); r.onload=e=>{ try{ appData=JSON.parse(e.target.result); saveLocal(); location.reload(); }catch(e){customAlert("Erro arquivo");} }; r.readAsText(inp.files[0]); }
     function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+    
+    function customAlert(msg) {
+        document.getElementById('custom-alert-msg').innerText = msg;
+        document.getElementById('custom-alert-modal').style.display = 'flex';
+    }
+
+    function closeCustomAlert() {
+        document.getElementById('custom-alert-modal').style.display = 'none';
+    }
+
+    function customConfirm(msg) {
+        return new Promise((resolve) => {
+            document.getElementById('custom-confirm-msg').innerText = msg;
+            document.getElementById('custom-confirm-modal').style.display = 'flex';
+            
+            const btnYes = document.getElementById('custom-confirm-yes');
+            const btnNo = document.getElementById('custom-confirm-no');
+            
+            const newBtnYes = btnYes.cloneNode(true);
+            const newBtnNo = btnNo.cloneNode(true);
+            btnYes.parentNode.replaceChild(newBtnYes, btnYes);
+            btnNo.parentNode.replaceChild(newBtnNo, btnNo);
+            
+            newBtnYes.addEventListener('click', () => {
+                document.getElementById('custom-confirm-modal').style.display = 'none';
+                resolve(true);
+            });
+            
+            newBtnNo.addEventListener('click', () => {
+                document.getElementById('custom-confirm-modal').style.display = 'none';
+                resolve(false);
+            });
+        });
+    }
     // --- HISTORY LOGIC ---
     async function loadHistory() {
         const container = document.getElementById('history-canvas');
