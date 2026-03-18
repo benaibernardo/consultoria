@@ -39,8 +39,22 @@
         .container { max-width: 480px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; height: 100%; background: var(--bg); box-shadow: 0 0 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
 
         /* HEADER */
-        .header { background: #001F5B; padding: 20px; flex-shrink: 0; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 10px 30px -10px rgba(0,31,91,0.3); z-index: 100; display: flex; justify-content: space-between; align-items: flex-start; color: white; transition: background 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; position: absolute; top: 0; left: 0; right: 0; width: 100%; }
-        .header.hidden { transform: translateY(-110%); opacity: 0; pointer-events: none; }
+        .header { background: #001F5B; padding: 20px 20px 35px 20px; flex-shrink: 0; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 10px 30px -10px rgba(0,31,91,0.3); z-index: 100; display: flex; justify-content: space-between; align-items: flex-start; color: white; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; width: 100%; overflow: hidden; max-height: 400px; }
+        .header.minimized { padding: 12px 20px; cursor: pointer; align-items: center; max-height: 80px; }
+        .header.minimized .h-brand, 
+        .header.minimized .h-sub-brand, 
+        .header.minimized .h-sub, 
+        .header.minimized .progress-container, 
+        .header.minimized .h-actions,
+        .header.minimized .header-collapse-btn { display: none !important; }
+        .header.minimized .h-title { font-size: 1.1rem; margin-bottom: 0; text-align: center; width: 100%; }
+        .header.minimized .h-info { padding-right: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+        
+        .header-expand-icon { display: none; margin-top: 4px; font-size: 2.2rem; color: #facc15; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); animation: bounce-subtle 2s infinite; }
+        .header.minimized .header-expand-icon { display: block; }
+        
+        .header-collapse-btn { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); text-align: center; font-size: 2.2rem; color: #facc15; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: pointer; padding: 5px 20px; animation: bounce-subtle 2s infinite; }
+
         [data-theme="dark"] .header { background: #1e293b; box-shadow: none; border-bottom: 1px solid var(--border); }
 
         .h-info { flex: 1; padding-right: 10px; }
@@ -64,8 +78,7 @@
         .wa-btn { background: #25D366 !important; border-color: #20b858 !important; color: white !important; }
         
         /* CONTENT */
-        .content { flex: 1; overflow-y: auto; padding: 0 20px 100px 20px; scroll-behavior: smooth; }
-        .content::before { content: ''; display: block; height: calc(var(--header-height, 180px) + 20px); flex-shrink: 0; }
+        .content { flex: 1; overflow-y: auto; padding: 20px 20px 100px 20px; scroll-behavior: smooth; }
         .tab-pane { display: none; animation: fade 0.3s; }
         .tab-pane.active { display: block; }
 
@@ -278,6 +291,7 @@
             <div class="h-brand">BENAI BERNARDO</div>
             <div class="h-sub-brand">Consultoria de Treinamento</div>
             <div class="h-title" id="sName">Olá!</div>
+            <i class="fa-solid fa-chevron-down header-expand-icon"></i>
             <div class="h-sub" id="sFocus">Carregando...</div>
             <div class="h-sub" id="sCheckup" style="display:none; margin-top: 6px; font-weight: 500; color: #e2e8f0; font-size: 0.85rem; align-items: center; gap: 6px;">
                 <i class="fa-solid fa-calendar-check" style="color: #facc15; font-size: 1.1rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i> 
@@ -298,7 +312,11 @@
         </div>
         <div class="h-actions">
             <a href="https://wa.me/5541997222664" target="_blank" class="h-btn wa-btn"><i class="fa-brands fa-whatsapp"></i></a>
+            <button class="h-btn" onclick="toggleVoice()" id="voice-btn"><i class="fa-solid fa-volume-high"></i></button>
             <button class="h-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+        </div>
+        <div class="header-collapse-btn" onclick="collapseHeader(event)">
+            <i class="fa-solid fa-chevron-up"></i>
         </div>
     </div>
 
@@ -370,17 +388,17 @@
                 <div id="plan-individual" style="border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: left; background: var(--bg);">
                     <div style="font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 5px;">Plano Individual</div>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button onclick="openPayment('https://www.asaas.com/c/ipcsin79y1wwgxgk')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s;">
+                        <button onclick="openPayment('https://nubank.com.br/cobrar/17t1f/69bae66d-fc2a-41dd-81b6-fa79ac950103')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s;">
                             Mensal<br><span style="color: var(--accent); font-size: 1rem;">R$ 150</span>
                         </button>
-                        <button onclick="openPayment('https://www.asaas.com/c/oonjexsbw08fh8va')" style="flex: 1; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,168,232,0.3);">
+                        <button onclick="openPayment('https://nubank.com.br/cobrar/17t1f/69bae60b-ab03-4869-9cd9-41bfcde420b5')" style="flex: 1; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,168,232,0.3);">
                             Trimestral<br><span style="font-size: 1rem;">R$ 417</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Plano Casal -->
-                <div id="plan-casal" style="border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: left; background: var(--bg);">
+                <div id="plan-casal" style="display: none; border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: left; background: var(--bg);">
                     <div style="font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 5px;">Plano Casal</div>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
                         <button onclick="openPayment('https://www.asaas.com/c/1t1rlw6rouetzdh0')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s;">
@@ -797,13 +815,46 @@
         if (type === 'success') navigator.vibrate([30, 50, 30, 50, 50]);
     }
 
-    function speak(text) {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'pt-BR';
-            utterance.rate = 1.1;
-            window.speechSynthesis.speak(utterance);
+    let voiceEnabled = true;
+    let ptVoice = null;
+
+    function initVoice() {
+        if (!('speechSynthesis' in window)) return;
+        const voices = window.speechSynthesis.getVoices();
+        ptVoice = voices.find(v => v.lang === 'pt-BR' || v.lang === 'pt_BR') || 
+                  voices.find(v => v.lang.startsWith('pt')) || 
+                  voices[0];
+    }
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = initVoice;
+        initVoice();
+    }
+
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        const icon = document.querySelector('#voice-btn i');
+        if (voiceEnabled) {
+            icon.className = 'fa-solid fa-volume-high';
+            speak("Treinador de voz ativado.");
+        } else {
+            icon.className = 'fa-solid fa-volume-xmark';
+            window.speechSynthesis.cancel();
         }
+    }
+
+    function speak(text) {
+        if (!voiceEnabled || !('speechSynthesis' in window)) return;
+        
+        window.speechSynthesis.cancel(); // Interrupt previous speech
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        if (ptVoice) utterance.voice = ptVoice;
+        utterance.lang = 'pt-BR';
+        utterance.rate = 1.15; // Slightly faster for energy
+        utterance.pitch = 1.05; // Slightly higher pitch for clarity
+        
+        window.speechSynthesis.speak(utterance);
     }
 
     function playCheers() {
@@ -962,8 +1013,11 @@
             // Auto-open next exercise
             const allCards = Array.from(document.querySelectorAll('.ex-card'));
             const currentIndex = allCards.indexOf(card);
+            let nextExerciseText = "";
+            let nextCard = null;
+            
             if (currentIndex !== -1 && currentIndex + 1 < allCards.length) {
-                const nextCard = allCards[currentIndex + 1];
+                nextCard = allCards[currentIndex + 1];
                 if (!nextCard.classList.contains('done')) {
                     nextCard.classList.remove('collapsed');
                     const nextIcon = nextCard.querySelector('.ex-header .fa-chevron-down');
@@ -974,11 +1028,45 @@
                         nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 300);
                 }
+                
+                // Determine if phase changed
+                const currentUid = card.id.replace('card-', '');
+                const nextUid = nextCard.id.replace('card-', '');
+                const currentStageId = currentUid.split('-')[1];
+                const nextStageId = nextUid.split('-')[1];
+                
+                let phaseText = "";
+                if (currentStageId !== nextStageId) {
+                    const stagesMap = {
+                        'mobilidade': 'fase de mobilidade',
+                        'ativacao': 'fase de ativação',
+                        'forca': 'fase de força e carga',
+                        'desaceleracao': 'fase de desaceleração'
+                    };
+                    const nextPhaseName = stagesMap[nextStageId] || 'próxima fase';
+                    phaseText = `Iniciando ${nextPhaseName}. `;
+                }
+
+                const nextNameEl = nextCard.querySelector('.ex-title');
+                if (nextNameEl) {
+                    const clone = nextNameEl.cloneNode(true);
+                    const badge = clone.querySelector('span');
+                    if(badge) badge.remove();
+                    const videoBtn = clone.querySelector('a');
+                    if(videoBtn) videoBtn.remove();
+                    
+                    let nextName = clone.textContent.trim();
+                    nextExerciseText = `${phaseText}Prepare-se para o próximo exercício: ${nextName}.`;
+                }
+            } else if (currentIndex + 1 === allCards.length) {
+                nextExerciseText = "Treino finalizado. Parabéns!";
             }
 
             // Force timer if there is rest time
             if(restTime > 0) {
-                openTimer(restTime, true);
+                openTimer(restTime, true, nextExerciseText);
+            } else if (nextExerciseText) {
+                speak(nextExerciseText);
             }
             
             checkBlocksState();
@@ -1040,14 +1128,7 @@
     }
 
     function openPayment(url) {
-        const emailInput = document.getElementById('renovacao-email');
-        const email = emailInput ? emailInput.value.trim() : '';
-        if (!email) {
-            alert("Por favor, preencha seu e-mail de cadastro antes de escolher um plano.");
-            if(emailInput) emailInput.focus();
-            return;
-        }
-        window.open(url + '?email=' + encodeURIComponent(email), '_blank');
+        window.open(url, '_blank');
     }
 
     function checkBlocksState() {
@@ -1430,40 +1511,57 @@
         } catch(e) { console.log("Audio not supported"); }
     }
 
-    function openTimer(seconds, forced = false) {
+    function openTimer(seconds, forced = false, nextExerciseText = "") {
         haptic('medium');
         timeLeft = seconds;
+        let initialTime = seconds;
         document.getElementById('timer-overlay').style.display = 'flex';
         
         const closeBtn = document.getElementById('btn-close-timer');
         const forcedMsg = document.getElementById('timer-forced-msg');
         
+        let speechText = "Hora de descanso. " + nextExerciseText;
+        
         if(forced) {
             closeBtn.style.display = 'none';
             forcedMsg.style.display = 'block';
-            speak("Descansar");
+            speak(speechText);
         } else {
             closeBtn.style.display = 'block';
             closeBtn.innerText = 'VOLTAR AO TREINO';
             forcedMsg.style.display = 'none';
+            speak(speechText);
         }
         
         updateTimerDisplay();
         if(timerInterval) clearInterval(timerInterval);
         
-        let spokenWarning = false;
+        let halfwayAnnounced = false;
+        let prepareAnnounced = false;
         
         timerInterval = setInterval(() => {
             timeLeft--;
             updateTimerDisplay();
             
-            if(timeLeft === 3 && !spokenWarning) {
-                speak("Prepare-se");
-                spokenWarning = true;
+            if (initialTime > 10 && timeLeft === Math.floor(initialTime / 2) && !halfwayAnnounced) {
+                speak("Metade do tempo.");
+                halfwayAnnounced = true;
+            }
+            
+            if (timeLeft === 5 && !prepareAnnounced) {
+                speak("Prepare-se.");
+                prepareAnnounced = true;
+            } else if (timeLeft === 3) {
+                speak("Três.");
+            } else if (timeLeft === 2) {
+                speak("Dois.");
+            } else if (timeLeft === 1) {
+                speak("Um.");
             }
             
             if(timeLeft <= 0) {
                 clearInterval(timerInterval);
+                speak("Vamos lá!");
                 haptic('heavy');
                 playBeep();
                 closeBtn.style.display = 'block';
@@ -1493,10 +1591,9 @@
         document.getElementById(`tab-${n}`).classList.add('active');
         document.querySelectorAll('.nav-btn')[n-1].classList.add('active');
         
-        // Always show header when switching tabs
+        // Do NOT auto-expand header when switching tabs
         const headerEl = document.querySelector('.header');
         if (headerEl) {
-            headerEl.classList.remove('hidden');
             const activeTab = document.getElementById(`tab-${n}`);
             if (window.resetHeaderScroll) window.resetHeaderScroll(activeTab ? activeTab.scrollTop : 0);
         }
@@ -1727,9 +1824,24 @@
         const headerEl = document.querySelector('.header');
 
         window.resetHeaderScroll = (currentScrollTop = 0) => {
-            headerHidden = false;
+            // We no longer auto-expand the header on tab switch or scroll reset
             lastScrollY = currentScrollTop;
         };
+
+        window.collapseHeader = (e) => {
+            if (e) e.stopPropagation();
+            if (!headerHidden) {
+                headerEl.classList.add('minimized');
+                headerHidden = true;
+            }
+        };
+
+        headerEl.addEventListener('click', () => {
+            if (headerHidden) {
+                headerEl.classList.remove('minimized');
+                headerHidden = false;
+            }
+        });
 
         document.querySelectorAll('.content').forEach(contentEl => {
             contentEl.addEventListener('scroll', (e) => {
@@ -1737,15 +1849,11 @@
                 
                 if (currentScrollY > lastScrollY && currentScrollY > 80) {
                     if (!headerHidden) {
-                        headerEl.classList.add('hidden');
+                        headerEl.classList.add('minimized');
                         headerHidden = true;
                     }
-                } else if (currentScrollY < lastScrollY) {
-                    if (headerHidden) {
-                        headerEl.classList.remove('hidden');
-                        headerHidden = false;
-                    }
                 }
+                // Removed auto-expand on scroll up
                 lastScrollY = currentScrollY;
             }, { passive: true });
         });
