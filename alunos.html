@@ -1,18 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Benai Bernardo | Painel de Alunos</title>
-    
+
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -21,404 +24,632 @@
 
     <!-- Tailwind Config -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            navy: '#001F5B',
-                            cyan: '#00A8E8',
-                            orange: '#f97316',
-                            bg: '#f8fafc'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        head: ['Outfit', 'sans-serif']
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                navy: "#001F5B",
+                cyan: "#00A8E8",
+                orange: "#f97316",
+                bg: "#f8fafc",
+              },
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              head: ["Outfit", "sans-serif"],
+            },
+          },
+        },
+      };
     </script>
 
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        #overlay { backdrop-filter: blur(3px); transition: opacity 0.3s ease; }
-        
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--brand-orange);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      #overlay {
+        backdrop-filter: blur(3px);
+        transition: opacity 0.3s ease;
+      }
+
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--brand-orange);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-        /* Estilo para o PDF (Oculto na tela) */
-        #pdf-container { display: none; }
-        .pdf-content { padding: 40px; font-family: 'Inter', sans-serif; color: #333; background: #fff; }
-        .pdf-header { border-bottom: 2px solid #001F5B; padding-bottom: 20px; margin-bottom: 30px; }
-        .pdf-title { font-family: 'Outfit', sans-serif; color: #001F5B; font-size: 24px; font-weight: bold; margin: 0; }
-        .pdf-subtitle { color: #00A8E8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
-        .pdf-section { margin-bottom: 25px; }
-        .pdf-section-title { font-family: 'Outfit', sans-serif; color: #f97316; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; }
-        .pdf-item { margin-bottom: 10px; }
-        .pdf-label { font-weight: bold; font-size: 12px; color: #666; text-transform: uppercase; display: block; }
-        .pdf-value { font-size: 14px; color: #111; margin-top: 2px; }
+      /* Estilo para o PDF (Oculto na tela) */
+      #pdf-container {
+        display: none;
+      }
+      .pdf-content {
+        padding: 40px;
+        font-family: "Inter", sans-serif;
+        color: #333;
+        background: #fff;
+      }
+      .pdf-header {
+        border-bottom: 2px solid #001f5b;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+      }
+      .pdf-title {
+        font-family: "Outfit", sans-serif;
+        color: #001f5b;
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+      }
+      .pdf-subtitle {
+        color: #00a8e8;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 5px;
+      }
+      .pdf-section {
+        margin-bottom: 25px;
+      }
+      .pdf-section-title {
+        font-family: "Outfit", sans-serif;
+        color: #f97316;
+        font-size: 16px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+      }
+      .pdf-item {
+        margin-bottom: 10px;
+      }
+      .pdf-label {
+        font-weight: bold;
+        font-size: 12px;
+        color: #666;
+        text-transform: uppercase;
+        display: block;
+      }
+      .pdf-value {
+        font-size: 14px;
+        color: #111;
+        margin-top: 2px;
+      }
     </style>
-</head>
-<body class="bg-brand-bg text-slate-800 font-sans min-h-screen">
-
+  </head>
+  <body class="bg-brand-bg text-slate-800 font-sans min-h-screen">
     <!-- Header -->
-    <header class="bg-brand-navy border-b border-brand-navy sticky top-0 z-30 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-brand-cyan rounded-xl flex items-center justify-center text-white shadow-md">
-                    <i data-lucide="dumbbell" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h1 class="font-head text-2xl font-extrabold text-white tracking-tight leading-none">Benai <span class="text-brand-cyan">Bernardo</span></h1>
-                    <p class="text-brand-cyan text-xs font-semibold uppercase tracking-widest">Painel de Alunos</p>
-                </div>
-            </div>
-            <button onclick="loadStudents()" class="flex items-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
-                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar
-            </button>
+    <header
+      class="bg-brand-navy border-b border-brand-navy sticky top-0 z-30 shadow-lg"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 bg-brand-cyan rounded-xl flex items-center justify-center text-white shadow-md"
+          >
+            <i data-lucide="dumbbell" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h1
+              class="font-head text-2xl font-extrabold text-white tracking-tight leading-none"
+            >
+              Benai <span class="text-brand-cyan">Bernardo</span>
+            </h1>
+            <p
+              class="text-brand-cyan text-xs font-semibold uppercase tracking-widest"
+            >
+              Painel de Alunos
+            </p>
+          </div>
         </div>
+        <button
+          onclick="loadStudents()"
+          class="flex items-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
+        >
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar
+        </button>
+      </div>
     </header>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <!-- Dashboard Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 hidden" id="dashboardStats">
-            <!-- Injetado via JS -->
-        </div>
+      <!-- Dashboard Stats -->
+      <div
+        class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 hidden"
+        id="dashboardStats"
+      >
+        <!-- Injetado via JS -->
+      </div>
 
-        <!-- Controls (Search & Sort) -->
-        <div id="controlsBar" class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 hidden">
-            <div class="relative w-full sm:w-96">
-                <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5"></i>
-                <input type="text" id="searchInput" placeholder="Buscar aluno por nome..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent shadow-sm transition-all text-sm">
-            </div>
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-                <button onclick="openGlobalNoticeModal()" class="w-full sm:w-auto px-4 py-2.5 bg-brand-navy text-white rounded-xl hover:bg-blue-900 transition-colors shadow-sm text-sm font-bold flex items-center justify-center gap-2">
-                    <i data-lucide="bell" class="w-4 h-4"></i> Aviso Global
-                </button>
-                <select id="sortSelect" class="w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan shadow-sm text-slate-700 text-sm font-medium cursor-pointer">
-                    <option value="newest">Mais recentes primeiro</option>
-                    <option value="oldest">Mais antigos primeiro</option>
-                    <option value="az">Ordem Alfabética (A-Z)</option>
-                </select>
-            </div>
+      <!-- Controls (Search & Sort) -->
+      <div
+        id="controlsBar"
+        class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 hidden"
+      >
+        <div class="relative w-full sm:w-96">
+          <i
+            data-lucide="search"
+            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5"
+          ></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Buscar aluno por nome..."
+            class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-transparent shadow-sm transition-all text-sm"
+          />
         </div>
+        <div
+          class="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap"
+        >
+          <button
+            onclick="window.location.href = 'gerador.html'"
+            class="w-full sm:w-auto px-4 py-2.5 bg-brand-cyan text-white rounded-xl hover:bg-cyan-600 transition-colors shadow-sm text-sm font-bold flex items-center justify-center gap-2"
+          >
+            <i data-lucide="plus" class="w-4 h-4"></i> Novo Aluno
+          </button>
+          <button
+            onclick="openGlobalNoticeModal()"
+            class="w-full sm:w-auto px-4 py-2.5 bg-brand-navy text-white rounded-xl hover:bg-blue-900 transition-colors shadow-sm text-sm font-bold flex items-center justify-center gap-2"
+          >
+            <i data-lucide="bell" class="w-4 h-4"></i> Aviso Global
+          </button>
+          <select
+            id="sortSelect"
+            class="w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan shadow-sm text-slate-700 text-sm font-medium cursor-pointer"
+          >
+            <option value="newest">Mais recentes primeiro</option>
+            <option value="oldest">Mais antigos primeiro</option>
+            <option value="az">Ordem Alfabética (A-Z)</option>
+          </select>
+        </div>
+      </div>
 
-        <!-- Loading State -->
-        <div id="loadingState" class="text-center py-20">
-            <div class="loader mb-4"></div>
-            <p class="text-slate-500 font-medium">Buscando dados na planilha...</p>
-        </div>
+      <!-- Loading State -->
+      <div id="loadingState" class="text-center py-20">
+        <div class="loader mb-4"></div>
+        <p class="text-slate-500 font-medium">Buscando dados na planilha...</p>
+      </div>
 
-        <!-- Cards Grid -->
-        <div id="studentsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
-            <!-- Cards injetados via JS -->
+      <!-- Cards Grid -->
+      <div
+        id="studentsGrid"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 hidden"
+      >
+        <!-- Cards injetados via JS -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="text-center py-20 hidden">
+        <div
+          class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400"
+        >
+          <i data-lucide="users" class="w-8 h-8"></i>
         </div>
-        
-        <!-- Empty State -->
-        <div id="emptyState" class="text-center py-20 hidden">
-            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
-                <i data-lucide="users" class="w-8 h-8"></i>
-            </div>
-            <h3 class="text-lg font-head font-bold text-brand-navy">Nenhum aluno encontrado</h3>
-            <p class="text-slate-500 mt-1">As anamneses preenchidas aparecerão aqui.</p>
-        </div>
+        <h3 class="text-lg font-head font-bold text-brand-navy">
+          Nenhum aluno encontrado
+        </h3>
+        <p class="text-slate-500 mt-1">
+          As anamneses preenchidas aparecerão aqui.
+        </p>
+      </div>
     </main>
 
     <!-- Global Notice Modal -->
     <div id="globalNoticeModal" class="fixed inset-0 z-[60] hidden">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeGlobalNoticeModal()"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-head font-bold text-brand-navy">Aviso Global (WebApp)</h3>
-                <button onclick="closeGlobalNoticeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <p class="text-sm text-slate-500 mb-4">Esta mensagem aparecerá como um pop-up para todos os alunos quando eles abrirem o WebApp de treinos.</p>
-            <textarea id="globalNoticeText" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-cyan outline-none resize-none h-32" placeholder="Ex: Feriado amanhã, foco na dieta!"></textarea>
-            <div class="flex justify-end gap-3 mt-4">
-                <button onclick="closeGlobalNoticeModal()" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-50 rounded-xl transition-colors">Cancelar</button>
-                <button onclick="saveGlobalNotice()" class="px-4 py-2 bg-brand-navy text-white font-medium rounded-xl hover:bg-brand-navy/90 transition-colors flex items-center gap-2">
-                    <i data-lucide="send" class="w-4 h-4"></i> Enviar Aviso
-                </button>
-            </div>
+      <div
+        class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+        onclick="closeGlobalNoticeModal()"
+      ></div>
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-head font-bold text-brand-navy">
+            Aviso Global (WebApp)
+          </h3>
+          <button
+            onclick="closeGlobalNoticeModal()"
+            class="text-slate-400 hover:text-slate-600"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
+        <p class="text-sm text-slate-500 mb-4">
+          Esta mensagem aparecerá como um pop-up para todos os alunos quando
+          eles abrirem o WebApp de treinos.
+        </p>
+        <textarea
+          id="globalNoticeText"
+          class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-cyan outline-none resize-none h-32"
+          placeholder="Ex: Feriado amanhã, foco na dieta!"
+        ></textarea>
+        <div class="flex justify-end gap-3 mt-4">
+          <button
+            onclick="closeGlobalNoticeModal()"
+            class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-50 rounded-xl transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onclick="saveGlobalNotice()"
+            class="px-4 py-2 bg-brand-navy text-white font-medium rounded-xl hover:bg-brand-navy/90 transition-colors flex items-center gap-2"
+          >
+            <i data-lucide="send" class="w-4 h-4"></i> Enviar Aviso
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Student Modal -->
     <div id="studentModal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0" id="studentModalOverlay" onclick="closeStudentModal()"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all scale-95 opacity-0" id="studentModalContentBox">
-            
-            <!-- Modal Header -->
-            <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50">
-                <div>
-                    <h2 id="modalName" class="text-2xl font-head font-extrabold text-brand-navy">Nome do Aluno</h2>
-                    <div class="flex flex-wrap items-center gap-4 mt-2">
-                        <p id="modalEmail" class="text-sm text-slate-500 flex items-center gap-1"><i data-lucide="mail" class="w-4 h-4"></i> <span>email@teste.com</span></p>
-                        <div class="flex items-center gap-2">
-                            <p id="modalPhone" class="text-sm text-slate-500 flex items-center gap-1"><i data-lucide="phone" class="w-4 h-4"></i> <span>(00) 0000-0000</span></p>
-                            <button id="btnWhatsapp" onclick="openWhatsapp()" class="text-xs font-bold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-2 py-1 rounded-md transition-colors flex items-center gap-1">
-                                <i data-lucide="message-circle" class="w-3 h-3"></i> Chamar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <button onclick="closeStudentModal()" class="p-2 bg-white rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shadow-sm border border-slate-200">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+      <div
+        class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0"
+        id="studentModalOverlay"
+        onclick="closeStudentModal()"
+      ></div>
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all scale-95 opacity-0"
+        id="studentModalContentBox"
+      >
+        <!-- Modal Header -->
+        <div
+          class="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50"
+        >
+          <div>
+            <h2
+              id="modalName"
+              class="text-2xl font-head font-extrabold text-brand-navy"
+            >
+              Nome do Aluno
+            </h2>
+            <div class="flex flex-wrap items-center gap-4 mt-2">
+              <p
+                id="modalEmail"
+                class="text-sm text-slate-500 flex items-center gap-1"
+              >
+                <i data-lucide="mail" class="w-4 h-4"></i>
+                <span>email@teste.com</span>
+              </p>
+              <div class="flex items-center gap-2">
+                <p
+                  id="modalPhone"
+                  class="text-sm text-slate-500 flex items-center gap-1"
+                >
+                  <i data-lucide="phone" class="w-4 h-4"></i>
+                  <span>(00) 0000-0000</span>
+                </p>
+                <button
+                  id="btnWhatsapp"
+                  onclick="openWhatsapp()"
+                  class="text-xs font-bold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-2 py-1 rounded-md transition-colors flex items-center gap-1"
+                >
+                  <i data-lucide="message-circle" class="w-3 h-3"></i> Chamar
                 </button>
+              </div>
             </div>
-
-            <!-- Action Buttons Bar -->
-            <div class="px-6 py-4 border-b border-slate-100 flex flex-wrap gap-3 bg-white">
-                <button onclick="createWorkout()" class="flex-1 sm:flex-none px-4 py-2 bg-brand-orange text-white text-sm font-bold rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 shadow-sm">
-                    <i data-lucide="dumbbell" class="w-4 h-4"></i> Criar / Editar Treino
-                </button>
-                <button onclick="viewHistory()" class="flex-1 sm:flex-none px-4 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
-                    <i data-lucide="history" class="w-4 h-4"></i> Histórico
-                </button>
-                <div class="w-full sm:w-px sm:h-8 bg-slate-200 mx-1 hidden sm:block"></div>
-                <button onclick="copyForAI()" class="flex-1 sm:flex-none px-4 py-2 bg-brand-cyan/10 text-brand-cyan text-sm font-bold rounded-xl hover:bg-brand-cyan/20 transition-colors flex items-center justify-center gap-2">
-                    <i data-lucide="bot" class="w-4 h-4"></i> Copiar p/ IA
-                </button>
-                <button onclick="generatePDF()" class="flex-1 sm:flex-none px-4 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
-                    <i data-lucide="file-down" class="w-4 h-4"></i> Gerar PDF
-                </button>
-            </div>
-
-            <!-- Modal Content (Scrollable) -->
-            <div class="p-6 overflow-y-auto flex-1 bg-slate-50 custom-scrollbar" id="modalContent">
-                <!-- Sections will be injected here via JS -->
-            </div>
+          </div>
+          <button
+            onclick="closeStudentModal()"
+            class="p-2 bg-white rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shadow-sm border border-slate-200"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
+
+        <!-- Action Buttons Bar -->
+        <div
+          class="px-6 py-4 border-b border-slate-100 flex flex-wrap gap-3 bg-white"
+        >
+          <button
+            onclick="createWorkout()"
+            class="flex-1 sm:flex-none px-4 py-2 bg-brand-orange text-white text-sm font-bold rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 shadow-sm"
+          >
+            <i data-lucide="dumbbell" class="w-4 h-4"></i> Criar / Editar Treino
+          </button>
+          <button
+            onclick="viewHistory()"
+            class="flex-1 sm:flex-none px-4 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
+          >
+            <i data-lucide="history" class="w-4 h-4"></i> Histórico
+          </button>
+          <div
+            class="w-full sm:w-px sm:h-8 bg-slate-200 mx-1 hidden sm:block"
+          ></div>
+          <button
+            onclick="copyForAI()"
+            class="flex-1 sm:flex-none px-4 py-2 bg-brand-cyan/10 text-brand-cyan text-sm font-bold rounded-xl hover:bg-brand-cyan/20 transition-colors flex items-center justify-center gap-2"
+          >
+            <i data-lucide="bot" class="w-4 h-4"></i> Copiar p/ IA
+          </button>
+          <button
+            onclick="generatePDF()"
+            class="flex-1 sm:flex-none px-4 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
+          >
+            <i data-lucide="file-down" class="w-4 h-4"></i> Gerar PDF
+          </button>
+        </div>
+
+        <!-- Modal Content (Scrollable) -->
+        <div
+          class="p-6 overflow-y-auto flex-1 bg-slate-50 custom-scrollbar"
+          id="modalContent"
+        >
+          <!-- Sections will be injected here via JS -->
+        </div>
+      </div>
     </div>
 
     <!-- Template Oculto para o PDF -->
     <div id="pdf-container">
-        <div id="pdf-content" class="pdf-content">
-            <div class="pdf-header">
-                <h1 class="pdf-title">BENAI BERNARDO</h1>
-                <div class="pdf-subtitle">Anamnese do Aluno</div>
-            </div>
-            <div id="pdf-body">
-                <!-- Conteúdo injetado via JS -->
-            </div>
+      <div id="pdf-content" class="pdf-content">
+        <div class="pdf-header">
+          <h1 class="pdf-title">BENAI BERNARDO</h1>
+          <div class="pdf-subtitle">Anamnese do Aluno</div>
         </div>
+        <div id="pdf-body">
+          <!-- Conteúdo injetado via JS -->
+        </div>
+      </div>
     </div>
 
     <script>
-        // URL do seu Google Apps Script (Web App)
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxxzYPeyU9xwRznGW81iGxA_21e_sDszYmXGWiiZTxtxDo9IC0duL7UuaYy6BIDZ_DC/exec';
-        
-        let studentsData = [];
-        let currentStudent = null;
+      // URL do seu Google Apps Script (Web App)
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycbxxzYPeyU9xwRznGW81iGxA_21e_sDszYmXGWiiZTxtxDo9IC0duL7UuaYy6BIDZ_DC/exec";
 
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            loadStudents();
+      let studentsData = [];
+      let currentStudent = null;
 
-            // Event Listeners para Busca e Ordenação
-            document.getElementById('searchInput').addEventListener('input', applyFilters);
-            document.getElementById('sortSelect').addEventListener('change', applyFilters);
-        });
+      document.addEventListener("DOMContentLoaded", () => {
+        lucide.createIcons();
+        loadStudents();
 
-        // 1. BUSCAR DADOS DA PLANILHA
-        async function loadStudents() {
-            document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('studentsGrid').classList.add('hidden');
-            document.getElementById('emptyState').classList.add('hidden');
-            document.getElementById('dashboardStats').classList.add('hidden');
-            document.getElementById('controlsBar').classList.add('hidden');
+        // Event Listeners para Busca e Ordenação
+        document
+          .getElementById("searchInput")
+          .addEventListener("input", applyFilters);
+        document
+          .getElementById("sortSelect")
+          .addEventListener("change", applyFilters);
+      });
 
-            try {
-                const response = await fetch(API_URL + '?tipo=anamnese');
-                const data = await response.json();
-                
-                // Inverte o array para mostrar os mais recentes primeiro
-                studentsData = data.reverse(); 
-                
-                if(studentsData.length > 0 && studentsData[0].Nome) {
-                    updateStats(studentsData);
-                    renderStudents(studentsData);
-                    document.getElementById('studentsGrid').classList.remove('hidden');
-                    document.getElementById('dashboardStats').classList.remove('hidden');
-                    document.getElementById('controlsBar').classList.remove('flex');
-                    document.getElementById('controlsBar').classList.add('flex');
-                } else {
-                    // Se a planilha estiver vazia, carrega dados de exemplo (Mock)
-                    loadMockData();
-                }
-            } catch (error) {
-                console.error("Erro ao carregar dados:", error);
-                // Em caso de erro (CORS, etc), carrega os dados de exemplo para o usuário não ficar travado
-                loadMockData();
-            } finally {
-                document.getElementById('loadingState').classList.add('hidden');
-            }
-        }
+      // 1. BUSCAR DADOS DA PLANILHA
+      async function loadStudents() {
+        document.getElementById("loadingState").classList.remove("hidden");
+        document.getElementById("studentsGrid").classList.add("hidden");
+        document.getElementById("emptyState").classList.add("hidden");
+        document.getElementById("dashboardStats").classList.add("hidden");
+        document.getElementById("controlsBar").classList.add("hidden");
 
-        // Função auxiliar para carregar dados falsos (Mock) se a planilha estiver vazia
-        function loadMockData() {
-            studentsData = [
-                {
-                    Data: new Date().toISOString(),
-                    Nome: "Carlos Eduardo Silva (Exemplo)",
-                    Email: "carlos@email.com",
-                    WhatsApp: "(11) 98765-4321",
-                    Nascimento: "15/05/1990",
-                    Ocupacao: "Engenheiro de Software",
-                    Peso: "82",
-                    Altura: "1.78",
-                    Objetivos: "Hipertrofia e melhora do condicionamento físico.",
-                    Experiencia: "Intermediário (treino há 2 anos, mas parei nos últimos 3 meses).",
-                    Esportes: "Futebol aos finais de semana.",
-                    Rotina: "Trabalho 8h por dia sentado na frente do computador.",
-                    Estilo_Vida: "Durmo cerca de 6h por noite. Alimentação desregulada durante a semana devido à correria.",
-                    Dias_Treino: "Segunda, Quarta e Sexta",
-                    Tempo_Treino: "45 a 60 minutos",
-                    Condicoes_Medicas: "Nenhuma",
-                    Dores_Lesoes: "Sinto um leve desconforto no ombro direito ao fazer supino pesado.",
-                    Remedios: "Nenhum",
-                    Local: "Academia SmartFit",
-                    Equipamentos: "Academia completa (máquinas, halteres, barras, polias).",
-                    Calistenia_Flexao: "N/A",
-                    Calistenia_Barra: "N/A",
-                    Calistenia_Mergulho: "N/A",
-                    Calistenia_Agachamento: "N/A",
-                    Calistenia_Pistol: "N/A",
-                    Calistenia_Prancha: "N/A",
-                    Gosta: "Agachamento livre, barra fixa e exercícios compostos.",
-                    Odeia: "Esteira e exercícios muito isolados (como rosca concentrada)."
-                },
-                {
-                    Data: new Date(Date.now() - 86400000).toISOString(), // Ontem
-                    Nome: "Mariana Costa (Exemplo)",
-                    Email: "mariana.costa@email.com",
-                    WhatsApp: "(21) 99999-8888",
-                    Nascimento: "22/11/1995",
-                    Ocupacao: "Arquiteta",
-                    Peso: "65",
-                    Altura: "1.65",
-                    Objetivos: "Emagrecimento e definição muscular.",
-                    Experiencia: "Iniciante (nunca treinei musculação a sério).",
-                    Esportes: "Nenhum.",
-                    Rotina: "Trabalho híbrido, parte em casa, parte visitando obras (muito tempo em pé).",
-                    Estilo_Vida: "Durmo bem (8h). Alimentação controlada, mas sinto muita ansiedade à noite e acabo comendo doce.",
-                    Dias_Treino: "Terça, Quinta e Sábado",
-                    Tempo_Treino: "30 a 40 minutos",
-                    Condicoes_Medicas: "Asma leve (controlada).",
-                    Dores_Lesoes: "Nenhuma",
-                    Remedios: "Anticoncepcional.",
-                    Local: "Casa",
-                    Equipamentos: "1 par de halteres de 3kg, 1 colchonete e um kit de elásticos (mini bands).",
-                    Calistenia_Flexao: "Não consigo ainda",
-                    Calistenia_Barra: "Não tenho barra",
-                    Calistenia_Mergulho: "Consigo (5 reps/segs)",
-                    Calistenia_Agachamento: "Consigo (15 reps/segs)",
-                    Calistenia_Pistol: "Não consigo ainda",
-                    Calistenia_Prancha: "Consigo (45 reps/segs)",
-                    Gosta: "Aulas coletivas, exercícios mais dinâmicos.",
-                    Odeia: "Pegar muito peso e máquinas complexas."
-                },
-                {
-                    Data: new Date(Date.now() - 172800000).toISOString(), // Anteontem
-                    Nome: "Roberto Almeida (Exemplo)",
-                    Email: "roberto.almeida@email.com",
-                    WhatsApp: "(31) 97777-6666",
-                    Nascimento: "10/03/1978",
-                    Ocupacao: "Gerente Comercial",
-                    Peso: "95",
-                    Altura: "1.80",
-                    Objetivos: "Saúde, longevidade e fortalecimento da lombar.",
-                    Experiencia: "Sedentário há mais de 5 anos.",
-                    Esportes: "Nenhum.",
-                    Rotina: "Viajo muito de carro, passo horas dirigindo.",
-                    Estilo_Vida: "Durmo 5h por noite, acordo cansado. Estresse altíssimo no trabalho.",
-                    Dias_Treino: "Segunda a Sexta",
-                    Tempo_Treino: "Apenas 30 minutos",
-                    Condicoes_Medicas: "Hipertensão controlada com medicação.",
-                    Dores_Lesoes: "Hérnia de disco lombar (L4-L5). Sinto dor ao ficar muito tempo em pé ou levantar peso do chão.",
-                    Remedios: "Losartana 50mg.",
-                    Local: "Casa",
-                    Equipamentos: "Esteira, bicicleta, 1 banco reclinável e halteres de 1kg a 10kg. Não tem barra livre nem polia.",
-                    Calistenia_Flexao: "Consigo (8 reps/segs)",
-                    Calistenia_Barra: "Não consigo",
-                    Calistenia_Mergulho: "Não consigo ainda",
-                    Calistenia_Agachamento: "Sinto dor/limitação",
-                    Calistenia_Pistol: "Não consigo ainda",
-                    Calistenia_Prancha: "Consigo (30 reps/segs)",
-                    Gosta: "Caminhada leve na esteira.",
-                    Odeia: "Qualquer exercício que force as costas."
-                }
-            ];
-            
+        try {
+          const response = await fetch(API_URL + "?tipo=anamnese");
+          const data = await response.json();
+
+          // Inverte o array para mostrar os mais recentes primeiro
+          studentsData = data.reverse();
+
+          if (studentsData.length > 0 && studentsData[0].Nome) {
             updateStats(studentsData);
             renderStudents(studentsData);
-            document.getElementById('studentsGrid').classList.remove('hidden');
-            document.getElementById('dashboardStats').classList.remove('hidden');
-            document.getElementById('controlsBar').classList.remove('hidden');
-            document.getElementById('controlsBar').classList.add('flex');
-            
-            // Adiciona um aviso visual de que são dados de teste
-            const aviso = document.createElement('div');
-            aviso.className = 'bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 flex items-center gap-3';
-            aviso.innerHTML = '<i data-lucide="info" class="w-5 h-5 text-amber-500"></i> <p class="text-sm font-medium">Sua planilha ainda está vazia. Exibindo 3 alunos de exemplo (Mock) para você testar as funcionalidades.</p>';
-            document.getElementById('studentsGrid').parentNode.insertBefore(aviso, document.getElementById('studentsGrid'));
-            lucide.createIcons();
+            document.getElementById("studentsGrid").classList.remove("hidden");
+            document
+              .getElementById("dashboardStats")
+              .classList.remove("hidden");
+            document.getElementById("controlsBar").classList.remove("flex");
+            document.getElementById("controlsBar").classList.add("flex");
+          } else {
+            // Se a planilha estiver vazia, carrega dados de exemplo (Mock)
+            loadMockData();
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados:", error);
+          // Em caso de erro (CORS, etc), carrega os dados de exemplo para o usuário não ficar travado
+          loadMockData();
+        } finally {
+          document.getElementById("loadingState").classList.add("hidden");
+        }
+      }
+
+      // Função auxiliar para carregar dados falsos (Mock) se a planilha estiver vazia
+      function loadMockData() {
+        studentsData = [
+          {
+            Data: new Date().toISOString(),
+            Nome: "Carlos Eduardo Silva (Exemplo)",
+            Email: "carlos@email.com",
+            WhatsApp: "(11) 98765-4321",
+            Nascimento: "15/05/1990",
+            Ocupacao: "Engenheiro de Software",
+            Peso: "82",
+            Altura: "1.78",
+            Objetivos: "Hipertrofia e melhora do condicionamento físico.",
+            Experiencia:
+              "Intermediário (treino há 2 anos, mas parei nos últimos 3 meses).",
+            Esportes: "Futebol aos finais de semana.",
+            Rotina: "Trabalho 8h por dia sentado na frente do computador.",
+            Estilo_Vida:
+              "Durmo cerca de 6h por noite. Alimentação desregulada durante a semana devido à correria.",
+            Dias_Treino: "Segunda, Quarta e Sexta",
+            Tempo_Treino: "45 a 60 minutos",
+            Condicoes_Medicas: "Nenhuma",
+            Dores_Lesoes:
+              "Sinto um leve desconforto no ombro direito ao fazer supino pesado.",
+            Remedios: "Nenhum",
+            Local: "Academia SmartFit",
+            Equipamentos:
+              "Academia completa (máquinas, halteres, barras, polias).",
+            Calistenia_Flexao: "N/A",
+            Calistenia_Barra: "N/A",
+            Calistenia_Mergulho: "N/A",
+            Calistenia_Agachamento: "N/A",
+            Calistenia_Pistol: "N/A",
+            Calistenia_Prancha: "N/A",
+            Gosta: "Agachamento livre, barra fixa e exercícios compostos.",
+            Odeia:
+              "Esteira e exercícios muito isolados (como rosca concentrada).",
+          },
+          {
+            Data: new Date(Date.now() - 86400000).toISOString(), // Ontem
+            Nome: "Mariana Costa (Exemplo)",
+            Email: "mariana.costa@email.com",
+            WhatsApp: "(21) 99999-8888",
+            Nascimento: "22/11/1995",
+            Ocupacao: "Arquiteta",
+            Peso: "65",
+            Altura: "1.65",
+            Objetivos: "Emagrecimento e definição muscular.",
+            Experiencia: "Iniciante (nunca treinei musculação a sério).",
+            Esportes: "Nenhum.",
+            Rotina:
+              "Trabalho híbrido, parte em casa, parte visitando obras (muito tempo em pé).",
+            Estilo_Vida:
+              "Durmo bem (8h). Alimentação controlada, mas sinto muita ansiedade à noite e acabo comendo doce.",
+            Dias_Treino: "Terça, Quinta e Sábado",
+            Tempo_Treino: "30 a 40 minutos",
+            Condicoes_Medicas: "Asma leve (controlada).",
+            Dores_Lesoes: "Nenhuma",
+            Remedios: "Anticoncepcional.",
+            Local: "Casa",
+            Equipamentos:
+              "1 par de halteres de 3kg, 1 colchonete e um kit de elásticos (mini bands).",
+            Calistenia_Flexao: "Não consigo ainda",
+            Calistenia_Barra: "Não tenho barra",
+            Calistenia_Mergulho: "Consigo (5 reps/segs)",
+            Calistenia_Agachamento: "Consigo (15 reps/segs)",
+            Calistenia_Pistol: "Não consigo ainda",
+            Calistenia_Prancha: "Consigo (45 reps/segs)",
+            Gosta: "Aulas coletivas, exercícios mais dinâmicos.",
+            Odeia: "Pegar muito peso e máquinas complexas.",
+          },
+          {
+            Data: new Date(Date.now() - 172800000).toISOString(), // Anteontem
+            Nome: "Roberto Almeida (Exemplo)",
+            Email: "roberto.almeida@email.com",
+            WhatsApp: "(31) 97777-6666",
+            Nascimento: "10/03/1978",
+            Ocupacao: "Gerente Comercial",
+            Peso: "95",
+            Altura: "1.80",
+            Objetivos: "Saúde, longevidade e fortalecimento da lombar.",
+            Experiencia: "Sedentário há mais de 5 anos.",
+            Esportes: "Nenhum.",
+            Rotina: "Viajo muito de carro, passo horas dirigindo.",
+            Estilo_Vida:
+              "Durmo 5h por noite, acordo cansado. Estresse altíssimo no trabalho.",
+            Dias_Treino: "Segunda a Sexta",
+            Tempo_Treino: "Apenas 30 minutos",
+            Condicoes_Medicas: "Hipertensão controlada com medicação.",
+            Dores_Lesoes:
+              "Hérnia de disco lombar (L4-L5). Sinto dor ao ficar muito tempo em pé ou levantar peso do chão.",
+            Remedios: "Losartana 50mg.",
+            Local: "Casa",
+            Equipamentos:
+              "Esteira, bicicleta, 1 banco reclinável e halteres de 1kg a 10kg. Não tem barra livre nem polia.",
+            Calistenia_Flexao: "Consigo (8 reps/segs)",
+            Calistenia_Barra: "Não consigo",
+            Calistenia_Mergulho: "Não consigo ainda",
+            Calistenia_Agachamento: "Sinto dor/limitação",
+            Calistenia_Pistol: "Não consigo ainda",
+            Calistenia_Prancha: "Consigo (30 reps/segs)",
+            Gosta: "Caminhada leve na esteira.",
+            Odeia: "Qualquer exercício que force as costas.",
+          },
+        ];
+
+        updateStats(studentsData);
+        renderStudents(studentsData);
+        document.getElementById("studentsGrid").classList.remove("hidden");
+        document.getElementById("dashboardStats").classList.remove("hidden");
+        document.getElementById("controlsBar").classList.remove("hidden");
+        document.getElementById("controlsBar").classList.add("flex");
+
+        // Adiciona um aviso visual de que são dados de teste
+        const aviso = document.createElement("div");
+        aviso.className =
+          "bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 flex items-center gap-3";
+        aviso.innerHTML =
+          '<i data-lucide="info" class="w-5 h-5 text-amber-500"></i> <p class="text-sm font-medium">Sua planilha ainda está vazia. Exibindo 3 alunos de exemplo (Mock) para você testar as funcionalidades.</p>';
+        document
+          .getElementById("studentsGrid")
+          .parentNode.insertBefore(
+            aviso,
+            document.getElementById("studentsGrid"),
+          );
+        lucide.createIcons();
+      }
+
+      // LÓGICA DE FILTRAGEM E ORDENAÇÃO
+      function applyFilters() {
+        const query = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const sortType = document.getElementById("sortSelect").value;
+
+        // Filtra por nome
+        let filtered = studentsData.filter(
+          (s) => s.Nome && s.Nome.toLowerCase().includes(query),
+        );
+
+        // Ordena
+        if (sortType === "newest") {
+          filtered.sort(
+            (a, b) => new Date(b.Data || 0) - new Date(a.Data || 0),
+          );
+        } else if (sortType === "oldest") {
+          filtered.sort(
+            (a, b) => new Date(a.Data || 0) - new Date(b.Data || 0),
+          );
+        } else if (sortType === "az") {
+          filtered.sort((a, b) => a.Nome.localeCompare(b.Nome));
         }
 
-        // LÓGICA DE FILTRAGEM E ORDENAÇÃO
-        function applyFilters() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const sortType = document.getElementById('sortSelect').value;
+        renderStudents(filtered);
+      }
 
-            // Filtra por nome
-            let filtered = studentsData.filter(s => s.Nome && s.Nome.toLowerCase().includes(query));
+      // ATUALIZAR MÉTRICAS (DASHBOARD STATS)
+      function updateStats(students) {
+        const total = students.length;
+        let comAlerta = 0;
 
-            // Ordena
-            if (sortType === 'newest') {
-                filtered.sort((a, b) => new Date(b.Data || 0) - new Date(a.Data || 0));
-            } else if (sortType === 'oldest') {
-                filtered.sort((a, b) => new Date(a.Data || 0) - new Date(b.Data || 0));
-            } else if (sortType === 'az') {
-                filtered.sort((a, b) => a.Nome.localeCompare(b.Nome));
-            }
+        students.forEach((s) => {
+          const condicoes = (s.Condicoes_Medicas || "").toLowerCase();
+          const dores = (s.Dores_Lesoes || "").toLowerCase();
+          const remedios = (s.Remedios || "").toLowerCase();
 
-            renderStudents(filtered);
-        }
+          if (
+            (condicoes !== "nenhuma" && condicoes !== "") ||
+            (dores !== "nenhuma" && dores !== "") ||
+            (remedios !== "nenhuma" && remedios !== "")
+          ) {
+            comAlerta++;
+          }
+        });
 
-        // ATUALIZAR MÉTRICAS (DASHBOARD STATS)
-        function updateStats(students) {
-            const total = students.length;
-            let comAlerta = 0;
-
-            students.forEach(s => {
-                const condicoes = (s.Condicoes_Medicas || '').toLowerCase();
-                const dores = (s.Dores_Lesoes || '').toLowerCase();
-                const remedios = (s.Remedios || '').toLowerCase();
-
-                if ((condicoes !== 'nenhuma' && condicoes !== '') || 
-                    (dores !== 'nenhuma' && dores !== '') ||
-                    (remedios !== 'nenhuma' && remedios !== '')) {
-                    comAlerta++;
-                }
-            });
-
-            document.getElementById('dashboardStats').innerHTML = `
+        document.getElementById("dashboardStats").innerHTML = `
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-brand-navy/10 flex items-center justify-center text-brand-navy"><i data-lucide="users" class="w-6 h-6"></i></div>
                     <div><p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Total de Alunos</p><p class="text-2xl font-head font-extrabold text-brand-navy leading-none">${total}</p></div>
@@ -432,50 +663,54 @@
                     <div><p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Sem Restrições</p><p class="text-2xl font-head font-extrabold text-emerald-600 leading-none">${total - comAlerta}</p></div>
                 </div>
             `;
-            lucide.createIcons();
-        }
+        lucide.createIcons();
+      }
 
-        // 2. RENDERIZAR CARDS
-        function renderStudents(students) {
-            const grid = document.getElementById('studentsGrid');
-            grid.innerHTML = '';
+      // 2. RENDERIZAR CARDS
+      function renderStudents(students) {
+        const grid = document.getElementById("studentsGrid");
+        grid.innerHTML = "";
 
-            students.forEach((student, index) => {
-                // Ignora linhas vazias
-                if(!student.Nome) return;
+        students.forEach((student, index) => {
+          // Ignora linhas vazias
+          if (!student.Nome) return;
 
-                // Lógica de Alertas (Saúde, Lesões, Remédios)
-                let alertsHTML = '';
-                const condicoes = (student.Condicoes_Medicas || '').toLowerCase();
-                const dores = (student.Dores_Lesoes || '').toLowerCase();
-                const remedios = (student.Remedios || '').toLowerCase();
+          // Lógica de Alertas (Saúde, Lesões, Remédios)
+          let alertsHTML = "";
+          const condicoes = (student.Condicoes_Medicas || "").toLowerCase();
+          const dores = (student.Dores_Lesoes || "").toLowerCase();
+          const remedios = (student.Remedios || "").toLowerCase();
 
-                const hasHealthIssue = (condicoes !== 'nenhuma' && condicoes !== '') || 
-                                       (dores !== 'nenhuma' && dores !== '') ||
-                                       (remedios !== 'nenhuma' && remedios !== '');
+          const hasHealthIssue =
+            (condicoes !== "nenhuma" && condicoes !== "") ||
+            (dores !== "nenhuma" && dores !== "") ||
+            (remedios !== "nenhuma" && remedios !== "");
 
-                if (hasHealthIssue) {
-                    alertsHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600 border border-red-100">
+          if (hasHealthIssue) {
+            alertsHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600 border border-red-100">
                                     <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Alerta de Saúde/Lesão
                                  </span>`;
-                } else {
-                    alertsHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+          } else {
+            alertsHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
                                     <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Sem Restrições
                                  </span>`;
-                }
+          }
 
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-2xl p-6 border-t-4 border-t-brand-cyan border-x border-b border-slate-200 shadow-sm hover:shadow-xl transition-all cursor-pointer group relative overflow-hidden';
-                card.onclick = () => openStudentModal(index);
-                
-                // Formata a data se existir
-                const dataPreenchimento = student.Data ? new Date(student.Data).toLocaleDateString('pt-BR') : '';
+          const card = document.createElement("div");
+          card.className =
+            "bg-white rounded-2xl p-6 border-t-4 border-t-brand-cyan border-x border-b border-slate-200 shadow-sm hover:shadow-xl transition-all cursor-pointer group relative overflow-hidden";
+          card.onclick = () => openStudentModal(index);
 
-                card.innerHTML = `
+          // Formata a data se existir
+          const dataPreenchimento = student.Data
+            ? new Date(student.Data).toLocaleDateString("pt-BR")
+            : "";
+
+          card.innerHTML = `
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h3 class="font-head font-bold text-xl text-brand-navy group-hover:text-brand-orange transition-colors">${student.Nome}</h3>
-                            <p class="text-xs text-slate-400 mt-1">${dataPreenchimento ? 'Preenchido em: ' + dataPreenchimento : ''}</p>
+                            <p class="text-xs text-slate-400 mt-1">${dataPreenchimento ? "Preenchido em: " + dataPreenchimento : ""}</p>
                         </div>
                         <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-orange group-hover:text-white transition-colors">
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -485,16 +720,16 @@
                     <div class="space-y-3 mb-5">
                         <div>
                             <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-0.5">Objetivo</p>
-                            <p class="text-sm font-semibold text-slate-700 truncate">${student.Objetivos || 'Não informado'}</p>
+                            <p class="text-sm font-semibold text-slate-700 truncate">${student.Objetivos || "Não informado"}</p>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-0.5">Local</p>
-                                <p class="text-sm font-semibold text-slate-700 truncate">${student.Local || '-'}</p>
+                                <p class="text-sm font-semibold text-slate-700 truncate">${student.Local || "-"}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-0.5">Experiência</p>
-                                <p class="text-sm font-semibold text-slate-700 truncate">${student.Experiencia || '-'}</p>
+                                <p class="text-sm font-semibold text-slate-700 truncate">${student.Experiencia || "-"}</p>
                             </div>
                         </div>
                     </div>
@@ -503,97 +738,107 @@
                         ${alertsHTML}
                     </div>
                 `;
-                grid.appendChild(card);
-            });
-            
-            lucide.createIcons();
+          grid.appendChild(card);
+        });
+
+        lucide.createIcons();
+      }
+
+      // 3. ABRIR MODAL DO ALUNO
+      function openStudentModal(index) {
+        currentStudent = studentsData[index];
+        if (!currentStudent) return;
+
+        // Header do Modal
+        document.getElementById("modalName").innerText = currentStudent.Nome;
+        document.getElementById("modalEmail").innerHTML =
+          `<i data-lucide="mail" class="w-3 h-3"></i> <span>${currentStudent.Email || "Sem e-mail"}</span>`;
+        document.getElementById("modalPhone").innerHTML =
+          `<i data-lucide="phone" class="w-3 h-3"></i> <span>${currentStudent.WhatsApp || "Sem telefone"}</span>`;
+
+        // Conteúdo do Modal (Seções)
+        const contentList = document.getElementById("modalContent");
+        contentList.innerHTML = "";
+
+        const sections = [
+          {
+            title: "Dados Pessoais",
+            icon: "user",
+            fields: [
+              { key: "Data", label: "Data de Preenchimento" },
+              { key: "Nascimento", label: "Data de Nascimento" },
+              { key: "Ocupacao", label: "Ocupação / Profissão" },
+              { key: "Peso", label: "Peso (kg)" },
+              { key: "Altura", label: "Altura (m)" },
+            ],
+          },
+          {
+            title: "Histórico e Objetivos",
+            icon: "target",
+            fields: [
+              { key: "Objetivos", label: "Objetivos Principais" },
+              { key: "Experiencia", label: "Tempo de Treino" },
+              { key: "Esportes", label: "Prática de Esportes" },
+            ],
+          },
+          {
+            title: "Saúde e Limitações",
+            icon: "activity",
+            alertSection: true,
+            fields: [
+              {
+                key: "Condicoes_Medicas",
+                label: "Condições de Saúde Diagnosticadas",
+                alert: true,
+              },
+              {
+                key: "Dores_Lesoes",
+                label: "Dores, Lesões ou Cirurgias",
+                alert: true,
+              },
+              { key: "Remedios", label: "Uso de Medicamentos", alert: true },
+            ],
+          },
+          {
+            title: "Local e Rotina",
+            icon: "map-pin",
+            fields: [
+              { key: "Local", label: "Local de Treino" },
+              { key: "Equipamentos", label: "Equipamentos Disponíveis" },
+              { key: "Dias_Treino", label: "Dias Disponíveis" },
+              { key: "Tempo_Treino", label: "Tempo por Sessão" },
+              { key: "Rotina", label: "Rotina de Trabalho" },
+              { key: "Estilo_Vida", label: "Qualidade do Sono e Alimentação" },
+            ],
+          },
+          {
+            title: "Preferências",
+            icon: "heart",
+            fields: [
+              { key: "Gosta", label: "Exercícios que Gosta" },
+              { key: "Odeia", label: "Exercícios que Evita/Odeia" },
+            ],
+          },
+        ];
+
+        // Adiciona Calistenia se for em Casa
+        if (currentStudent.Local === "Casa") {
+          sections.splice(4, 0, {
+            title: "Métricas de Força (Calistenia)",
+            icon: "dumbbell",
+            fields: [
+              { key: "Calistenia_Flexao", label: "Flexão de Braço" },
+              { key: "Calistenia_Barra", label: "Barra Fixa" },
+              { key: "Calistenia_Mergulho", label: "Mergulho" },
+              { key: "Calistenia_Agachamento", label: "Agachamento" },
+              { key: "Calistenia_Pistol", label: "Pistol Squat" },
+              { key: "Calistenia_Prancha", label: "Prancha" },
+            ],
+          });
         }
 
-        // 3. ABRIR MODAL DO ALUNO
-        function openStudentModal(index) {
-            currentStudent = studentsData[index];
-            if(!currentStudent) return;
-
-            // Header do Modal
-            document.getElementById('modalName').innerText = currentStudent.Nome;
-            document.getElementById('modalEmail').innerHTML = `<i data-lucide="mail" class="w-3 h-3"></i> <span>${currentStudent.Email || 'Sem e-mail'}</span>`;
-            document.getElementById('modalPhone').innerHTML = `<i data-lucide="phone" class="w-3 h-3"></i> <span>${currentStudent.WhatsApp || 'Sem telefone'}</span>`;
-
-            // Conteúdo do Modal (Seções)
-            const contentList = document.getElementById('modalContent');
-            contentList.innerHTML = '';
-
-            const sections = [
-                {
-                    title: 'Dados Pessoais',
-                    icon: 'user',
-                    fields: [
-                        { key: 'Data', label: 'Data de Preenchimento' },
-                        { key: 'Nascimento', label: 'Data de Nascimento' },
-                        { key: 'Ocupacao', label: 'Ocupação / Profissão' },
-                        { key: 'Peso', label: 'Peso (kg)' },
-                        { key: 'Altura', label: 'Altura (m)' }
-                    ]
-                },
-                {
-                    title: 'Histórico e Objetivos',
-                    icon: 'target',
-                    fields: [
-                        { key: 'Objetivos', label: 'Objetivos Principais' },
-                        { key: 'Experiencia', label: 'Tempo de Treino' },
-                        { key: 'Esportes', label: 'Prática de Esportes' }
-                    ]
-                },
-                {
-                    title: 'Saúde e Limitações',
-                    icon: 'activity',
-                    alertSection: true,
-                    fields: [
-                        { key: 'Condicoes_Medicas', label: 'Condições de Saúde Diagnosticadas', alert: true },
-                        { key: 'Dores_Lesoes', label: 'Dores, Lesões ou Cirurgias', alert: true },
-                        { key: 'Remedios', label: 'Uso de Medicamentos', alert: true }
-                    ]
-                },
-                {
-                    title: 'Local e Rotina',
-                    icon: 'map-pin',
-                    fields: [
-                        { key: 'Local', label: 'Local de Treino' },
-                        { key: 'Equipamentos', label: 'Equipamentos Disponíveis' },
-                        { key: 'Dias_Treino', label: 'Dias Disponíveis' },
-                        { key: 'Tempo_Treino', label: 'Tempo por Sessão' },
-                        { key: 'Rotina', label: 'Rotina de Trabalho' },
-                        { key: 'Estilo_Vida', label: 'Qualidade do Sono e Alimentação' }
-                    ]
-                },
-                {
-                    title: 'Preferências',
-                    icon: 'heart',
-                    fields: [
-                        { key: 'Gosta', label: 'Exercícios que Gosta' },
-                        { key: 'Odeia', label: 'Exercícios que Evita/Odeia' }
-                    ]
-                }
-            ];
-
-            // Adiciona Calistenia se for em Casa
-            if (currentStudent.Local === 'Casa') {
-                sections.splice(4, 0, {
-                    title: 'Métricas de Força (Calistenia)',
-                    icon: 'dumbbell',
-                    fields: [
-                        { key: 'Calistenia_Flexao', label: 'Flexão de Braço' },
-                        { key: 'Calistenia_Barra', label: 'Barra Fixa' },
-                        { key: 'Calistenia_Mergulho', label: 'Mergulho' },
-                        { key: 'Calistenia_Agachamento', label: 'Agachamento' },
-                        { key: 'Calistenia_Pistol', label: 'Pistol Squat' },
-                        { key: 'Calistenia_Prancha', label: 'Prancha' }
-                    ]
-                });
-            }
-
-            sections.forEach(sec => {
-                let sectionHTML = `
+        sections.forEach((sec) => {
+          let sectionHTML = `
                     <div class="mb-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 class="text-lg font-head font-bold text-brand-navy mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
                             <i data-lucide="${sec.icon}" class="w-5 h-5 text-brand-orange"></i> ${sec.title}
@@ -601,232 +846,273 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 `;
 
-                sec.fields.forEach(field => {
-                    const value = currentStudent[field.key];
-                    if (value !== undefined && value !== '') {
-                        let isAlert = false;
-                        if (field.alert && value.toLowerCase() !== 'nenhuma' && value.toLowerCase() !== 'não') {
-                            isAlert = true;
-                        }
+          sec.fields.forEach((field) => {
+            const value = currentStudent[field.key];
+            if (value !== undefined && value !== "") {
+              let isAlert = false;
+              if (
+                field.alert &&
+                value.toLowerCase() !== "nenhuma" &&
+                value.toLowerCase() !== "não"
+              ) {
+                isAlert = true;
+              }
 
-                        sectionHTML += `
-                            <div class="bg-slate-50 p-4 rounded-xl border ${isAlert ? 'border-red-200 bg-red-50' : 'border-slate-100'}">
-                                <span class="block text-[11px] font-bold uppercase tracking-wider ${isAlert ? 'text-red-500' : 'text-slate-500'} mb-1">${field.label}</span>
-                                <p class="text-sm font-medium ${isAlert ? 'text-red-900' : 'text-slate-800'} whitespace-pre-wrap">${value}</p>
+              sectionHTML += `
+                            <div class="bg-slate-50 p-4 rounded-xl border ${isAlert ? "border-red-200 bg-red-50" : "border-slate-100"}">
+                                <span class="block text-[11px] font-bold uppercase tracking-wider ${isAlert ? "text-red-500" : "text-slate-500"} mb-1">${field.label}</span>
+                                <p class="text-sm font-medium ${isAlert ? "text-red-900" : "text-slate-800"} whitespace-pre-wrap">${value}</p>
                             </div>
                         `;
-                    }
-                });
-
-                sectionHTML += `</div></div>`;
-                contentList.innerHTML += sectionHTML;
-            });
-
-            lucide.createIcons();
-
-            // Animação de abertura
-            const modal = document.getElementById('studentModal');
-            const overlay = document.getElementById('studentModalOverlay');
-            const contentBox = document.getElementById('studentModalContentBox');
-            
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                overlay.classList.remove('opacity-0');
-                overlay.classList.add('opacity-100');
-                contentBox.classList.remove('scale-95', 'opacity-0');
-                contentBox.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-
-        function closeStudentModal() {
-            const modal = document.getElementById('studentModal');
-            const overlay = document.getElementById('studentModalOverlay');
-            const contentBox = document.getElementById('studentModalContentBox');
-            
-            overlay.classList.remove('opacity-100');
-            overlay.classList.add('opacity-0');
-            contentBox.classList.remove('scale-100', 'opacity-100');
-            contentBox.classList.add('scale-95', 'opacity-0');
-            
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        // FUNÇÕES DOS NOVOS BOTÕES
-        function createWorkout() {
-            if(!currentStudent) return;
-            // Redireciona para o gerador passando o ID ou Email do aluno
-            const identifier = encodeURIComponent(currentStudent.Email || currentStudent.Nome);
-            window.location.href = `gerador.html?aluno=${identifier}`;
-        }
-
-        function viewHistory() {
-            alert("Em breve! O histórico de treinos será exibido aqui quando o Gerador estiver salvando os treinos na planilha.");
-        }
-
-        // AVISO GLOBAL
-        function openGlobalNoticeModal() {
-            document.getElementById('globalNoticeModal').classList.remove('hidden');
-        }
-
-        function closeGlobalNoticeModal() {
-            document.getElementById('globalNoticeModal').classList.add('hidden');
-        }
-
-        function saveGlobalNotice() {
-            const text = document.getElementById('globalNoticeText').value.trim();
-            if(!text) {
-                alert("Digite um aviso antes de enviar.");
-                return;
             }
-            // Simulação de sucesso
-            alert("Aviso Global salvo com sucesso! Ele aparecerá no WebApp dos alunos.");
-            closeGlobalNoticeModal();
-            document.getElementById('globalNoticeText').value = '';
+          });
+
+          sectionHTML += `</div></div>`;
+          contentList.innerHTML += sectionHTML;
+        });
+
+        lucide.createIcons();
+
+        // Animação de abertura
+        const modal = document.getElementById("studentModal");
+        const overlay = document.getElementById("studentModalOverlay");
+        const contentBox = document.getElementById("studentModalContentBox");
+
+        modal.classList.remove("hidden");
+        setTimeout(() => {
+          overlay.classList.remove("opacity-0");
+          overlay.classList.add("opacity-100");
+          contentBox.classList.remove("scale-95", "opacity-0");
+          contentBox.classList.add("scale-100", "opacity-100");
+        }, 10);
+      }
+
+      function closeStudentModal() {
+        const modal = document.getElementById("studentModal");
+        const overlay = document.getElementById("studentModalOverlay");
+        const contentBox = document.getElementById("studentModalContentBox");
+
+        overlay.classList.remove("opacity-100");
+        overlay.classList.add("opacity-0");
+        contentBox.classList.remove("scale-100", "opacity-100");
+        contentBox.classList.add("scale-95", "opacity-0");
+
+        setTimeout(() => {
+          modal.classList.add("hidden");
+        }, 300);
+      }
+
+      // FUNÇÕES DOS NOVOS BOTÕES
+      function createWorkout() {
+        if (!currentStudent) return;
+        // Redireciona para o gerador passando os dados do aluno
+        const params = new URLSearchParams();
+        if (currentStudent.Email) params.append("email", currentStudent.Email);
+        if (currentStudent.Nome) params.append("nome", currentStudent.Nome);
+        if (currentStudent.Tipo_Consultoria)
+          params.append("tipo", currentStudent.Tipo_Consultoria);
+        if (currentStudent.Status_Treino)
+          params.append("status", currentStudent.Status_Treino);
+        if (currentStudent.Data_Inicio)
+          params.append("inicio", currentStudent.Data_Inicio);
+        if (currentStudent.Data_Fim)
+          params.append("fim", currentStudent.Data_Fim);
+
+        window.location.href = `gerador.html?${params.toString()}`;
+      }
+
+      function viewHistory() {
+        alert(
+          "Em breve! O histórico de treinos será exibido aqui quando o Gerador estiver salvando os treinos na planilha.",
+        );
+      }
+
+      // AVISO GLOBAL
+      function openGlobalNoticeModal() {
+        document.getElementById("globalNoticeModal").classList.remove("hidden");
+      }
+
+      function closeGlobalNoticeModal() {
+        document.getElementById("globalNoticeModal").classList.add("hidden");
+      }
+
+      function saveGlobalNotice() {
+        const text = document.getElementById("globalNoticeText").value.trim();
+        if (!text) {
+          alert("Digite um aviso antes de enviar.");
+          return;
         }
+        // Simulação de sucesso
+        alert(
+          "Aviso Global salvo com sucesso! Ele aparecerá no WebApp dos alunos.",
+        );
+        closeGlobalNoticeModal();
+        document.getElementById("globalNoticeText").value = "";
+      }
 
-        // 4. GERAR PDF
-        function generatePDF() {
-            if(!currentStudent) return;
-            
-            const pdfBody = document.getElementById('pdf-body');
-            pdfBody.innerHTML = ''; // Limpa anterior
+      // 4. GERAR PDF
+      function generatePDF() {
+        if (!currentStudent) return;
 
-            // Adiciona dados pessoais no topo
-            pdfBody.innerHTML += `
+        const pdfBody = document.getElementById("pdf-body");
+        pdfBody.innerHTML = ""; // Limpa anterior
+
+        // Adiciona dados pessoais no topo
+        pdfBody.innerHTML += `
                 <div class="pdf-section">
                     <div class="pdf-section-title">DADOS PESSOAIS</div>
                     <div class="pdf-item"><span class="pdf-label">Nome:</span> <div class="pdf-value">${currentStudent.Nome}</div></div>
                     <div class="pdf-item"><span class="pdf-label">Email:</span> <div class="pdf-value">${currentStudent.Email}</div></div>
                     <div class="pdf-item"><span class="pdf-label">WhatsApp:</span> <div class="pdf-value">${currentStudent.WhatsApp}</div></div>
-                    <div class="pdf-item"><span class="pdf-label">Ocupação:</span> <div class="pdf-value">${currentStudent.Ocupacao || '-'}</div></div>
-                    <div class="pdf-item"><span class="pdf-label">Peso / Altura:</span> <div class="pdf-value">${currentStudent.Peso || '-'}kg / ${currentStudent.Altura || '-'}m</div></div>
+                    <div class="pdf-item"><span class="pdf-label">Ocupação:</span> <div class="pdf-value">${currentStudent.Ocupacao || "-"}</div></div>
+                    <div class="pdf-item"><span class="pdf-label">Peso / Altura:</span> <div class="pdf-value">${currentStudent.Peso || "-"}kg / ${currentStudent.Altura || "-"}m</div></div>
                 </div>
             `;
 
-            // Adiciona o resto das perguntas
-            const sections = [
-                { title: 'OBJETIVOS E ROTINA', keys: ['Objetivos', 'Experiencia', 'Esportes', 'Rotina', 'Estilo_Vida'] },
-                { title: 'DISPONIBILIDADE E LOCAL', keys: ['Dias_Treino', 'Tempo_Treino', 'Local', 'Equipamentos'] },
-                { title: 'SAÚDE E LIMITAÇÕES (ATENÇÃO)', keys: ['Condicoes_Medicas', 'Dores_Lesoes', 'Remedios'] },
-                { title: 'PREFERÊNCIAS', keys: ['Gosta', 'Odeia'] }
-            ];
+        // Adiciona o resto das perguntas
+        const sections = [
+          {
+            title: "OBJETIVOS E ROTINA",
+            keys: [
+              "Objetivos",
+              "Experiencia",
+              "Esportes",
+              "Rotina",
+              "Estilo_Vida",
+            ],
+          },
+          {
+            title: "DISPONIBILIDADE E LOCAL",
+            keys: ["Dias_Treino", "Tempo_Treino", "Local", "Equipamentos"],
+          },
+          {
+            title: "SAÚDE E LIMITAÇÕES (ATENÇÃO)",
+            keys: ["Condicoes_Medicas", "Dores_Lesoes", "Remedios"],
+          },
+          { title: "PREFERÊNCIAS", keys: ["Gosta", "Odeia"] },
+        ];
 
-            sections.forEach(sec => {
-                let sectionHTML = `<div class="pdf-section"><div class="pdf-section-title">${sec.title}</div>`;
-                sec.keys.forEach(key => {
-                    if(currentStudent[key]) {
-                        // Formata o nome da chave para ficar bonito (ex: Dias_Treino -> Dias Treino)
-                        const label = key.replace('_', ' ');
-                        sectionHTML += `<div class="pdf-item"><span class="pdf-label">${label}:</span> <div class="pdf-value">${currentStudent[key]}</div></div>`;
-                    }
-                });
-                sectionHTML += `</div>`;
-                pdfBody.innerHTML += sectionHTML;
-            });
+        sections.forEach((sec) => {
+          let sectionHTML = `<div class="pdf-section"><div class="pdf-section-title">${sec.title}</div>`;
+          sec.keys.forEach((key) => {
+            if (currentStudent[key]) {
+              // Formata o nome da chave para ficar bonito (ex: Dias_Treino -> Dias Treino)
+              const label = key.replace("_", " ");
+              sectionHTML += `<div class="pdf-item"><span class="pdf-label">${label}:</span> <div class="pdf-value">${currentStudent[key]}</div></div>`;
+            }
+          });
+          sectionHTML += `</div>`;
+          pdfBody.innerHTML += sectionHTML;
+        });
 
-            // Configurações do html2pdf
-            const element = document.getElementById('pdf-content');
-            const opt = {
-                margin:       10,
-                filename:     `Anamnese_${currentStudent.Nome.replace(/\s+/g, '_')}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+        // Configurações do html2pdf
+        const element = document.getElementById("pdf-content");
+        const opt = {
+          margin: 10,
+          filename: `Anamnese_${currentStudent.Nome.replace(/\s+/g, "_")}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        };
 
-            // Gera o PDF
-            html2pdf().set(opt).from(element).save();
+        // Gera o PDF
+        html2pdf().set(opt).from(element).save();
+      }
+
+      // 5. COPIAR PARA IA (Formato otimizado para ChatGPT/Claude)
+      function copyForAI() {
+        if (!currentStudent) return;
+
+        let textToCopy = `Atue como meu assistente sênior de periodização e biomecânica. Eu sou o treinador Benai Bernardo, especialista na integração de musculação, calistenia, treinamento funcional e híbrido.\n\n`;
+        textToCopy += `Abaixo estão os dados da anamnese do meu novo aluno. Quero que você crie um microciclo de treino (divisão exata baseada nos dias disponíveis do aluno) altamente personalizado, pronto para ser aplicado.\n\n`;
+
+        textToCopy += `Regras Absolutas de Prescrição:\n\n`;
+        textToCopy += `Ambiente e Equipamento: Adapte 100% dos exercícios à realidade do aluno. Se ele treina em casa com 1 par de halteres de 5kg, use variáveis de intensidade (tempo sob tensão, isometria, métodos avançados) em vez de pedir para ele pegar mais peso. Se for academia, extraia o máximo das máquinas e pesos livres.\n\n`;
+        textToCopy += `Patologias e Dores: Se houver relato de dor, lesão ou cirurgia, o treino deve preservar totalmente a estrutura afetada, fortalecendo a musculatura adjacente de forma segura. NENHUM exercício pode agravar o quadro.\n\n`;
+        textToCopy += `Volume e Tempo: O treino deve caber perfeitamente no tempo diário disponível informado pelo aluno.\n\n`;
+
+        textToCopy += `A Minha Metodologia de 4 Fases (OBRIGATÓRIO em toda sessão):\n`;
+        textToCopy += `Toda sessão diária de treino que você gerar deve ser dividida exatamente nestes 4 blocos:\n\n`;
+        textToCopy += `Fase 1: Mobilidade: 2 a 3 exercícios. Use os dados de 'rigidez' da anamnese e a rotina do aluno (ex: se trabalha sentado, foque em quadril e torácica). A mobilidade deve preparar as articulações que serão usadas no Bloco 3.\n\n`;
+        textToCopy += `Fase 2: Ativação: 1 a 2 exercícios. Foco em conexão mente-músculo e prevenção. Se o aluno relatou 'dificuldade em sentir' um músculo, ative-o aqui (ex: ativação de glúteo médio antes de agachar).\n\n`;
+        textToCopy += `Fase 3: Força / Carga: O bloco principal. Priorize exercícios multiarticulares no início. Especifique Séries, Repetições (ou tempo) e Intervalo de descanso.\n\n`;
+        textToCopy += `Fase 4: Desaceleração: 1 a 2 exercícios finais. Baseado no nível de 'estresse' e 'sono' do aluno. Pode ser alongamento passivo, exercícios de respiração (box breathing) ou liberação miofascial para baixar o cortisol e iniciar a recuperação.\n\n`;
+
+        textToCopy += `Formato de Saída:\n`;
+        textToCopy += `Entregue a resposta limpa, separada por dias (Treino A, Treino B, etc.), com os 4 blocos claramente divididos em cada dia, para que eu possa apenas revisar e transferir para o meu aplicativo.\n\n`;
+
+        textToCopy += `Aqui estão os dados do aluno:\n`;
+        textToCopy += `--- DADOS DO ALUNO ---\n`;
+        textToCopy += `Nome: ${currentStudent.Nome}\n`;
+        textToCopy += `Objetivo: ${currentStudent.Objetivos}\n`;
+        textToCopy += `Experiência: ${currentStudent.Experiencia}\n`;
+        textToCopy += `Peso: ${currentStudent.Peso}kg | Altura: ${currentStudent.Altura}m\n\n`;
+
+        textToCopy += `--- SAÚDE E LIMITAÇÕES ---\n`;
+        textToCopy += `Condições Médicas: ${currentStudent.Condicoes_Medicas}\n`;
+        textToCopy += `Dores/Lesões: ${currentStudent.Dores_Lesoes}\n`;
+        textToCopy += `Remédios: ${currentStudent.Remedios}\n\n`;
+
+        textToCopy += `--- ROTINA E LOCAL ---\n`;
+        textToCopy += `Local de Treino: ${currentStudent.Local}\n`;
+        textToCopy += `Equipamentos: ${currentStudent.Equipamentos}\n`;
+        textToCopy += `Dias Disponíveis: ${currentStudent.Dias_Treino}\n`;
+        textToCopy += `Tempo por Sessão: ${currentStudent.Tempo_Treino}\n`;
+        textToCopy += `Rotina de Trabalho: ${currentStudent.Rotina}\n`;
+        textToCopy += `Sono e Alimentação: ${currentStudent.Estilo_Vida}\n\n`;
+
+        if (currentStudent.Local === "Casa") {
+          textToCopy += `--- MÉTRICAS DE FORÇA (CALISTENIA) ---\n`;
+          textToCopy += `Flexão de Braço: ${currentStudent.Calistenia_Flexao || "N/A"}\n`;
+          textToCopy += `Barra Fixa: ${currentStudent.Calistenia_Barra || "N/A"}\n`;
+          textToCopy += `Mergulho: ${currentStudent.Calistenia_Mergulho || "N/A"}\n`;
+          textToCopy += `Agachamento: ${currentStudent.Calistenia_Agachamento || "N/A"}\n`;
+          textToCopy += `Pistol Squat: ${currentStudent.Calistenia_Pistol || "N/A"}\n`;
+          textToCopy += `Prancha: ${currentStudent.Calistenia_Prancha || "N/A"}\n\n`;
         }
 
-        // 5. COPIAR PARA IA (Formato otimizado para ChatGPT/Claude)
-        function copyForAI() {
-            if(!currentStudent) return;
+        textToCopy += `--- PREFERÊNCIAS ---\n`;
+        textToCopy += `Gosta de fazer: ${currentStudent.Gosta}\n`;
+        textToCopy += `Odeia fazer: ${currentStudent.Odeia}\n`;
 
-            let textToCopy = `Atue como meu assistente sênior de periodização e biomecânica. Eu sou o treinador Benai Bernardo, especialista na integração de musculação, calistenia, treinamento funcional e híbrido.\n\n`;
-            textToCopy += `Abaixo estão os dados da anamnese do meu novo aluno. Quero que você crie um microciclo de treino (divisão exata baseada nos dias disponíveis do aluno) altamente personalizado, pronto para ser aplicado.\n\n`;
-            
-            textToCopy += `Regras Absolutas de Prescrição:\n\n`;
-            textToCopy += `Ambiente e Equipamento: Adapte 100% dos exercícios à realidade do aluno. Se ele treina em casa com 1 par de halteres de 5kg, use variáveis de intensidade (tempo sob tensão, isometria, métodos avançados) em vez de pedir para ele pegar mais peso. Se for academia, extraia o máximo das máquinas e pesos livres.\n\n`;
-            textToCopy += `Patologias e Dores: Se houver relato de dor, lesão ou cirurgia, o treino deve preservar totalmente a estrutura afetada, fortalecendo a musculatura adjacente de forma segura. NENHUM exercício pode agravar o quadro.\n\n`;
-            textToCopy += `Volume e Tempo: O treino deve caber perfeitamente no tempo diário disponível informado pelo aluno.\n\n`;
-            
-            textToCopy += `A Minha Metodologia de 4 Fases (OBRIGATÓRIO em toda sessão):\n`;
-            textToCopy += `Toda sessão diária de treino que você gerar deve ser dividida exatamente nestes 4 blocos:\n\n`;
-            textToCopy += `Fase 1: Mobilidade: 2 a 3 exercícios. Use os dados de 'rigidez' da anamnese e a rotina do aluno (ex: se trabalha sentado, foque em quadril e torácica). A mobilidade deve preparar as articulações que serão usadas no Bloco 3.\n\n`;
-            textToCopy += `Fase 2: Ativação: 1 a 2 exercícios. Foco em conexão mente-músculo e prevenção. Se o aluno relatou 'dificuldade em sentir' um músculo, ative-o aqui (ex: ativação de glúteo médio antes de agachar).\n\n`;
-            textToCopy += `Fase 3: Força / Carga: O bloco principal. Priorize exercícios multiarticulares no início. Especifique Séries, Repetições (ou tempo) e Intervalo de descanso.\n\n`;
-            textToCopy += `Fase 4: Desaceleração: 1 a 2 exercícios finais. Baseado no nível de 'estresse' e 'sono' do aluno. Pode ser alongamento passivo, exercícios de respiração (box breathing) ou liberação miofascial para baixar o cortisol e iniciar a recuperação.\n\n`;
-            
-            textToCopy += `Formato de Saída:\n`;
-            textToCopy += `Entregue a resposta limpa, separada por dias (Treino A, Treino B, etc.), com os 4 blocos claramente divididos em cada dia, para que eu possa apenas revisar e transferir para o meu aplicativo.\n\n`;
-            
-            textToCopy += `Aqui estão os dados do aluno:\n`;
-            textToCopy += `--- DADOS DO ALUNO ---\n`;
-            textToCopy += `Nome: ${currentStudent.Nome}\n`;
-            textToCopy += `Objetivo: ${currentStudent.Objetivos}\n`;
-            textToCopy += `Experiência: ${currentStudent.Experiencia}\n`;
-            textToCopy += `Peso: ${currentStudent.Peso}kg | Altura: ${currentStudent.Altura}m\n\n`;
-            
-            textToCopy += `--- SAÚDE E LIMITAÇÕES ---\n`;
-            textToCopy += `Condições Médicas: ${currentStudent.Condicoes_Medicas}\n`;
-            textToCopy += `Dores/Lesões: ${currentStudent.Dores_Lesoes}\n`;
-            textToCopy += `Remédios: ${currentStudent.Remedios}\n\n`;
+        // Copia para a área de transferência
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(() => {
+            alert(
+              "✅ Prompt e dados copiados com sucesso! Agora é só colar no Gemini.",
+            );
+          })
+          .catch((err) => {
+            console.error("Erro ao copiar", err);
+            alert("Erro ao copiar. Tente novamente.");
+          });
+      }
 
-            textToCopy += `--- ROTINA E LOCAL ---\n`;
-            textToCopy += `Local de Treino: ${currentStudent.Local}\n`;
-            textToCopy += `Equipamentos: ${currentStudent.Equipamentos}\n`;
-            textToCopy += `Dias Disponíveis: ${currentStudent.Dias_Treino}\n`;
-            textToCopy += `Tempo por Sessão: ${currentStudent.Tempo_Treino}\n`;
-            textToCopy += `Rotina de Trabalho: ${currentStudent.Rotina}\n`;
-            textToCopy += `Sono e Alimentação: ${currentStudent.Estilo_Vida}\n\n`;
-
-            if (currentStudent.Local === 'Casa') {
-                textToCopy += `--- MÉTRICAS DE FORÇA (CALISTENIA) ---\n`;
-                textToCopy += `Flexão de Braço: ${currentStudent.Calistenia_Flexao || 'N/A'}\n`;
-                textToCopy += `Barra Fixa: ${currentStudent.Calistenia_Barra || 'N/A'}\n`;
-                textToCopy += `Mergulho: ${currentStudent.Calistenia_Mergulho || 'N/A'}\n`;
-                textToCopy += `Agachamento: ${currentStudent.Calistenia_Agachamento || 'N/A'}\n`;
-                textToCopy += `Pistol Squat: ${currentStudent.Calistenia_Pistol || 'N/A'}\n`;
-                textToCopy += `Prancha: ${currentStudent.Calistenia_Prancha || 'N/A'}\n\n`;
-            }
-
-            textToCopy += `--- PREFERÊNCIAS ---\n`;
-            textToCopy += `Gosta de fazer: ${currentStudent.Gosta}\n`;
-            textToCopy += `Odeia fazer: ${currentStudent.Odeia}\n`;
-
-            // Copia para a área de transferência
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert("✅ Prompt e dados copiados com sucesso! Agora é só colar no Gemini.");
-            }).catch(err => {
-                console.error('Erro ao copiar', err);
-                alert("Erro ao copiar. Tente novamente.");
-            });
+      // 6. ABRIR WHATSAPP
+      function openWhatsapp() {
+        if (!currentStudent || !currentStudent.WhatsApp) {
+          alert("Número de WhatsApp não encontrado para este aluno.");
+          return;
         }
 
-        // 6. ABRIR WHATSAPP
-        function openWhatsapp() {
-            if(!currentStudent || !currentStudent.WhatsApp) {
-                alert("Número de WhatsApp não encontrado para este aluno.");
-                return;
-            }
-            
-            // Limpa o número (remove parênteses, traços e espaços)
-            let phone = currentStudent.WhatsApp.replace(/\D/g, '');
-            
-            // Adiciona o DDI do Brasil (55) se não tiver
-            if(phone.length === 10 || phone.length === 11) {
-                phone = '55' + phone;
-            }
-            
-            // Cria a mensagem padrão
-            const firstName = currentStudent.Nome.split(' ')[0];
-            const message = encodeURIComponent(`Fala ${firstName}, tudo bem? Aqui é o Benai Bernardo! Acabei de analisar a sua anamnese e já estou começando a montar o seu planejamento de treinos. 🚀`);
-            
-            // Abre o link do WhatsApp Web/App
-            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        // Limpa o número (remove parênteses, traços e espaços)
+        let phone = currentStudent.WhatsApp.replace(/\D/g, "");
+
+        // Adiciona o DDI do Brasil (55) se não tiver
+        if (phone.length === 10 || phone.length === 11) {
+          phone = "55" + phone;
         }
+
+        // Cria a mensagem padrão
+        const firstName = currentStudent.Nome.split(" ")[0];
+        const message = encodeURIComponent(
+          `Fala ${firstName}, tudo bem? Aqui é o Benai Bernardo! Acabei de analisar a sua anamnese e já estou começando a montar o seu planejamento de treinos. 🚀`,
+        );
+
+        // Abre o link do WhatsApp Web/App
+        window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+      }
     </script>
-</body>
+  </body>
 </html>
