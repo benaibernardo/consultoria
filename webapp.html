@@ -1114,7 +1114,7 @@
                 notas: ""
             };
             
-            fetch("https://script.google.com/macros/s/AKfycbx5f06kJ7-rJwtG0HOaP_FDYKjqicLdZknE7fa6NCrpo7ZbQM0UHwgvuJ6k4NlLyi25/exec", {
+            fetch("https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec", {
                 method: "POST",
                 headers: {
                     "Content-Type": "text/plain;charset=utf-8"
@@ -1239,7 +1239,7 @@
         list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; color:var(--accent); margin-bottom:10px;"></i><br>Buscando seu histórico...</div>';
 
         try {
-            const url = "https://script.google.com/macros/s/AKfycbx5f06kJ7-rJwtG0HOaP_FDYKjqicLdZknE7fa6NCrpo7ZbQM0UHwgvuJ6k4NlLyi25/exec";
+            const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
             const res = await fetch(url + "?t=" + Date.now());
             const data = await res.json();
             
@@ -1702,7 +1702,7 @@
                 imagemBase64: base64Image
             };
 
-            const url = "https://script.google.com/macros/s/AKfycbx5f06kJ7-rJwtG0HOaP_FDYKjqicLdZknE7fa6NCrpo7ZbQM0UHwgvuJ6k4NlLyi25/exec";
+            const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
             
             const req = await fetch(url, {
                 method: 'POST',
