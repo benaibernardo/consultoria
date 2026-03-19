@@ -1865,6 +1865,85 @@
         updateHeaderHeight();
         initHeaderScroll();
     }, 100);
+
+    // Notifications Logic
+    async function fetchNotifications() {
+        if (!currentData || !currentData.email) return;
+        
+        try {
+            const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
+            const res = await fetch(`${url}?tipo=notificacoes&email=${encodeURIComponent(currentData.email)}&t=${Date.now()}`);
+            const data = await res.json();
+            
+            if (data && data.length > 0) {
+                showNotificationModal(data);
+            }
+        } catch (e) {
+            console.error("Erro ao buscar notificações:", e);
+        }
+    }
+
+    function showNotificationModal(notices) {
+        const modal = document.getElementById('notification-modal');
+        const content = document.getElementById('notification-content');
+        
+        if (!modal || !content) return;
+        
+        let html = '';
+        notices.forEach(notice => {
+            const isGlobal = notice.tipo === 'global';
+            const icon = isGlobal ? 'fa-bullhorn' : 'fa-envelope';
+            const color = isGlobal ? 'var(--accent)' : 'var(--success)';
+            const title = isGlobal ? 'Aviso Geral' : 'Mensagem do Treinador';
+            
+            html += `
+                <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: ${color}20; color: ${color}; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                        <h4 style="margin: 0; font-family: var(--font-num); color: var(--text); font-size: 1.1rem;">${title}</h4>
+                    </div>
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">${notice.mensagem}</p>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; text-align: right;">
+                        ${new Date(notice.data).toLocaleDateString('pt-BR')}
+                    </div>
+                </div>
+            `;
+        });
+        
+        content.innerHTML = html;
+        modal.style.display = 'flex';
+    }
+
+    function closeNotificationModal() {
+        document.getElementById('notification-modal').style.display = 'none';
+        // Opcional: Marcar como lida no backend
+    }
+
+    // Chama a busca de notificações após renderizar os dados
+    const originalRender = render;
+    render = function(data) {
+        originalRender(data);
+        setTimeout(fetchNotifications, 1500); // Busca após 1.5s
+    };
 </script>
+
+<!-- Notification Modal -->
+<div id="notification-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);">
+    <div style="background: var(--bg); width: 100%; max-width: 400px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 80vh; display: flex; flex-direction: column;">
+        <h3 style="font-family: var(--font-num); font-size: 1.5rem; color: var(--text); margin-bottom: 5px;">Novas Mensagens</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Você tem recados importantes do seu treinador.</p>
+        
+        <div id="notification-content" style="flex: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
+            <!-- Notificações injetadas aqui -->
+        </div>
+        
+        <button onclick="closeNotificationModal()" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; transition: 0.2s;">
+            Entendi, fechar
+        </button>
+    </div>
+</div>
+
 </body>
 </html>
