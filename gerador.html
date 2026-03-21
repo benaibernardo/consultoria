@@ -2812,61 +2812,81 @@
         }
       };
 
-      function handleInitialLoad() {
+      async function handleInitialLoad() {
         const urlParams = new URLSearchParams(window.location.search);
         const emailParam = urlParams.get("email");
+        const nomeParam  = urlParams.get("nome");
 
         if (emailParam) {
-          // Check if student exists
-          let existingStudent = appData.students.find(
-            (s) => s.email === emailParam,
-          );
+          let existingStudent = appData.students.find(s => s.email === emailParam);
 
           if (existingStudent) {
-            // Update existing student with URL params if provided
-            if (urlParams.get("nome"))
-              existingStudent.name = urlParams.get("nome");
-            if (urlParams.get("tipo"))
-              existingStudent.tipoConsultoria = urlParams.get("tipo");
-            if (urlParams.get("status"))
-              existingStudent.statusTreino = urlParams.get("status");
-            if (urlParams.get("inicio"))
-              existingStudent.startDate = urlParams.get("inicio");
-            if (urlParams.get("fim"))
-              existingStudent.expiryDate = urlParams.get("fim");
-
+            // Aluno já existe no gerador — só carrega
             saveLocal();
             loadStudent(existingStudent.id);
+
           } else {
-            // Create new student with URL params
+            // Aluno novo — busca dados completos da anamnese no Sheets
+            showToast("Buscando dados do aluno...");
+
+            let dadosAnamnese = {};
+            try {
+              const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec?tipo=anamnese";
+              const response = await fetch(url);
+              const todasAnamneses = await response.json();
+
+              // Busca pelo e-mail do aluno (campo "E-mail" com hífen)
+              const registro = todasAnamneses.find(a => a["E-mail"] === emailParam);
+
+              if (registro) {
+                dadosAnamnese = {
+                  whatsapp:     registro["WhatsApp"]          || "",
+                  objetivo:     registro["Objetivos"]         || "",
+                  experiencia:  registro["Experiencia"]       || "",
+                  local:        registro["Local"]             || "",
+                  equipamentos: registro["Equipamentos"]      || "",
+                  diasSemana:   registro["Dias_Semana"]       || "",
+                  tempoTreino:  registro["Tempo_Treino"]      || "",
+                  condicoes:    registro["Condicoes_Medicas"] || "",
+                  dores:        registro["Dores_Lesoes"]      || "",
+                  remedios:     registro["Remedios"]          || "",
+                };
+                showToast("Dados da anamnese carregados!");
+              } else {
+                showToast("Anamnese não encontrada — aluno criado sem dados.");
+              }
+            } catch(err) {
+              showToast("Erro ao buscar anamnese. Aluno criado sem dados.");
+            }
+
+            // Cria o aluno no gerador com os dados buscados
             const id = Date.now().toString();
             const today = new Date().toISOString().split("T")[0];
             appData.students.unshift({
               id,
-              name: urlParams.get("nome") || "Novo Aluno",
-              focus: "Hipertrofia",
-              startDate: urlParams.get("inicio") || today,
-              expiryDate: urlParams.get("fim") || "",
-              checkUpDay: "",
-              checkUpTime: "",
-              planoAtual: "individual",
-              email: emailParam,
-              tipoConsultoria: urlParams.get("tipo") || "Online",
-              statusTreino: urlParams.get("status") || "Pendente",
-              pillars: JSON.parse(JSON.stringify(appData.pillars)),
-              blocks: [],
+              name:            nomeParam              || "Novo Aluno",
+              focus:           dadosAnamnese.objetivo || "Hipertrofia",
+              startDate:       today,
+              expiryDate:      "",
+              checkUpDay:      "",
+              checkUpTime:     "",
+              planoAtual:      "individual",
+              email:           emailParam,
+              tipoConsultoria: "Online",
+              statusTreino:    "Pendente",
+              pillars:         JSON.parse(JSON.stringify(appData.pillars)),
+              blocks:          [],
+              anamnese:        dadosAnamnese,
             });
+
             saveLocal();
             renderStudentList();
             loadStudent(id);
           }
 
-          // Clean URL to avoid issues on reload
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname,
-          );
+          // Limpa a URL para evitar problemas ao recarregar
+          window.history.replaceState({}, document.title, window.location.pathname);
+
         } else {
           if (appData.students.length) loadStudent(appData.students[0].id);
           else createStudent();
@@ -4722,7 +4742,61 @@
       }
 
       // 4. SAVE STUDENT TO CLOUD (UPDATED)
+      async function saveToSheets() {
+        if (!currentStudent) return;
+
+        showToast("Salvando treino na nuvem...");
+
+        if (!currentStudent.sheetsId) {
+          currentStudent.sheetsId = "treino_" + Date.now();
+          saveLocal();
+        }
+
+        const data = {
+          tipo:            "treino",
+          sheetsId:        currentStudent.sheetsId,
+          email:           currentStudent.email           || "",
+          nome:            currentStudent.name            || "",
+          tipoConsultoria: currentStudent.tipoConsultoria || "Online",
+          statusTreino:    currentStudent.statusTreino    || "Pendente",
+          dataInicio:      currentStudent.startDate       || "",
+          dataFim:         currentStudent.expiryDate      || "",
+          treino:          JSON.stringify(currentStudent),
+        };
+
+        try {
+          await fetch(
+            "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec",
+            {
+              method: "POST",
+              mode: "no-cors",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            }
+          );
+
+          showToast("Treino salvo com sucesso!");
+
+          const id = currentStudent.sheetsId;
+          const longUrl = window.location.origin +
+            window.location.pathname.replace("gerador.html", "webapp.html") +
+            "?id=" + id;
+
+          const msgLink = "Treino salvo!\n\nLink do aluno:\n" + longUrl + "\n\nCopie o link acima e cole no TinyURL para personalizar.\n\nAbrir TinyURL agora?";
+          if (await customConfirm(msgLink))
+            window.open("https://tinyurl.com/app", "_blank");
+
+        } catch (e) {
+          customAlert("Erro ao salvar: " + e.message);
+        }
+      }
+
       async function saveToCloud(method) {
+        // Aluno sem gistId = novo sistema, salva no Sheets
+        if (!currentStudent.gistId) {
+          return saveToSheets();
+        }
+
         const t = document.getElementById("gh-token").value.trim();
         if (!t) return customAlert("Configure o Token primeiro.");
 
