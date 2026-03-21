@@ -167,12 +167,6 @@
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <a
-            href="gerador.html"
-            class="flex items-center gap-2 text-sm font-medium text-brand-navy bg-brand-cyan hover:bg-cyan-400 px-4 py-2 rounded-lg transition-colors shadow-md"
-          >
-            <i data-lucide="plus" class="w-4 h-4"></i> Novo Aluno
-          </a>
           <button
             onclick="loadStudents()"
             class="flex items-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
@@ -387,7 +381,7 @@
                 class="text-sm text-slate-500 flex items-center gap-1"
               >
                 <i data-lucide="mail" class="w-4 h-4"></i>
-                <span>email@teste.com</span>
+                <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03666e626a6f4377667077662d606c6e">[email&#160;protected]</a></span>
               </p>
               <div class="flex items-center gap-2">
                 <p
@@ -507,11 +501,61 @@
         document.getElementById("controlsBar").classList.add("hidden");
 
         try {
-          const response = await fetch(API_URL + "?tipo=anamnese");
-          const data = await response.json();
+          const [anamneseRes, gestaoRes] = await Promise.all([
+            fetch(API_URL + "?tipo=anamnese"),
+            fetch(API_URL + "?tipo=gestao")
+          ]);
+          
+          const anamneseData = await anamneseRes.json();
+          const gestaoData = await gestaoRes.json();
+
+          // Normaliza campo E-mail (com hífen) para Email (sem hífen)
+          const normalizeEmail = (obj) => {
+            if (obj && obj['E-mail'] && !obj.Email) {
+              obj.Email = obj['E-mail'];
+            }
+            return obj;
+          };
+
+          // Merge data based on Email
+          const mergedDataMap = new Map();
+
+          // First, add all anamnese data
+          if (Array.isArray(anamneseData)) {
+            anamneseData.forEach(student => {
+              normalizeEmail(student);
+              if (student.Email) {
+                mergedDataMap.set(student.Email.toLowerCase().trim(), { ...student });
+              }
+            });
+          }
+
+          // Then, add/merge gestao data
+          if (Array.isArray(gestaoData)) {
+            gestaoData.forEach(gestao => {
+              normalizeEmail(gestao);
+              if (gestao.Email) {
+                const emailKey = gestao.Email.toLowerCase().trim();
+                if (mergedDataMap.has(emailKey)) {
+                  // Merge with existing anamnese data
+                  mergedDataMap.set(emailKey, { ...mergedDataMap.get(emailKey), ...gestao });
+                } else {
+                  // Student only exists in gestao (created manually via gerador)
+                  mergedDataMap.set(emailKey, {
+                    Nome: gestao.Nome || "Aluno sem Anamnese",
+                    Email: gestao.Email,
+                    Data: gestao.Data_Inicio || new Date().toISOString(),
+                    ...gestao
+                  });
+                }
+              }
+            });
+          }
+
+          const mergedData = Array.from(mergedDataMap.values());
 
           // Inverte o array para mostrar os mais recentes primeiro
-          studentsData = data.reverse();
+          studentsData = mergedData.reverse();
 
           if (studentsData.length > 0 && studentsData[0].Nome) {
             updateStats(studentsData);
@@ -520,7 +564,7 @@
             document
               .getElementById("dashboardStats")
               .classList.remove("hidden");
-            document.getElementById("controlsBar").classList.remove("flex");
+            document.getElementById("controlsBar").classList.remove("hidden");
             document.getElementById("controlsBar").classList.add("flex");
           } else {
             // Se a planilha estiver vazia, carrega dados de exemplo (Mock)
@@ -760,7 +804,7 @@
           const card = document.createElement("div");
           card.className =
             "bg-white rounded-2xl p-6 border-t-4 border-t-brand-cyan border-x border-b border-slate-200 shadow-sm hover:shadow-xl transition-all cursor-pointer group relative overflow-hidden";
-          card.onclick = () => openStudentModal(index);
+          card.onclick = () => openStudentModal(student);
 
           // Formata a data se existir
           const dataPreenchimento = student.Data
@@ -806,8 +850,8 @@
       }
 
       // 3. ABRIR MODAL DO ALUNO
-      function openStudentModal(index) {
-        currentStudent = studentsData[index];
+      function openStudentModal(student) {
+        currentStudent = student;
         if (!currentStudent) return;
 
         // Header do Modal
@@ -982,20 +1026,10 @@
       // FUNÇÕES DOS NOVOS BOTÕES
       function createWorkout() {
         if (!currentStudent) return;
-        // Redireciona para o gerador passando os dados do aluno
         const params = new URLSearchParams();
         if (currentStudent.Email) params.append("email", currentStudent.Email);
-        if (currentStudent.Nome) params.append("nome", currentStudent.Nome);
-        if (currentStudent.Tipo_Consultoria)
-          params.append("tipo", currentStudent.Tipo_Consultoria);
-        if (currentStudent.Status_Treino)
-          params.append("status", currentStudent.Status_Treino);
-        if (currentStudent.Data_Inicio)
-          params.append("inicio", currentStudent.Data_Inicio);
-        if (currentStudent.Data_Fim)
-          params.append("fim", currentStudent.Data_Fim);
-
-        window.location.href = `gerador.html?${params.toString()}`;
+        if (currentStudent.Nome)  params.append("nome",  currentStudent.Nome);
+        window.location.href = "gerador.html?" + params.toString();
       }
 
       function viewHistory() {
@@ -1243,7 +1277,7 @@
         // Cria a mensagem padrão
         const firstName = currentStudent.Nome.split(" ")[0];
         const message = encodeURIComponent(
-          `Fala ${firstName}, tudo bem? Aqui é o Benai Bernardo! Acabei de analisar a sua anamnese e já estou começando a montar o seu planejamento de treinos. 🚀`,
+          `Fala ${firstName}, tudo bem? Aqui é o Benai Bernardo! Acabei de analisar a sua anamnese e já estou começando a montar o seu planejamento de treinos. 📋`,
         );
 
         // Abre o link do WhatsApp Web/App
