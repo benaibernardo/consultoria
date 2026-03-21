@@ -53,7 +53,7 @@
         .header-expand-icon { display: none; margin-top: 4px; font-size: 2.2rem; color: #facc15; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); animation: bounce-subtle 2s infinite; }
         .header.minimized .header-expand-icon { display: block; }
         
-        .header-collapse-btn { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); text-align: center; font-size: 2.2rem; color: #facc15; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: pointer; padding: 5px 20px; animation: bounce-subtle 2s infinite; }
+        .header-collapse-btn { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 2.2rem; color: #facc15; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: pointer; padding: 5px 20px; animation: bounce-subtle 2s infinite; }
 
         [data-theme="dark"] .header { background: #1e293b; box-shadow: none; border-bottom: 1px solid var(--border); }
 
@@ -178,14 +178,13 @@
         .s-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,168,232,0.1); }
         [data-theme="dark"] .s-input { color: var(--text); }
         
-        .pse-container { margin-top: 15px; }
+        .pse-container { margin-top: 10px; }
         .pse-lbl { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 8px; text-align: center; }
         .pse-range { width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(to right, #4ade80, #facc15, #f97316, #ef4444, #7f1d1d); -webkit-appearance: none; appearance: none; cursor: pointer; }
         .pse-range::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: white; border: 3px solid var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .pse-emojis { display: flex; justify-content: space-between; font-size: 1.2rem; margin-top: 8px; padding: 0 5px; }
         
-        .btn-feito { width: 100%; padding: 14px; border-radius: 12px; background: var(--surface); border: 2px solid var(--border); color: var(--text-muted); font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; }
-        .ex-card.done .btn-feito { background: var(--success); border-color: var(--success); color: white; }
+
         
         .btn-finish-workout { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; border: none; border-radius: 16px; font-weight: 900; font-size: 1.2rem; margin-top: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 20px rgba(0,168,232,0.3); transition: 0.3s; }
         .btn-finish-workout:active { transform: scale(0.98); }
@@ -198,21 +197,25 @@
         .ex-body { transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; max-height: 2000px; opacity: 1; overflow: hidden; }
         .ex-card.collapsed .ex-body { max-height: 0; opacity: 0; }
         
-        .timer-btn { position: relative; border: 2px solid var(--accent); animation: pulse-border 2s infinite; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
+        .timer-btn { position: relative; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; cursor: default; }
         .timer-btn:active { transform: scale(0.95); }
         @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(0,168,232,0.4); } 70% { box-shadow: 0 0 0 8px rgba(0,168,232,0); } 100% { box-shadow: 0 0 0 0 rgba(0,168,232,0); } }
         .timer-click-hint { font-size: 0.5rem; text-transform: uppercase; color: var(--accent); font-weight: 900; margin-top: 2px; }
         
-        .set-row { display: grid; grid-template-columns: 60px 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
-        .set-row.no-load { grid-template-columns: 60px 1fr; }
-        .set-lbl { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
-        .s-input { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 5px; text-align: center; font-weight: 700; font-family: var(--font-mono); color: var(--primary); width: 100%; font-size: 1.1rem; transition: 0.2s; }
-        .s-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,168,232,0.1); }
+        .set-row { display: grid; grid-template-columns: 56px 1fr; gap: 6px; align-items: center; margin-bottom: 5px; }
+        .set-row.no-load { grid-template-columns: 56px 1fr; }
+        .set-lbl { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+        .s-input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 5px 5px; text-align: center; font-weight: 700; font-family: var(--font-mono); color: var(--primary); width: 100%; font-size: 0.85rem; transition: 0.2s; }
+        .s-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,168,232,0.1); }
+        .s-input.filled { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.4); }
         [data-theme="dark"] .s-input { color: var(--text); }
         
-        .pse-display { text-align: center; font-size: 1.1rem; font-weight: 800; margin-bottom: 10px; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .pse-display { text-align: center; font-weight: 800; margin-bottom: 8px; transition: 0.2s; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 6px; }
         
-        .btn-feito { width: 100%; padding: 14px; border-radius: 12px; background: var(--success); border: 2px solid var(--success); color: white; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+        .btn-actions { display: flex; gap: 8px; margin-top: 15px; }
+        .btn-descanso { flex: 1; padding: 12px 8px; border-radius: 12px; background: var(--surface); border: 2px solid var(--accent); color: var(--accent); font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; animation: pulse-border 2s infinite; min-height: 48px; }
+        .btn-descanso:active { transform: scale(0.98); }
+        .btn-feito { flex: 1; padding: 12px 8px; border-radius: 12px; background: var(--success); border: 2px solid var(--success); color: white; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(16,185,129,0.2); min-height: 48px; }
         .btn-feito:active { transform: scale(0.98); }
         .ex-card.done .btn-feito { background: var(--surface); border-color: var(--border); color: var(--text-muted); box-shadow: none; }
         
@@ -285,6 +288,14 @@
     <div id="timer-forced-msg" style="display:none; margin-top:20px; font-size:0.85rem; color:var(--accent); font-weight:700; text-align:center;">Descanso obrigatório.<br>Prepare-se para a próxima série!</div>
 </div>
 
+<div id="welcome-overlay" style="display:none; position:fixed; inset:0; background:var(--primary); z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px;" onclick="dismissWelcome()">
+    <div style="font-size:0.65rem; font-weight:800; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:3px; margin-bottom:30px;">Benai Bernardo · Consultoria</div>
+    <div id="welcome-name" style="font-family:var(--font-num); font-size:2rem; font-weight:900; color:white; line-height:1.2; margin-bottom:12px;">Olá!</div>
+    <div style="width:40px; height:3px; background:var(--accent); border-radius:2px; margin:0 auto 20px;"></div>
+    <div id="welcome-focus" style="font-size:0.9rem; color:rgba(255,255,255,0.6); margin-bottom:50px;"></div>
+    <div style="font-size:0.7rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">Toque para continuar</div>
+</div>
+
 <div class="container">
     <div class="header">
         <div class="h-info">
@@ -298,17 +309,7 @@
                 <span>Check-up: <span id="val-checkup" style="font-weight: 800; color: #ffffff;"></span></span>
             </div>
             
-            <div class="progress-container">
-                <div class="h-dates">
-                    <span id="val-start">--/--</span>
-                    <span id="val-days-left" class="days-left-badge">-- dias</span>
-                    <span id="val-end">--/--</span>
-                </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="plan-progress"></div>
-                </div>
-                <div id="plan-warning" class="plan-warning">Seu plano expira em breve!</div>
-            </div>
+
         </div>
         <div class="h-actions">
             <a href="https://wa.me/5541997222664" target="_blank" class="h-btn wa-btn"><i class="fa-brands fa-whatsapp"></i></a>
@@ -322,6 +323,18 @@
 
     <!-- TAB 1: TREINO -->
     <div id="tab-1" class="tab-pane active content">
+
+        <!-- BANNER RENOVAÇÃO — aparece 5 dias antes do vencimento -->
+        <div id="banner-renovar" style="display:none; background:var(--surface); border:1px solid #f59e0b; border-radius:12px; padding:12px 15px; margin-bottom:15px; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fa-solid fa-rotate" style="color:#f59e0b; font-size:1.2rem;"></i>
+                <span id="banner-renovar-texto" style="font-weight:700; color:var(--primary); font-size:0.95rem; white-space:nowrap;"></span>
+            </div>
+            <button onclick="go(4)" style="background:transparent; border:1px solid #f59e0b; color:#f59e0b; padding:5px 12px; border-radius:6px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:0.2s; white-space:nowrap;">
+                Renovar
+            </button>
+        </div>
+
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <i class="fa-solid fa-location-dot" style="color: var(--accent); font-size: 1.2rem;"></i>
@@ -375,11 +388,30 @@
 
     <!-- TAB 4: PLANO / RENOVAÇÃO (NOVO) -->
     <div id="tab-4" class="tab-pane content">
+
+        <!-- Card status plano atual -->
+        <div style="background:var(--primary); border-radius:14px; padding:18px; margin-bottom:15px; color:white;">
+            <div style="font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.5); margin-bottom:10px;">Plano Atual</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div>
+                    <div style="font-size:1.1rem; font-weight:900;" id="plan-status-type">—</div>
+                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-top:2px;" id="plan-status-days"></div>
+                </div>
+                <span id="val-days-left" class="days-left-badge" style="background:rgba(255,255,255,0.15);">-- dias</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:rgba(255,255,255,0.5); margin-bottom:4px;">
+                <span id="val-start">--/--</span>
+                <span id="val-end">--/--</span>
+            </div>
+            <div style="height:5px; background:rgba(255,255,255,0.15); border-radius:3px; overflow:hidden;">
+                <div id="plan-progress-mini" style="height:100%; width:0%; border-radius:3px; transition:width 1s ease, background 0.5s ease;"></div>
+            </div>
+        </div>
+
         <div style="padding:15px; border:1px solid var(--border); border-radius:12px; background:var(--surface); text-align:center;">
-            <i class="fa-solid fa-star" style="font-size:2.5rem; color:var(--warning); margin-bottom:15px;"></i>
-            <h3 style="color:var(--primary); font-weight:800; margin-bottom:10px;">Seu Plano</h3>
-            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Gerencie sua assinatura e garanta a continuidade dos seus resultados.</p>
-            
+            <h3 style="color:var(--primary); font-weight:800; margin-bottom:10px;">Renovar Plano</h3>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Garanta a continuidade dos seus resultados.</p>
+
             <div style="margin-bottom: 20px; text-align: left;">
             </div>
 
@@ -388,11 +420,11 @@
                 <div id="plan-individual" style="border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: left; background: var(--bg);">
                     <div style="font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 5px;">Plano Individual</div>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button onclick="openPayment('https://nubank.com.br/cobrar/17t1f/69bae66d-fc2a-41dd-81b6-fa79ac950103')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s;">
+                        <button onclick="openPayment('https://nubank.com.br/cobrar/17t1f/69bae66d-fc2a-41dd-81b6-fa79ac950103')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid rgba(0,168,232,0.3); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 0 10px rgba(0,168,232,0.1);">
                             Mensal<br><span style="color: var(--accent); font-size: 1rem;">R$ 150</span>
                         </button>
-                        <button onclick="openPayment('https://nubank.com.br/cobrar/17t1f/69bae60b-ab03-4869-9cd9-41bfcde420b5')" style="flex: 1; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,168,232,0.3);">
-                            Trimestral<br><span style="font-size: 1rem;">R$ 417</span>
+                        <button onclick="openPayment('https://nubank.com.br/cobrar/17t1f/69bae60b-ab03-4869-9cd9-41bfcde420b5')" style="flex: 1; padding: 10px; background: rgba(0,168,232,0.05); color: var(--text); border: 1px solid rgba(0,168,232,0.6); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 0 15px rgba(0,168,232,0.2);">
+                            Trimestral<br><span style="color: var(--accent); font-size: 1rem;">R$ 417</span>
                         </button>
                     </div>
                 </div>
@@ -401,11 +433,11 @@
                 <div id="plan-casal" style="display: none; border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: left; background: var(--bg);">
                     <div style="font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 5px;">Plano Casal</div>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button onclick="openPayment('https://www.asaas.com/c/1t1rlw6rouetzdh0')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s;">
+                        <button onclick="openPayment('https://www.asaas.com/c/1t1rlw6rouetzdh0')" style="flex: 1; padding: 10px; background: var(--surface); color: var(--text); border: 1px solid rgba(0,168,232,0.3); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 0 10px rgba(0,168,232,0.1);">
                             Mensal<br><span style="color: var(--accent); font-size: 1rem;">R$ 280</span>
                         </button>
-                        <button onclick="openPayment('https://www.asaas.com/c/gwsg9k3021hu4dwn')" style="flex: 1; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,168,232,0.3);">
-                            Trimestral<br><span style="font-size: 1rem;">R$ 780</span>
+                        <button onclick="openPayment('https://www.asaas.com/c/gwsg9k3021hu4dwn')" style="flex: 1; padding: 10px; background: rgba(0,168,232,0.05); color: var(--text); border: 1px solid rgba(0,168,232,0.6); border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; box-shadow: 0 0 15px rgba(0,168,232,0.2);">
+                            Trimestral<br><span style="color: var(--accent); font-size: 1rem;">R$ 780</span>
                         </button>
                     </div>
                 </div>
@@ -512,7 +544,7 @@
     <div class="nav-btn active" onclick="go(1)" style="color: #3b82f6;"><i class="fa-solid fa-dumbbell"></i></div>
     <div class="nav-btn" onclick="go(2)" style="color: #8b5cf6;"><i class="fa-solid fa-brain"></i></div>
     <div class="nav-btn" onclick="go(3)" style="color: #10b981;"><i class="fa-solid fa-calendar-check"></i></div>
-    <div class="nav-btn" onclick="go(4)" style="color: #f59e0b;"><i class="fa-solid fa-star"></i></div>
+    <div class="nav-btn" id="nav-renovar" onclick="go(4)" style="color: #f59e0b; display: flex;"><i class="fa-solid fa-star"></i></div>
     <div class="nav-btn" onclick="go(5)" style="color: #ec4899;"><i class="fa-solid fa-comment-dots"></i></div>
 </div>
 
@@ -525,6 +557,28 @@
         initTheme();
         loadWorkout();
     });
+
+    function showWelcome(name, focus) {
+        const todayKey = 'welcomed_' + new Date().toDateString();
+        if (localStorage.getItem(todayKey)) return;
+        localStorage.setItem(todayKey, '1');
+        const ov = document.getElementById('welcome-overlay');
+        const nameEl = document.getElementById('welcome-name');
+        const focusEl = document.getElementById('welcome-focus');
+        if (!ov) return;
+        if (nameEl) nameEl.innerText = 'Olá, ' + name.split(' ')[0] + '!';
+        if (focusEl) focusEl.innerText = focus || 'Seu treino está pronto.';
+        ov.style.display = 'flex';
+        setTimeout(() => dismissWelcome(), 3000);
+    }
+
+    function dismissWelcome() {
+        const ov = document.getElementById('welcome-overlay');
+        if (!ov) return;
+        ov.style.opacity = '0';
+        ov.style.transition = 'opacity 0.6s ease';
+        setTimeout(() => { ov.style.display = 'none'; }, 600);
+    }
 
     async function loadWorkout() {
         const p = new URLSearchParams(window.location.search);
@@ -542,16 +596,27 @@
             }
         } else if(id) {
             try {
-                const req = await fetch(`https://api.github.com/gists/${id}`);
-                const json = await req.json();
-                const content = json.files["treino.json"].content;
+                let content;
+
+                if(id.startsWith("treino_")) {
+                    // Novo sistema — busca no Google Sheets via Apps Script
+                    const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec?tipo=treino&id=" + id;
+                    const req = await fetch(url);
+                    content = await req.text();
+                } else {
+                    // Sistema antigo — busca no GitHub Gist (alunos existentes)
+                    const req = await fetch("https://api.github.com/gists/" + id);
+                    const json = await req.json();
+                    content = json.files["treino.json"].content;
+                }
+
                 currentData = JSON.parse(content);
-                localStorage.setItem('cached_workout', JSON.stringify(currentData));
+                localStorage.setItem('cached_workout_' + id, JSON.stringify(currentData));
                 render(currentData);
             } catch(e) {
-                const cached = localStorage.getItem('cached_workout');
+                const cached = localStorage.getItem('cached_workout_' + id) || localStorage.getItem('cached_workout');
                 if(cached) render(JSON.parse(cached));
-                else document.getElementById('wList').innerHTML = "Erro ao carregar.";
+                else document.getElementById('wList').innerHTML = "Erro ao carregar. Verifique sua conexão.";
             }
         } else if (dataOld) {
             try {
@@ -567,8 +632,11 @@
 
     function render(data) {
         const fullName = data.name || 'Aluno';
-        document.getElementById('sName').innerText = `Olá, ${fullName}!`;
+        document.getElementById('sName').innerText = 'Olá, ' + fullName + '!';
         document.getElementById('sFocus').innerText = data.focus || '';
+
+        // Splash de boas-vindas (uma vez por dia)
+        showWelcome(fullName, data.focus);
         
         const checkupEl = document.getElementById('sCheckup');
         if (data.checkUpDay && data.checkUpTime) {
@@ -588,15 +656,21 @@
             checkupEl.style.display = 'none';
         }
         
-        // Dates & Progress Bar
+        // Dates & Progress — alimenta card da aba Plano
         const fmt = d => d ? d.split('-').reverse().slice(0,2).join('/') : '--';
-        document.getElementById('val-start').innerText = fmt(data.startDate);
-        document.getElementById('val-end').innerText = fmt(data.expiryDate);
+        const startEl = document.getElementById('val-start');
+        const endEl = document.getElementById('val-end');
+        if (startEl) startEl.innerText = fmt(data.startDate);
+        if (endEl) endEl.innerText = fmt(data.expiryDate);
         const planValidUntil = document.getElementById('plan-valid-until');
-        if (planValidUntil) {
-            planValidUntil.innerText = data.expiryDate ? data.expiryDate.split('-').reverse().join('/') : '--/--/----';
+        if (planValidUntil) planValidUntil.innerText = data.expiryDate ? data.expiryDate.split('-').reverse().join('/') : '--/--/----';
+
+        const planTypeEl = document.getElementById('plan-status-type');
+        if (planTypeEl) {
+            const typeMap = { 'individual': 'Plano Individual', 'casal': 'Plano Casal' };
+            planTypeEl.innerText = typeMap[data.planoAtual] || data.tipoConsultoria || 'Consultoria Online';
         }
-        
+
         calculateProgress(data.startDate, data.expiryDate);
         
         // Filter plans
@@ -769,41 +843,52 @@
         if(percent < 0) percent = 0;
         if(percent > 100) percent = 100;
         
-        const bar = document.getElementById('plan-progress');
         const badge = document.getElementById('val-days-left');
-        const warning = document.getElementById('plan-warning');
-        
-        setTimeout(() => { bar.style.width = percent + '%'; }, 500);
-        
-        if(daysLeft > 0) {
-            badge.innerText = `${Math.ceil(daysLeft)} dias`;
+        const miniBar = document.getElementById('plan-progress-mini');
+        const planDaysEl = document.getElementById('plan-status-days');
+
+        // Define cor progressiva: verde → amarelo → vermelho
+        let barColor;
+        if (daysLeft <= 0)      barColor = '#ef4444';
+        else if (daysLeft <= 5) barColor = '#f59e0b';
+        else if (percent >= 75) barColor = '#f97316';
+        else                    barColor = '#10b981';
+
+        setTimeout(() => {
+            if (miniBar) {
+                miniBar.style.width = percent + '%';
+                miniBar.style.background = barColor;
+            }
+        }, 600);
+
+        if (daysLeft > 0) {
+            if (badge) badge.innerText = Math.ceil(daysLeft) + ' dias';
+            if (planDaysEl) planDaysEl.innerText = Math.ceil(daysLeft) + ' dias restantes';
         } else {
-            badge.innerText = `Expirado`;
+            if (badge) badge.innerText = 'Expirado';
+            if (planDaysEl) planDaysEl.innerText = 'Plano expirado';
         }
 
-        // Color logic
+        // Color logic — expired lock e banner
         const expiredLock = document.getElementById('expired-lock');
         const wList = document.getElementById('wList');
-        
-        if(daysLeft <= 0) {
-            bar.style.background = 'var(--danger)';
-            warning.style.display = 'block';
-            warning.style.color = 'var(--danger)';
-            warning.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Seu plano expirou! Renove para continuar.`;
+        const bannerRenovar = document.getElementById('banner-renovar');
+        const bannerTexto = document.getElementById('banner-renovar-texto');
+
+        if (daysLeft <= 0) {
             if (wList) wList.style.display = 'none';
             if (expiredLock) expiredLock.style.display = 'block';
-        } else if(daysLeft <= 5) {
-            bar.style.background = 'var(--warning)';
-            warning.style.display = 'block';
-            warning.style.color = 'var(--warning)';
-            warning.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Seu plano acaba em ${Math.ceil(daysLeft)} dias! Prepare-se para renovar.`;
+            if (bannerRenovar) bannerRenovar.style.display = 'flex';
+            if (bannerTexto) bannerTexto.innerText = 'Plano expirado.';
+        } else if (daysLeft <= 5) {
             if (wList) wList.style.display = 'block';
             if (expiredLock) expiredLock.style.display = 'none';
+            if (bannerRenovar) bannerRenovar.style.display = 'flex';
+            if (bannerTexto) bannerTexto.innerText = 'Plano encerra em ' + Math.ceil(daysLeft) + ' dia' + (Math.ceil(daysLeft) > 1 ? 's' : '') + '.';
         } else {
-            bar.style.background = 'var(--success)';
-            warning.style.display = 'none';
             if (wList) wList.style.display = 'block';
             if (expiredLock) expiredLock.style.display = 'none';
+            if (bannerRenovar) bannerRenovar.style.display = 'none';
         }
     }
 
@@ -897,7 +982,7 @@
         const data = pseData[val - 1];
         const disp = document.getElementById(`pse-disp-${uid}`);
         if(disp) {
-            disp.innerHTML = `<span style="font-size:2.5rem; line-height:1;">${data.emoji}</span> <span style="color:${data.color}; font-size:0.95rem; text-transform:uppercase; margin-top:5px;">${data.text}</span>`;
+            disp.innerHTML = `<span style="font-size:1.2rem; line-height:1;">${data.emoji}</span><span style="color:${data.color}; font-size:0.78rem; font-weight:800; text-transform:uppercase;">${data.text}</span>`;
         }
         saveProgress(uid, 'pse', val);
     }
@@ -945,7 +1030,7 @@
             setsHtml += `
             <div class="set-row no-load">
                 <div class="set-lbl">Série ${s}</div>
-                <input type="text" class="s-input" id="carga-reps-${uid}-${s}" placeholder="Carga/Reps" onchange="saveLocalInput(this.id, this.value)">
+                <input type="text" class="s-input" id="carga-reps-${uid}-${s}" placeholder="ex: 15 reps / 80kg×10" onchange="saveLocalInput(this.id, this.value); if(this.value.trim()) this.classList.add('filled'); else this.classList.remove('filled');">
             </div>`;
         }
         
@@ -962,30 +1047,31 @@
             <div class="ex-body" id="ex-body-${uid}">
                 ${item.note ? `<div class="ex-obs" style="margin-top:0; margin-bottom:15px;"><i class="fa-solid fa-circle-info mt-0.5"></i> <div>${item.note}</div></div>` : ''}
 
-                <div class="ex-grid-stats">
+                <div class="ex-grid-stats" style="grid-template-columns: 1fr 1fr; max-width: 200px; margin: 0 auto 10px;">
                     <div class="stat-box"><span class="stat-val">${item.sets || '-'}</span><span class="stat-lbl">Séries</span></div>
                     <div class="stat-box"><span class="stat-val">${item.reps || '-'}</span><span class="stat-lbl">Reps</span></div>
-                    <div class="stat-box timer-btn" onclick="openTimer(${restTime})">
-                        <span class="stat-val"><i class="fa-solid fa-stopwatch"></i> ${restTime}s</span>
-                        <span class="timer-click-hint">INICIAR</span>
-                    </div>
                 </div>
 
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border);">
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);">
                     ${setsHtml}
                 </div>
 
                 <div class="pse-container">
                     <div id="pse-disp-${uid}" class="pse-display">
-                        <span style="font-size:2.5rem; line-height:1;">🤔</span> 
-                        <span style="color:#eab308; font-size:0.95rem; text-transform:uppercase; margin-top:5px;">Um pouco difícil</span>
+                        <span style="font-size:1.2rem; line-height:1;">🤔</span>
+                        <span style="color:#eab308; font-size:0.78rem; font-weight:800; text-transform:uppercase;">Um pouco difícil</span>
                     </div>
                     <input type="range" class="pse-range" min="1" max="10" value="5" id="pse-${uid}" oninput="updatePSE('${uid}', this.value)">
                 </div>
 
-                <button class="btn-feito" onclick="toggleDone('${uid}', ${restTime})">
-                    <i class="fa-solid fa-check-circle"></i> FEITO
-                </button>
+                <div class="btn-actions">
+                    <button class="btn-descanso" onclick="openTimer(${restTime})">
+                        <i class="fa-solid fa-pause-circle"></i> DESCANSO${restTime > 0 ? ' (' + restTime + 's)' : ''}
+                    </button>
+                    <button class="btn-feito" onclick="toggleDone('${uid}', ${restTime})">
+                        <i class="fa-solid fa-check-circle"></i> FEITO
+                    </button>
+                </div>
             </div>
         </div>`;
     }
@@ -1599,7 +1685,45 @@
         }
         
         if(n === 3) renderHistory();
+        if(n === 4) refreshPlanBar();
         if(n === 5) initFeedbackTab();
+    }
+
+    // Reaplica a barra quando a aba Plano fica visível
+    function refreshPlanBar() {
+        if (!currentData) return;
+        const miniBar = document.getElementById('plan-progress-mini');
+        if (!miniBar) return;
+
+        const startStr = currentData.startDate;
+        const endStr = currentData.expiryDate;
+        if (!startStr || !endStr) return;
+
+        const [sy, sm, sd] = startStr.split('-');
+        const [ey, em, ed] = endStr.split('-');
+        const start = new Date(sy, sm-1, sd);
+        const end   = new Date(ey, em-1, ed);
+        const today = new Date();
+        start.setHours(0,0,0,0); end.setHours(0,0,0,0); today.setHours(0,0,0,0);
+
+        const totalDays  = (end - start)  / 86400000;
+        const daysPassed = (today - start) / 86400000;
+        const daysLeft   = Math.ceil((end - today) / 86400000);
+
+        let percent = (daysPassed / totalDays) * 100;
+        if (percent < 0)   percent = 0;
+        if (percent > 100) percent = 100;
+
+        // Mínimo de 4% para a barra sempre ser visível
+        const displayPercent = Math.max(percent, 4);
+
+        let barColor;
+        if (daysLeft <= 0)      barColor = '#ef4444';
+        else if (daysLeft <= 5) barColor = '#f59e0b';
+        else if (percent >= 75) barColor = '#f97316';
+        else                    barColor = '#10b981';
+
+        miniBar.style.cssText = 'height:100%; border-radius:3px; width:' + displayPercent + '%; background:' + barColor + ';';
     }
 
     // --- FEEDBACK SYSTEM ---
@@ -1713,17 +1837,19 @@
 
             // As we use no-cors, we assume success if it doesn't throw
             haptic('success');
-            
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> ENVIADO COM SUCESSO!';
-            btn.style.background = 'var(--success)';
-            
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ENVIAR DEPOIMENTO';
-                btn.style.background = 'var(--accent)';
-                document.getElementById('fb-text').value = '';
-                updateFeedbackPreview();
-            }, 4000);
+
+            // Tela de agradecimento substitui o conteúdo da aba
+            const tab5 = document.getElementById('tab-5');
+            if (tab5) {
+                tab5.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 30px; gap:16px;">
+                    <div style="width:72px; height:72px; border-radius:50%; background:#dcfce7; display:flex; align-items:center; justify-content:center; font-size:2rem; color:#16a34a; margin-bottom:8px;">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div style="font-family:var(--font-num); font-size:1.5rem; font-weight:900; color:var(--primary);">Obrigado!</div>
+                    <div style="color:var(--text-muted); font-size:0.9rem; line-height:1.6; max-width:280px;">Seu depoimento foi recebido com sucesso. Ele é muito importante para que mais pessoas conheçam esse trabalho.</div>
+                </div>`;
+            }
 
         } catch (e) {
             console.error(e);
