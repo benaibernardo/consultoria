@@ -1192,8 +1192,7 @@
             
             const payload = {
                 tipo: "historico",
-                nomeAluno: currentData.name  || "Aluno",
-                emailAluno: currentData.email || "",
+                nomeAluno: currentData.name || "Aluno",
                 nomeTreino: currentData.blocks[bIdx].name || "Treino",
                 exercicio: item.name || "",
                 cargaReps: cargaRepsStr,
@@ -1327,14 +1326,13 @@
 
         try {
             const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
-            // Passa email (filtro principal) + nome (fallback para registros antigos)
-            const emailParam = encodeURIComponent(currentData.email || "");
-            const nomeParam  = encodeURIComponent(currentData.name  || "");
-            const res = await fetch(url + "?tipo=historico&email=" + emailParam + "&nome=" + nomeParam + "&t=" + Date.now());
+            const res = await fetch(url + "?tipo=historico&email=" + encodeURIComponent(currentData.email || "") + "&t=" + Date.now());
             const data = await res.json();
-
-            // O servidor já filtra pelo email/nome — apenas garante que veio array
-            cachedHistoryData = Array.isArray(data) ? data : [];
+            
+            cachedHistoryData = data.filter(row => 
+                row['Nome do Aluno'] && 
+                row['Nome do Aluno'].trim().toLowerCase() === currentData.name.trim().toLowerCase()
+            );
 
             renderHistoryUI();
 
@@ -1356,52 +1354,53 @@
             return;
         }
 
-        // Agrupa por DIA (DD/MM/YYYY) — ignora hora para juntar todos os exercícios do mesmo dia
         const grouped = {};
-        const horasPorDia = {}; // guarda a hora mais cedo do dia para exibir no card
         cachedHistoryData.forEach(row => {
-            const raw = row['Data/Hora'] || '';
-            let diaKey = 'Data Desconhecida';
-            let horaLabel = '';
-
+            let fullDate = row['Data/Hora'] || 'Data Desconhecida';
+            
             try {
-                let d = null;
-                if (typeof raw === 'string' && raw.includes('T')) {
-                    d = new Date(raw);
-                } else if (typeof raw === 'string' && raw.includes('/')) {
-                    // Formato DD/MM/YYYY HH:MM:SS
-                    const [datePart, timePart] = raw.split(' ');
-                    const [dd, mm, yyyy] = datePart.split('/');
-                    d = new Date(`${yyyy}-${mm}-${dd}T${timePart || '00:00:00'}`);
-                } else if (raw) {
-                    d = new Date(raw);
+                if (typeof fullDate === 'string' && fullDate.includes('T') && fullDate.includes('Z')) {
+                    const d = new Date(fullDate);
+                    if (!isNaN(d.getTime())) {
+                        const dia = String(d.getDate()).padStart(2, '0');
+                        const mes = String(d.getMonth() + 1).padStart(2, '0');
+                        const ano = d.getFullYear();
+                        const hora = String(d.getHours()).padStart(2, '0');
+                        const min = String(d.getMinutes()).padStart(2, '0');
+                        fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
+                    }
+                } else if (fullDate instanceof Date || (typeof fullDate === 'string' && !isNaN(Date.parse(fullDate)) && !fullDate.includes('/'))) {
+                     const d = new Date(fullDate);
+                     if (!isNaN(d.getTime())) {
+                        const dia = String(d.getDate()).padStart(2, '0');
+                        const mes = String(d.getMonth() + 1).padStart(2, '0');
+                        const ano = d.getFullYear();
+                        const hora = String(d.getHours()).padStart(2, '0');
+                        const min = String(d.getMinutes()).padStart(2, '0');
+                        fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
+                     }
                 }
-
-                if (d && !isNaN(d.getTime())) {
-                    const dia  = String(d.getDate()).padStart(2, '0');
-                    const mes  = String(d.getMonth() + 1).padStart(2, '0');
-                    const ano  = d.getFullYear();
-                    const hora = String(d.getHours()).padStart(2, '0');
-                    const min  = String(d.getMinutes()).padStart(2, '0');
-                    diaKey    = `${dia}/${mes}/${ano}`;
-                    horaLabel = `${hora}:${min}`;
-                }
-            } catch (e) { /* mantém Data Desconhecida */ }
-
-            if (!grouped[diaKey]) {
-                grouped[diaKey] = [];
-                horasPorDia[diaKey] = horaLabel;
+            } catch (e) {
+                // Keep original if parsing fails
             }
-            grouped[diaKey].push(row);
+            
+            if(!grouped[fullDate]) grouped[fullDate] = [];
+            grouped[fullDate].push(row);
         });
 
         const sortedDates = Object.keys(grouped).sort((a, b) => {
-            if (a === 'Data Desconhecida') return 1;
-            if (b === 'Data Desconhecida') return -1;
+            if(a === 'Data Desconhecida') return 1;
+            if(b === 'Data Desconhecida') return -1;
             try {
-                const [d1, m1, y1] = a.split('/');
-                const [d2, m2, y2] = b.split('/');
-                return new Date(y2, m2-1, d2) - new Date(y1, m1-1, d1);
+                const [dataPart, horaPart] = a.split(' às ');
+                const [d1, m1, y1] = dataPart.split('/');
+                const [h1, min1] = horaPart ? horaPart.split(':') : [0,0];
+                
+                const [dataPart2, horaPart2] = b.split(' às ');
+                const [d2, m2, y2] = dataPart2.split('/');
+                const [h2, min2] = horaPart2 ? horaPart2.split(':') : [0,0];
+                
+                return new Date(y2, m2-1, d2, h2, min2) - new Date(y1, m1-1, d1, h1, min1);
             } catch(e) { return 0; }
         });
 
@@ -1412,10 +1411,9 @@
         html += '<div class="history-feed">';
         
         sortedDates.forEach(date => {
-            const dateOnly = date; // já é DD/MM/YYYY
+            const dateOnly = date.split(' às ')[0];
             const items = grouped[date];
             const treinoNome = items[0]['Treino'] || 'Treino';
-            const horaDia = horasPorDia[date] || '';
             
             let exHtml = '';
             items.forEach(item => {
@@ -1446,7 +1444,7 @@
                 <div class="hc-header" onclick="this.nextElementSibling.classList.toggle('collapsed'); this.querySelector('.fa-chevron-down').style.transform = this.nextElementSibling.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(0deg)';" style="padding:15px; background:rgba(0,168,232,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                     <div>
                         <div style="font-weight:800; color:var(--primary); font-size:0.95rem;">${treinoNome}</div>
-                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"><i class="fa-regular fa-calendar" style="color:var(--accent);"></i> ${dateOnly}${horaDia ? ' às ' + horaDia : ''}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"><i class="fa-regular fa-calendar" style="color:var(--accent);"></i> ${date}</div>
                     </div>
                     <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.8rem; transition:0.3s; transform:rotate(-90deg);"></i>
                 </div>
