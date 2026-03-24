@@ -1237,14 +1237,13 @@
         secao.scrollIntoView({ behavior: "smooth" });
 
         try {
-          const res  = await fetch(API_URL + "?tipo=historico&email=" + encodeURIComponent(currentStudent.Email || ""));
+          const hEmail = encodeURIComponent(currentStudent.Email || "");
+          const hNome  = encodeURIComponent(currentStudent.Nome  || "");
+          const res  = await fetch(API_URL + "?tipo=historico&email=" + hEmail + "&nome=" + hNome);
           const rows = await res.json();
 
-          // Filtra pelo nome do aluno (o histórico usa Nome, não Email)
-          const nomeAluno = (currentStudent.Nome || "").trim().toLowerCase();
-          const filtrado  = Array.isArray(rows)
-            ? rows.filter(r => (r["Nome do Aluno"] || "").trim().toLowerCase() === nomeAluno)
-            : [];
+          // Servidor já filtra — garante array
+          const filtrado = Array.isArray(rows) ? rows : [];
 
           if (!filtrado.length) {
             secao.innerHTML = `
