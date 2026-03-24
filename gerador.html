@@ -3434,33 +3434,44 @@
       }
 
       async function autoSaveGestao() {
-        if (!currentStudent || !currentStudent.email) return; // Needs email to save
+        if (!currentStudent || !currentStudent.email) return;
+
+        // Monta o link do webapp se já tiver sheetsId
+        const linkTreino = currentStudent.sheetsId
+          ? (window.location.origin + window.location.pathname.replace("gerador.html", "webapp.html") + "?id=" + currentStudent.sheetsId)
+          : "";
 
         const data = {
-          tipo: "gestao",
-          email: currentStudent.email,
-          nome: currentStudent.name,
+          tipo:            "gestao",
+          email:           currentStudent.email,
+          nome:            currentStudent.name,
           tipoConsultoria: currentStudent.tipoConsultoria || "Online",
-          dataInicio: currentStudent.startDate || "",
-          dataFim: currentStudent.expiryDate || "",
-          dataCheckup: currentStudent.checkUpDay
-            ? `${currentStudent.checkUpDay} ${currentStudent.checkUpTime}`
-            : "",
-          statusTreino: currentStudent.statusTreino || "Pendente",
+          dataInicio:      currentStudent.startDate       || "",
+          dataFim:         currentStudent.expiryDate      || "",
+          dataCheckup:     currentStudent.checkUpDay
+                             ? `${currentStudent.checkUpDay} ${currentStudent.checkUpTime}`
+                             : "",
+          statusTreino:    currentStudent.statusTreino    || "Pendente",
+          sheetsId:        currentStudent.sheetsId        || "",
+          linkTreino:      linkTreino,
+          planoAtual:      currentStudent.planoAtual      || "",
         };
 
         try {
-          const response = await fetch(
+          const res = await fetch(
             "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec",
             {
-              method: "POST",
-              mode: "no-cors",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(data),
+              method:  "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body:    JSON.stringify(data),
             },
           );
-          // no-cors doesn't return a readable response, but we assume it worked if no network error
-          console.log("Auto-save gestão disparado para", currentStudent.email);
+          const result = await res.json();
+          if (result.status === "erro") {
+            console.error("Erro no auto-save da gestão:", result.mensagem);
+          } else {
+            console.log("Gestão salva para", currentStudent.email);
+          }
         } catch (e) {
           console.error("Erro no auto-save da gestão:", e);
         }
@@ -4765,15 +4776,22 @@
         };
 
         try {
-          await fetch(
+          const response = await fetch(
             "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec",
             {
-              method: "POST",
-              mode: "no-cors",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(data),
+              method:  "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body:    JSON.stringify(data),
             }
           );
+
+          const result = await response.json();
+          if (result.status === "erro") {
+            throw new Error(result.mensagem);
+          }
+
+          // Sincroniza dados de gestão (sheetsId + link) de volta ao Gestao_alunos
+          await autoSaveGestao();
 
           showToast("Treino salvo com sucesso!");
 
@@ -4787,7 +4805,7 @@
             window.open("https://tinyurl.com/app", "_blank");
 
         } catch (e) {
-          customAlert("Erro ao salvar: " + e.message);
+          customAlert("Erro ao salvar o treino:\n\n" + e.message);
         }
       }
 
