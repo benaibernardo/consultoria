@@ -414,7 +414,7 @@
           class="px-6 py-4 border-b border-slate-100 flex flex-wrap gap-3 bg-white"
         >
           <button
-            onclick="createWorkout()"
+            onclick="openGerador()"
             class="flex-1 sm:flex-none px-4 py-2 bg-brand-orange text-white text-sm font-bold rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 shadow-sm"
           >
             <i data-lucide="dumbbell" class="w-4 h-4"></i> Criar / Editar Treino
@@ -457,6 +457,7 @@
         </div>
       </div>
     </div>
+
 
     <!-- Template Oculto para o PDF -->
     <div id="pdf-container">
@@ -501,13 +502,15 @@
         document.getElementById("controlsBar").classList.add("hidden");
 
         try {
-          const [anamneseRes, gestaoRes] = await Promise.all([
+          const [anamneseRes, gestaoRes, treinosRes] = await Promise.all([
             fetch(API_URL + "?tipo=anamnese"),
-            fetch(API_URL + "?tipo=gestao")
+            fetch(API_URL + "?tipo=gestao"),
+            fetch(API_URL + "?tipo=treinos_lista")
           ]);
           
           const anamneseData = await anamneseRes.json();
           const gestaoData = await gestaoRes.json();
+          const treinosData = await treinosRes.json();
 
           // Normaliza campo E-mail (com hífen) para Email (sem hífen)
           const normalizeEmail = (obj) => {
@@ -547,6 +550,19 @@
                     Data: gestao.Data_Inicio || new Date().toISOString(),
                     ...gestao
                   });
+                }
+              }
+            });
+          }
+
+          // Merge treinos_lista to get sheetsId
+          if (Array.isArray(treinosData)) {
+            treinosData.forEach(treino => {
+              normalizeEmail(treino);
+              if (treino.Email) {
+                const emailKey = treino.Email.toLowerCase().trim();
+                if (mergedDataMap.has(emailKey)) {
+                  mergedDataMap.set(emailKey, { ...mergedDataMap.get(emailKey), sheetsId: treino.sheetsId });
                 }
               }
             });
@@ -994,7 +1010,97 @@
 
         lucide.createIcons();
 
-        // Animação de abertura
+        // --- PAINEL DE GESTÃO (topo do modal, dados vindos do Gestao_alunos) ---
+        const statusCores = {
+          "Ativo":    "bg-emerald-50 text-emerald-700 border-emerald-200",
+          "Pendente": "bg-amber-50 text-amber-700 border-amber-200",
+          "Inativo":  "bg-red-50 text-red-600 border-red-200",
+        };
+        const statusCor = statusCores[currentStudent.Status_Treino || currentStudent.statusTreino] || "bg-slate-100 text-slate-600 border-slate-200";
+        const statusLabel = currentStudent.Status_Treino || currentStudent.statusTreino || "Pendente";
+
+        const dataInicio  = currentStudent.Data_Inicio  || currentStudent.dataInicio  || "";
+        const dataFim     = currentStudent.Data_Fim     || currentStudent.dataFim     || "";
+        const checkup     = currentStudent.Data_Checkup || currentStudent.dataCheckup || "";
+        const tipo        = currentStudent.Tipo_Consultoria || currentStudent.tipoConsultoria || "";
+        const plano       = currentStudent.planoAtual   || "";
+        const sheetsId    = currentStudent.sheetsId     || "";
+
+        const webappLink  = sheetsId
+          ? (window.location.origin + window.location.pathname.replace("alunos.html","webapp.html") + "?id=" + sheetsId)
+          : "";
+
+        const fmtData = (iso) => {
+          if (!iso) return "—";
+          try { return new Date(iso).toLocaleDateString("pt-BR"); } catch(e) { return iso; }
+        };
+
+        // Calcula dias restantes do plano
+        let diasRestantesHTML = "";
+        if (dataFim) {
+          const hoje = new Date(); hoje.setHours(0,0,0,0);
+          const fim  = new Date(dataFim); fim.setHours(0,0,0,0);
+          const diff = Math.round((fim - hoje) / 86400000);
+          if (diff < 0) {
+            diasRestantesHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-lg">Vencido há ${Math.abs(diff)}d</span>`;
+          } else if (diff <= 7) {
+            diasRestantesHTML = `<span class="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg">Vence em ${diff}d</span>`;
+          } else {
+            diasRestantesHTML = `<span class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">${diff} dias restantes</span>`;
+          }
+        }
+
+        const painelGestao = `
+          <div class="mb-6 bg-white p-5 rounded-2xl border-2 border-brand-navy/10 shadow-sm">
+            <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center gap-2">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-orange"></i> Painel do Plano
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Status</span>
+                <span class="inline-block text-xs font-bold px-2 py-1 rounded-lg border ${statusCor}">${statusLabel}</span>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Modalidade</span>
+                <p class="text-sm font-semibold text-slate-700">${tipo || "—"}</p>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Plano</span>
+                <p class="text-sm font-semibold text-slate-700 capitalize">${plano || "—"}</p>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Início</span>
+                <p class="text-sm font-semibold text-slate-700">${fmtData(dataInicio)}</p>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Vencimento</span>
+                <p class="text-sm font-semibold text-slate-700">${fmtData(dataFim)}</p>
+                ${diasRestantesHTML}
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Checkup Semanal</span>
+                <p class="text-sm font-semibold text-slate-700">${checkup || "—"}</p>
+              </div>
+            </div>
+            ${webappLink ? `
+            <div class="flex items-center gap-2 p-3 bg-brand-navy/5 rounded-xl border border-brand-navy/10">
+              <i data-lucide="link" class="w-4 h-4 text-brand-cyan shrink-0"></i>
+              <p class="text-xs text-slate-500 truncate flex-1">${webappLink}</p>
+              <button onclick="navigator.clipboard.writeText('${webappLink}').then(()=>showToast('Link copiado!'))" class="shrink-0 text-xs font-bold bg-brand-cyan text-white px-3 py-1.5 rounded-lg hover:bg-cyan-600 transition-colors flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i> Copiar
+              </button>
+              <a href="${webappLink}" target="_blank" class="shrink-0 text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-1">
+                <i data-lucide="external-link" class="w-3 h-3"></i> Abrir
+              </a>
+            </div>` : `
+            <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-100">
+              <i data-lucide="alert-circle" class="w-4 h-4 text-amber-500 shrink-0"></i>
+              <p class="text-xs text-amber-700 font-medium">Nenhum treino criado ainda. Clique em "Criar / Editar Treino" para começar.</p>
+            </div>`}
+          </div>`;
+
+        contentList.innerHTML = painelGestao + contentList.innerHTML;
+        lucide.createIcons();
         const modal = document.getElementById("studentModal");
         const overlay = document.getElementById("studentModalOverlay");
         const contentBox = document.getElementById("studentModalContentBox");
@@ -1023,15 +1129,28 @@
         }, 300);
       }
 
-      // FUNÇÕES DOS NOVOS BOTÕES
-      function createWorkout() {
+      // ABRIR GERADOR COM ALUNO PRÉ-SELECIONADO
+      function openGerador() {
         if (!currentStudent) return;
-        const params = new URLSearchParams();
-        if (currentStudent.Email) params.append("email", currentStudent.Email);
-        if (currentStudent.Nome)  params.append("nome",  currentStudent.Nome);
-        window.location.href = "gerador.html?" + params.toString();
+        const email = encodeURIComponent(currentStudent.Email || "");
+        const nome  = encodeURIComponent(currentStudent.Nome  || "");
+        const base  = window.location.pathname.replace("alunos.html", "gerador.html");
+        window.open(base + "?email=" + email + "&nome=" + nome, "_blank");
       }
 
+      function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-brand-navy text-white px-6 py-3 rounded-xl shadow-2xl z-[100] text-sm font-bold transition-opacity duration-300 flex items-center gap-2 border border-blue-900';
+        toast.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-brand-cyan"></i> ${msg}`;
+        document.body.appendChild(toast);
+        lucide.createIcons();
+        setTimeout(() => {
+          toast.classList.add('opacity-0');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      // FUNÇÕES DOS NOVOS BOTÕES
       function viewHistory() {
         alert(
           "Em breve! O histórico de treinos será exibido aqui quando o Gerador estiver salvando os treinos na planilha.",
