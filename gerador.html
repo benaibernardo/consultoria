@@ -5133,16 +5133,13 @@
           // URL do seu Google Apps Script
           const url =
             "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
-          const res = await fetch(url + "?t=" + Date.now());
+          const emailParam = encodeURIComponent(currentStudent.email || "");
+          const nomeParam  = encodeURIComponent(currentStudent.name  || "");
+          const res = await fetch(url + "?tipo=historico&email=" + emailParam + "&nome=" + nomeParam + "&t=" + Date.now());
           const data = await res.json();
 
-          // Filtra pelo nome do aluno atual (ignorando maiúsculas/minúsculas e espaços extras)
-          const studentHistory = data.filter(
-            (row) =>
-              row["Nome do Aluno"] &&
-              row["Nome do Aluno"].trim().toLowerCase() ===
-                currentStudent.name.trim().toLowerCase(),
-          );
+          // O servidor já filtra — garante array
+          const studentHistory = Array.isArray(data) ? data : [];
 
           if (studentHistory.length === 0) {
             container.innerHTML =
