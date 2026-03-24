@@ -1405,6 +1405,9 @@
         });
 
         let html = buildCalendarHTML(cachedHistoryData);
+        html += '<div style="text-align:center; padding:10px 15px 5px; color:var(--text-muted); font-size:0.78rem; font-weight:600;">';
+        html += '<i class="fa-solid fa-hand-pointer" style="color:var(--accent); margin-right:5px;"></i> Toque em um dia verde para ver o treino';
+        html += '</div>';
         html += '<div class="history-feed">';
         
         sortedDates.forEach(date => {
@@ -1437,7 +1440,7 @@
             });
 
             html += `
-            <div id="hist-card-${dateOnly}" class="history-card" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:10px; scroll-margin-top: 20px;">
+            <div id="hist-card-${dateOnly}" class="history-card" style="display:none; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:10px; scroll-margin-top: 20px;">
                 <div class="hc-header" onclick="this.nextElementSibling.classList.toggle('collapsed'); this.querySelector('.fa-chevron-down').style.transform = this.nextElementSibling.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(0deg)';" style="padding:15px; background:rgba(0,168,232,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                     <div>
                         <div style="font-weight:800; color:var(--primary); font-size:0.95rem;">${treinoNome}</div>
@@ -1566,21 +1569,32 @@
     };
 
     window.scrollToDate = function(dateStr) {
+        // Esconde todos os cards; mostra apenas o do dia clicado
+        document.querySelectorAll('.history-card').forEach(c => { c.style.display = 'none'; });
+
         const el = document.getElementById('hist-card-' + dateStr);
-        if(el) {
+        if (el) {
+            el.style.display = 'block';
             el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             el.style.transition = 'box-shadow 0.3s';
             el.style.boxShadow = '0 0 0 3px var(--accent)';
             setTimeout(() => el.style.boxShadow = 'none', 1500);
-            
+            // Abre o acordeao automaticamente
             const body = el.querySelector('.hc-body');
             const icon = el.querySelector('.fa-chevron-down');
-            if(body && body.classList.contains('collapsed')) {
+            if (body && body.classList.contains('collapsed')) {
                 body.classList.remove('collapsed');
-                if(icon) icon.style.transform = 'rotate(0deg)';
+                if (icon) icon.style.transform = 'rotate(0deg)';
             }
         } else {
-            alert('Nenhum treino encontrado neste dia.');
+            const feed = document.querySelector('.history-feed');
+            if (feed) {
+                const aviso = document.createElement('div');
+                aviso.style.cssText = 'text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;';
+                aviso.textContent = 'Nenhum treino registrado neste dia.';
+                feed.appendChild(aviso);
+                setTimeout(() => aviso.remove(), 2000);
+            }
         }
     }
 
