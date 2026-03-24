@@ -1192,7 +1192,8 @@
             
             const payload = {
                 tipo: "historico",
-                nomeAluno: currentData.name || "Aluno",
+                nomeAluno: currentData.name  || "Aluno",
+                emailAluno: currentData.email || "",
                 nomeTreino: currentData.blocks[bIdx].name || "Treino",
                 exercicio: item.name || "",
                 cargaReps: cargaRepsStr,
@@ -1326,13 +1327,14 @@
 
         try {
             const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
-            const res = await fetch(url + "?tipo=historico&email=" + encodeURIComponent(currentData.email || "") + "&t=" + Date.now());
+            // Passa email (filtro principal) + nome (fallback para registros antigos)
+            const emailParam = encodeURIComponent(currentData.email || "");
+            const nomeParam  = encodeURIComponent(currentData.name  || "");
+            const res = await fetch(url + "?tipo=historico&email=" + emailParam + "&nome=" + nomeParam + "&t=" + Date.now());
             const data = await res.json();
-            
-            cachedHistoryData = data.filter(row => 
-                row['Nome do Aluno'] && 
-                row['Nome do Aluno'].trim().toLowerCase() === currentData.name.trim().toLowerCase()
-            );
+
+            // O servidor já filtra pelo email/nome — apenas garante que veio array
+            cachedHistoryData = Array.isArray(data) ? data : [];
 
             renderHistoryUI();
 
