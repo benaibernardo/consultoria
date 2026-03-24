@@ -1326,7 +1326,7 @@
 
         try {
             const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
-            const res = await fetch(url + "?t=" + Date.now());
+            const res = await fetch(url + "?tipo=historico&email=" + encodeURIComponent(currentData.email || "") + "&t=" + Date.now());
             const data = await res.json();
             
             cachedHistoryData = data.filter(row => 
