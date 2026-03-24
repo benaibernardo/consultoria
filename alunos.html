@@ -1050,6 +1050,8 @@
           }
         }
 
+        const linkPersonalizado = currentStudent.linkPersonalizado || currentStudent.Link_Personalizado || "";
+
         const painelGestao = `
           <div class="mb-6 bg-white p-5 rounded-2xl border-2 border-brand-navy/10 shadow-sm">
             <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -1082,9 +1084,11 @@
                 <p class="text-sm font-semibold text-slate-700">${checkup || "—"}</p>
               </div>
             </div>
+
             ${webappLink ? `
-            <div class="flex items-center gap-2 p-3 bg-brand-navy/5 rounded-xl border border-brand-navy/10">
+            <div class="flex items-center gap-2 p-3 mb-2 bg-brand-navy/5 rounded-xl border border-brand-navy/10">
               <i data-lucide="link" class="w-4 h-4 text-brand-cyan shrink-0"></i>
+              <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wider w-16 shrink-0">Link longo</p>
               <p class="text-xs text-slate-500 truncate flex-1">${webappLink}</p>
               <button onclick="navigator.clipboard.writeText('${webappLink}').then(()=>showToast('Link copiado!'))" class="shrink-0 text-xs font-bold bg-brand-cyan text-white px-3 py-1.5 rounded-lg hover:bg-cyan-600 transition-colors flex items-center gap-1">
                 <i data-lucide="copy" class="w-3 h-3"></i> Copiar
@@ -1093,10 +1097,29 @@
                 <i data-lucide="external-link" class="w-3 h-3"></i> Abrir
               </a>
             </div>` : `
-            <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-100">
+            <div class="flex items-center gap-2 p-3 mb-2 bg-amber-50 rounded-xl border border-amber-100">
               <i data-lucide="alert-circle" class="w-4 h-4 text-amber-500 shrink-0"></i>
               <p class="text-xs text-amber-700 font-medium">Nenhum treino criado ainda. Clique em "Criar / Editar Treino" para começar.</p>
             </div>`}
+
+            <div class="flex items-center gap-2 p-3 bg-violet-50 rounded-xl border border-violet-100">
+              <i data-lucide="wand-2" class="w-4 h-4 text-violet-500 shrink-0"></i>
+              <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wider w-16 shrink-0">TinyURL</p>
+              <input
+                id="inputLinkPersonalizado"
+                type="text"
+                placeholder="Cole o link personalizado aqui..."
+                value="${linkPersonalizado}"
+                class="flex-1 text-xs bg-white border border-violet-200 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-violet-300 text-slate-700 min-w-0"
+              />
+              ${linkPersonalizado ? `
+              <button onclick="navigator.clipboard.writeText('${linkPersonalizado}').then(()=>showToast('Link personalizado copiado!'))" class="shrink-0 text-xs font-bold bg-violet-500 text-white px-3 py-1.5 rounded-lg hover:bg-violet-600 transition-colors flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i> Copiar
+              </button>` : ""}
+              <button onclick="saveLinkPersonalizado()" class="shrink-0 text-xs font-bold bg-brand-navy text-white px-3 py-1.5 rounded-lg hover:bg-blue-900 transition-colors flex items-center gap-1">
+                <i data-lucide="save" class="w-3 h-3"></i> Salvar
+              </button>
+            </div>
           </div>`;
 
         contentList.innerHTML = painelGestao + contentList.innerHTML;
@@ -1150,11 +1173,194 @@
         }, 3000);
       }
 
-      // FUNÇÕES DOS NOVOS BOTÕES
-      function viewHistory() {
-        alert(
-          "Em breve! O histórico de treinos será exibido aqui quando o Gerador estiver salvando os treinos na planilha.",
-        );
+      // SALVAR LINK PERSONALIZADO (TinyURL) NA PLANILHA
+      async function saveLinkPersonalizado() {
+        if (!currentStudent) return;
+        const input = document.getElementById("inputLinkPersonalizado");
+        const link  = input ? input.value.trim() : "";
+
+        try {
+          const res = await fetch(API_URL, {
+            method:  "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              tipo:              "gestao",
+              email:             currentStudent.Email || "",
+              nome:              currentStudent.Nome  || "",
+              linkPersonalizado: link,
+              // mantém os campos existentes para não sobrescrever com vazio
+              tipoConsultoria:   currentStudent.Tipo_Consultoria || currentStudent.tipoConsultoria || "",
+              dataInicio:        currentStudent.Data_Inicio      || currentStudent.dataInicio      || "",
+              dataFim:           currentStudent.Data_Fim         || currentStudent.dataFim         || "",
+              dataCheckup:       currentStudent.Data_Checkup     || currentStudent.dataCheckup     || "",
+              statusTreino:      currentStudent.Status_Treino    || currentStudent.statusTreino    || "",
+              sheetsId:          currentStudent.sheetsId         || "",
+            }),
+          });
+          const result = await res.json();
+          if (result.status === "erro") throw new Error(result.mensagem);
+          currentStudent.linkPersonalizado = link;
+          showToast(link ? "Link personalizado salvo!" : "Link removido.");
+        } catch (e) {
+          alert("Erro ao salvar link:\n\n" + e.message);
+        }
+      }
+
+      // HISTÓRICO DE TREINOS — abre seção dentro do modal
+      async function viewHistory() {
+        if (!currentStudent) return;
+
+        // Scroll para a seção de histórico se já existir
+        const existente = document.getElementById("secaoHistorico");
+        if (existente) {
+          existente.scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+
+        const contentList = document.getElementById("modalContent");
+
+        // Cria placeholder de loading
+        const secao = document.createElement("div");
+        secao.id = "secaoHistorico";
+        secao.className = "mb-6 bg-white p-5 rounded-2xl border-2 border-brand-cyan/20 shadow-sm";
+        secao.innerHTML = `
+          <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center gap-2">
+            <i data-lucide="history" class="w-4 h-4 text-brand-cyan"></i> Histórico de Treinos
+          </h3>
+          <div class="flex items-center gap-3 py-6 justify-center text-slate-400">
+            <div class="loader" style="width:24px;height:24px;border-width:3px;"></div>
+            <span class="text-sm">Buscando histórico...</span>
+          </div>`;
+        // Insere logo após o Painel do Plano (primeiro filho)
+        contentList.insertBefore(secao, contentList.children[1] || null);
+        lucide.createIcons();
+        secao.scrollIntoView({ behavior: "smooth" });
+
+        try {
+          const res  = await fetch(API_URL + "?tipo=historico&email=" + encodeURIComponent(currentStudent.Email || ""));
+          const rows = await res.json();
+
+          // Filtra pelo nome do aluno (o histórico usa Nome, não Email)
+          const nomeAluno = (currentStudent.Nome || "").trim().toLowerCase();
+          const filtrado  = Array.isArray(rows)
+            ? rows.filter(r => (r["Nome do Aluno"] || "").trim().toLowerCase() === nomeAluno)
+            : [];
+
+          if (!filtrado.length) {
+            secao.innerHTML = `
+              <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center gap-2">
+                <i data-lucide="history" class="w-4 h-4 text-brand-cyan"></i> Histórico de Treinos
+              </h3>
+              <div class="text-center py-8 text-slate-400">
+                <i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+                <p class="text-sm font-medium">Nenhum treino registrado ainda.</p>
+              </div>`;
+            lucide.createIcons();
+            return;
+          }
+
+          // Agrupa por data (DD/MM/YYYY)
+          const grupos = {};
+          filtrado.forEach(r => {
+            const dataHora = r["Data/Hora"] || "";
+            const chave    = dataHora.split(" ")[0] || "Data desconhecida";
+            if (!grupos[chave]) grupos[chave] = [];
+            grupos[chave].push(r);
+          });
+
+          // Ordena datas mais recentes primeiro
+          const datasOrdenadas = Object.keys(grupos).sort((a, b) => {
+            const parse = d => { const [dd,mm,aa] = d.split("/"); return new Date(`${aa}-${mm}-${dd}`); };
+            return parse(b) - parse(a);
+          });
+
+          // Monta o acordeão — mostra só exercícios únicos por sessão (visão do treinador)
+          let html = `
+            <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center justify-between gap-2">
+              <span class="flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-brand-cyan"></i> Histórico de Treinos</span>
+              <span class="text-xs font-normal text-slate-400 normal-case">${datasOrdenadas.length} sessão(ões)</span>
+            </h3>
+            <div class="space-y-2">`;
+
+          datasOrdenadas.forEach((data, idx) => {
+            const itens       = grupos[data];
+            const nomeTreino  = itens[0]["Treino"] || "Treino";
+            const hora        = (itens[0]["Data/Hora"] || "").split(" ")[1] || "";
+            const aberto      = idx === 0; // primeira sessão começa aberta
+
+            // Exercícios únicos desta sessão (para visão do treinador)
+            const exerciciosUnicos = [...new Set(itens.map(i => i["Exercício"]).filter(Boolean))];
+
+            html += `
+              <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <button onclick="toggleHistoricoItem(this)" class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors text-left">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-brand-navy/10 flex items-center justify-center shrink-0">
+                      <i data-lucide="calendar" class="w-4 h-4 text-brand-navy"></i>
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-brand-navy">${data}${hora ? " · " + hora : ""}</p>
+                      <p class="text-xs text-slate-500 font-medium">${nomeTreino} · ${exerciciosUnicos.length} exercício(s)</p>
+                    </div>
+                  </div>
+                  <i data-lucide="${aberto ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-slate-400 shrink-0 transition-transform"></i>
+                </button>
+                <div class="historico-body ${aberto ? '' : 'hidden'} divide-y divide-slate-100">`;
+
+            itens.forEach(item => {
+              const exercicio = item["Exercício"]  || "—";
+              const carga     = item["Carga/Reps"] || "—";
+              const rpe       = item["RPE"]        || "—";
+              const notas     = item["Notas"]      || "";
+
+              // Cor do RPE
+              let rpeColor = "text-slate-500";
+              const rpeNum = parseInt(rpe);
+              if (!isNaN(rpeNum)) {
+                if (rpeNum <= 3)      rpeColor = "text-emerald-600";
+                else if (rpeNum <= 6) rpeColor = "text-amber-600";
+                else                  rpeColor = "text-red-600";
+              }
+
+              html += `
+                <div class="px-4 py-3 bg-white">
+                  <div class="flex items-start justify-between gap-3">
+                    <p class="text-sm font-semibold text-slate-800 flex-1">${exercicio}</p>
+                    <span class="text-xs font-bold ${rpeColor} shrink-0 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100">RPE ${rpe}</span>
+                  </div>
+                  ${carga !== "—" ? `<p class="text-xs text-brand-cyan font-medium mt-1">${carga}</p>` : ""}
+                  ${notas ? `<p class="text-xs text-slate-400 italic mt-1">${notas}</p>` : ""}
+                </div>`;
+            });
+
+            html += `</div></div>`;
+          });
+
+          html += `</div>`;
+          secao.innerHTML = html;
+          lucide.createIcons();
+
+        } catch (e) {
+          secao.innerHTML = `
+            <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center gap-2">
+              <i data-lucide="history" class="w-4 h-4 text-brand-cyan"></i> Histórico de Treinos
+            </h3>
+            <div class="text-center py-6 text-red-500">
+              <i data-lucide="alert-triangle" class="w-6 h-6 mx-auto mb-2"></i>
+              <p class="text-sm font-medium">Erro ao carregar histórico.</p>
+              <p class="text-xs text-slate-400 mt-1">${e.message}</p>
+            </div>`;
+          lucide.createIcons();
+        }
+      }
+
+      function toggleHistoricoItem(btn) {
+        const body = btn.nextElementSibling;
+        const icon = btn.querySelector("[data-lucide]");
+        const aberto = !body.classList.contains("hidden");
+        body.classList.toggle("hidden");
+        icon.setAttribute("data-lucide", aberto ? "chevron-down" : "chevron-up");
+        lucide.createIcons();
       }
 
       // AVISO GLOBAL E INDIVIDUAL
