@@ -1231,6 +1231,7 @@
 
             const payload = {
                 tipo: "historico",
+                email: currentData.email || "",
                 nomeAluno: currentData.name || "Aluno",
                 nomeTreino: currentData.blocks[bIdx].name || "Treino",
                 exercicio: item.name || "",
@@ -1383,13 +1384,12 @@
 
         try {
             const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
-            const res = await fetch(url + "?tipo=historico&email=" + encodeURIComponent(currentData.email || "") + "&t=" + Date.now());
+            const emailParam = encodeURIComponent(currentData.email || "");
+            const nomeParam = encodeURIComponent(currentData.name || "");
+            const res = await fetch(url + "?tipo=historico&email=" + emailParam + "&nome=" + nomeParam + "&t=" + Date.now());
             const data = await res.json();
             
-            cachedHistoryData = data.filter(row => 
-                row['Nome do Aluno'] && 
-                row['Nome do Aluno'].trim().toLowerCase() === currentData.name.trim().toLowerCase()
-            );
+            cachedHistoryData = Array.isArray(data) ? data : [];
 
             renderHistoryUI();
 
@@ -1521,9 +1521,15 @@
                 });
 
                 sortedFases.forEach(fase => {
-                    if (fase !== 'Geral' || Object.keys(fasesNoTreino).length > 1) {
-                        exHtml += `<div style="font-size:0.75rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-top:12px; margin-bottom:4px; padding-bottom:2px; border-bottom:1px solid var(--border); opacity:0.8;">${fase}</div>`;
-                    }
+                    const phaseColors = {
+                        'Mobilidade': '#10b981',
+                        'Ativação': '#f97316',
+                        'Força': '#ef4444',
+                        'Desaceleração': '#3b82f6',
+                        'Geral': 'var(--primary)'
+                    };
+                    const phaseColor = phaseColors[fase] || 'var(--primary)';
+                    exHtml += `<div style="font-size:0.75rem; font-weight:800; color:${phaseColor}; text-transform:uppercase; margin-top:12px; margin-bottom:4px; padding-bottom:2px; border-bottom:1px solid ${phaseColor}; opacity:0.9;">${fase}</div>`;
                     
                     fasesNoTreino[fase].forEach(item => {
                         const rpeRaw = item['RPE'] || '5';
@@ -1533,17 +1539,6 @@
                         
                         const cargaReps = item['Carga/Reps'] || '-';
                         const notas = item['Notas'] || '';
-                        
-                        let methodBadge = '';
-                        if (notas) {
-                            const parts = notas.split('|').map(p => p.trim());
-                            parts.forEach(p => {
-                                if (p.startsWith('Método:')) {
-                                    let methodText = p.replace('Método:', '').trim();
-                                    methodBadge = `<span style="font-size:0.6rem; background:var(--accent); color:white; padding:2px 4px; border-radius:4px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-right:6px;">${methodText}</span>`;
-                                }
-                            });
-                        }
                         
                         const setsArr = cargaReps.split('|').map(s => s.trim()).filter(s => s);
                         let setsHtml = '';
@@ -1555,7 +1550,6 @@
                         exHtml += `
                         <div style="padding:8px 0; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:6px;">
                             <div style="display:flex; align-items:center; font-size:0.85rem; line-height:1.2;">
-                                ${methodBadge}
                                 <span style="font-weight:700; color:var(--text);">${item['Exercício'] || '-'}</span>
                             </div>
                             <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;">
