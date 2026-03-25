@@ -1192,7 +1192,8 @@
             
             const payload = {
                 tipo: "historico",
-                nomeAluno: currentData.name || "Aluno",
+                nomeAluno: currentData.name  || "Aluno",
+                emailAluno: currentData.email || "",
                 nomeTreino: currentData.blocks[bIdx].name || "Treino",
                 exercicio: item.name || "",
                 cargaReps: cargaRepsStr,
@@ -1326,13 +1327,14 @@
 
         try {
             const url = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
-            const res = await fetch(url + "?tipo=historico&email=" + encodeURIComponent(currentData.email || "") + "&t=" + Date.now());
+            // Passa email (filtro principal) + nome (fallback para registros antigos)
+            const emailParam = encodeURIComponent(currentData.email || "");
+            const nomeParam  = encodeURIComponent(currentData.name  || "");
+            const res = await fetch(url + "?tipo=historico&email=" + emailParam + "&nome=" + nomeParam + "&t=" + Date.now());
             const data = await res.json();
-            
-            cachedHistoryData = data.filter(row => 
-                row['Nome do Aluno'] && 
-                row['Nome do Aluno'].trim().toLowerCase() === currentData.name.trim().toLowerCase()
-            );
+
+            // O servidor já filtra pelo email/nome — apenas garante que veio array
+            cachedHistoryData = Array.isArray(data) ? data : [];
 
             renderHistoryUI();
 
@@ -1354,53 +1356,52 @@
             return;
         }
 
+        // Agrupa por DIA (DD/MM/YYYY) — ignora hora para juntar todos os exercícios do mesmo dia
         const grouped = {};
+        const horasPorDia = {}; // guarda a hora mais cedo do dia para exibir no card
         cachedHistoryData.forEach(row => {
-            let fullDate = row['Data/Hora'] || 'Data Desconhecida';
-            
+            const raw = row['Data/Hora'] || '';
+            let diaKey = 'Data Desconhecida';
+            let horaLabel = '';
+
             try {
-                if (typeof fullDate === 'string' && fullDate.includes('T') && fullDate.includes('Z')) {
-                    const d = new Date(fullDate);
-                    if (!isNaN(d.getTime())) {
-                        const dia = String(d.getDate()).padStart(2, '0');
-                        const mes = String(d.getMonth() + 1).padStart(2, '0');
-                        const ano = d.getFullYear();
-                        const hora = String(d.getHours()).padStart(2, '0');
-                        const min = String(d.getMinutes()).padStart(2, '0');
-                        fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
-                    }
-                } else if (fullDate instanceof Date || (typeof fullDate === 'string' && !isNaN(Date.parse(fullDate)) && !fullDate.includes('/'))) {
-                     const d = new Date(fullDate);
-                     if (!isNaN(d.getTime())) {
-                        const dia = String(d.getDate()).padStart(2, '0');
-                        const mes = String(d.getMonth() + 1).padStart(2, '0');
-                        const ano = d.getFullYear();
-                        const hora = String(d.getHours()).padStart(2, '0');
-                        const min = String(d.getMinutes()).padStart(2, '0');
-                        fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
-                     }
+                let d = null;
+                if (typeof raw === 'string' && raw.includes('T')) {
+                    d = new Date(raw);
+                } else if (typeof raw === 'string' && raw.includes('/')) {
+                    // Formato DD/MM/YYYY HH:MM:SS
+                    const [datePart, timePart] = raw.split(' ');
+                    const [dd, mm, yyyy] = datePart.split('/');
+                    d = new Date(`${yyyy}-${mm}-${dd}T${timePart || '00:00:00'}`);
+                } else if (raw) {
+                    d = new Date(raw);
                 }
-            } catch (e) {
-                // Keep original if parsing fails
+
+                if (d && !isNaN(d.getTime())) {
+                    const dia  = String(d.getDate()).padStart(2, '0');
+                    const mes  = String(d.getMonth() + 1).padStart(2, '0');
+                    const ano  = d.getFullYear();
+                    const hora = String(d.getHours()).padStart(2, '0');
+                    const min  = String(d.getMinutes()).padStart(2, '0');
+                    diaKey    = `${dia}/${mes}/${ano}`;
+                    horaLabel = `${hora}:${min}`;
+                }
+            } catch (e) { /* mantém Data Desconhecida */ }
+
+            if (!grouped[diaKey]) {
+                grouped[diaKey] = [];
+                horasPorDia[diaKey] = horaLabel;
             }
-            
-            if(!grouped[fullDate]) grouped[fullDate] = [];
-            grouped[fullDate].push(row);
+            grouped[diaKey].push(row);
         });
 
         const sortedDates = Object.keys(grouped).sort((a, b) => {
-            if(a === 'Data Desconhecida') return 1;
-            if(b === 'Data Desconhecida') return -1;
+            if (a === 'Data Desconhecida') return 1;
+            if (b === 'Data Desconhecida') return -1;
             try {
-                const [dataPart, horaPart] = a.split(' às ');
-                const [d1, m1, y1] = dataPart.split('/');
-                const [h1, min1] = horaPart ? horaPart.split(':') : [0,0];
-                
-                const [dataPart2, horaPart2] = b.split(' às ');
-                const [d2, m2, y2] = dataPart2.split('/');
-                const [h2, min2] = horaPart2 ? horaPart2.split(':') : [0,0];
-                
-                return new Date(y2, m2-1, d2, h2, min2) - new Date(y1, m1-1, d1, h1, min1);
+                const [d1, m1, y1] = a.split('/');
+                const [d2, m2, y2] = b.split('/');
+                return new Date(y2, m2-1, d2) - new Date(y1, m1-1, d1);
             } catch(e) { return 0; }
         });
 
@@ -1409,48 +1410,87 @@
         html += '<i class="fa-solid fa-hand-pointer" style="color:var(--accent); margin-right:5px;"></i> Toque em um dia verde para ver o treino';
         html += '</div>';
         html += '<div class="history-feed">';
-        
-        sortedDates.forEach(date => {
-            const dateOnly = date.split(' às ')[0];
-            const items = grouped[date];
-            const treinoNome = items[0]['Treino'] || 'Treino';
-            
-            let exHtml = '';
-            items.forEach(item => {
-                const rpeVal = parseInt(item['RPE']) || 5;
-                const pseEmoji = ['🥱','😌','🙂','😐','🤔','😅','🥵','😫','🤬','💀'][rpeVal-1] || '';
-                const cargaReps = item['Carga/Reps'] || '-';
-                
-                // Format S1: 10 | S2: 10 into nice badges
-                const setsArr = cargaReps.split('|').map(s => s.trim()).filter(s => s);
-                let setsHtml = `<div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:4px;">`;
-                setsArr.forEach(s => {
-                    setsHtml += `<span style="font-size:0.7rem; background:var(--bg); padding:2px 6px; border-radius:4px; border:1px solid var(--border); color:var(--text-muted); font-weight:600;">${s}</span>`;
-                });
-                setsHtml += `</div>`;
 
-                exHtml += `
-                <div style="padding:10px 0; border-bottom:1px solid var(--border); font-size:0.85rem;">
-                    <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--text); margin-bottom:4px;">
-                        <span>${item['Exercício'] || '-'}</span>
-                        <span title="${item['RPE']}">${pseEmoji}</span>
-                    </div>
-                    ${setsHtml}
-                </div>`;
+        const rpeLabels = ['Muito fácil','Fácil','Confortável','Moderado','Um pouco difícil','Difícil','Muito difícil','Exaustivo','Máximo','Limite absoluto'];
+        const rpeEmojis = ['🥱','😌','🙂','😐','🤔','😅','🥵','😫','🤬','💀'];
+
+        sortedDates.forEach(date => {
+            const dateOnly = date; // DD/MM/YYYY
+            const items = grouped[date];
+
+            // Agrupa por nome do treino dentro do dia (resolve dois treinos no mesmo dia)
+            const treinosNoDia = {};
+            items.forEach(item => {
+                const t = item['Treino'] || 'Treino';
+                if (!treinosNoDia[t]) treinosNoDia[t] = [];
+                treinosNoDia[t].push(item);
+            });
+
+            let blocosHtml = '';
+            Object.entries(treinosNoDia).forEach(([treinoNome, exItems], tIdx) => {
+                let exHtml = '';
+                exItems.forEach(item => {
+                    const rpeVal   = parseInt(item['RPE']) || 5;
+                    const rpeEmoji = rpeEmojis[rpeVal - 1] || '';
+                    const rpeTexto = rpeLabels[rpeVal - 1] || item['RPE'] || '';
+                    const cargaReps = item['Carga/Reps'] || '';
+
+                    // Formata séries: "Série 1, 10 repetições | Série 2, 12 repetições"
+                    // → badges individuais por série
+                    let setsHtml = '';
+                    if (cargaReps && cargaReps !== '-') {
+                        const setsArr = cargaReps.split('|').map(s => s.trim()).filter(Boolean);
+                        setsHtml = '<div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:6px;">';
+                        setsArr.forEach((s, i) => {
+                            // Simplifica "Série 1, 10 repetições" → "S1: 10 reps"
+                            const simplified = s
+                                .replace(/série\s*/i, 'S')
+                                .replace(/,\s*/, ': ')
+                                .replace(/\s*repetições?/i, ' reps')
+                                .replace(/\s*rep$/i, ' reps');
+                            setsHtml += `<span style="font-size:0.72rem; background:rgba(0,168,232,0.1); padding:3px 8px; border-radius:6px; border:1px solid rgba(0,168,232,0.25); color:var(--accent); font-weight:700;">${simplified}</span>`;
+                        });
+                        setsHtml += '</div>';
+                    } else {
+                        setsHtml = '<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; font-style:italic;">Sem carga registrada</div>';
+                    }
+
+                    exHtml += `
+                    <div style="padding:12px 0; border-bottom:1px solid var(--border);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                            <span style="font-weight:700; color:var(--text); font-size:0.9rem; flex:1;">${item['Exercício'] || '-'}</span>
+                            <div style="text-align:right; flex-shrink:0;">
+                                <div style="font-size:1.1rem;">${rpeEmoji}</div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); font-weight:600; margin-top:1px; white-space:nowrap;">${rpeTexto}</div>
+                            </div>
+                        </div>
+                        ${setsHtml}
+                    </div>`;
+                });
+
+                // Se há mais de um treino no dia, adiciona separador com nome do treino
+                if (Object.keys(treinosNoDia).length > 1) {
+                    blocosHtml += `<div style="padding:8px 15px; background:rgba(0,31,91,0.04); border-bottom:1px solid var(--border); font-size:0.72rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px;">${treinoNome}</div>`;
+                }
+                blocosHtml += `<div style="padding:0 15px;">${exHtml}<div style="height:8px;"></div></div>`;
             });
 
             html += `
             <div id="hist-card-${dateOnly}" class="history-card" style="display:none; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:10px; scroll-margin-top: 20px;">
                 <div class="hc-header" onclick="this.nextElementSibling.classList.toggle('collapsed'); this.querySelector('.fa-chevron-down').style.transform = this.nextElementSibling.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(0deg)';" style="padding:15px; background:rgba(0,168,232,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                     <div>
-                        <div style="font-weight:800; color:var(--primary); font-size:0.95rem;">${treinoNome}</div>
-                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"><i class="fa-regular fa-calendar" style="color:var(--accent);"></i> ${date}</div>
+                        <div style="font-weight:800; color:var(--primary); font-size:0.95rem;">
+                            ${Object.keys(treinosNoDia).length > 1 ? Object.keys(treinosNoDia).join(' + ') : Object.keys(treinosNoDia)[0]}
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+                            <i class="fa-regular fa-calendar" style="color:var(--accent);"></i> ${dateOnly}
+                            &nbsp;·&nbsp; ${items.length} exercício(s)
+                        </div>
                     </div>
                     <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.8rem; transition:0.3s; transform:rotate(-90deg);"></i>
                 </div>
-                <div class="hc-body collapsed" style="padding:0 15px; transition: max-height 0.3s ease-in-out, padding 0.3s; max-height: 2000px; overflow: hidden;">
-                    ${exHtml}
-                    <div style="height:10px;"></div>
+                <div class="hc-body collapsed" style="padding:0; transition: max-height 0.4s ease-in-out, padding 0.3s; max-height: 3000px; overflow: hidden;">
+                    ${blocosHtml}
                 </div>
             </div>`;
         });
