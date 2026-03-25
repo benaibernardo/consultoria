@@ -1258,19 +1258,47 @@
             return;
           }
 
-          // Agrupa por data (DD/MM/YYYY)
+          // Agrupa por data (DD/MM/YYYY) — suporta ISO "2026-03-24T15:14:13.000Z" e "DD/MM/YYYY HH:MM:SS"
           const grupos = {};
+          const horasPorChave = {};
           filtrado.forEach(r => {
-            const dataHora = r["Data/Hora"] || "";
-            const chave    = dataHora.split(" ")[0] || "Data desconhecida";
-            if (!grupos[chave]) grupos[chave] = [];
+            const raw = r["Data/Hora"] || "";
+            let chave     = "Data desconhecida";
+            let horaLabel = "";
+            try {
+              let d = null;
+              if (typeof raw === "string" && raw.includes("T")) {
+                d = new Date(raw);
+              } else if (typeof raw === "string" && raw.includes("/")) {
+                const [datePart, timePart] = raw.split(" ");
+                const [dd, mm, yyyy] = datePart.split("/");
+                d = new Date(`${yyyy}-${mm}-${dd}T${timePart || "00:00:00"}`);
+              } else if (raw) {
+                d = new Date(raw);
+              }
+              if (d && !isNaN(d.getTime())) {
+                const dia  = String(d.getDate()).padStart(2, "0");
+                const mes  = String(d.getMonth() + 1).padStart(2, "0");
+                const ano  = d.getFullYear();
+                const hora = String(d.getHours()).padStart(2, "0");
+                const min  = String(d.getMinutes()).padStart(2, "0");
+                chave     = `${dia}/${mes}/${ano}`;
+                horaLabel = `${hora}:${min}`;
+              }
+            } catch(e) { /* mantém Data desconhecida */ }
+            if (!grupos[chave]) {
+              grupos[chave] = [];
+              horasPorChave[chave] = horaLabel;
+            }
             grupos[chave].push(r);
           });
 
           // Ordena datas mais recentes primeiro
           const datasOrdenadas = Object.keys(grupos).sort((a, b) => {
-            const parse = d => { const [dd,mm,aa] = d.split("/"); return new Date(`${aa}-${mm}-${dd}`); };
-            return parse(b) - parse(a);
+            if (a === "Data desconhecida") return 1;
+            if (b === "Data desconhecida") return -1;
+            const [d1,m1,y1] = a.split("/"); const [d2,m2,y2] = b.split("/");
+            return new Date(y2,m2-1,d2) - new Date(y1,m1-1,d1);
           });
 
           // Monta o acordeão — mostra só exercícios únicos por sessão (visão do treinador)
@@ -1284,7 +1312,7 @@
           datasOrdenadas.forEach((data, idx) => {
             const itens       = grupos[data];
             const nomeTreino  = itens[0]["Treino"] || "Treino";
-            const hora        = (itens[0]["Data/Hora"] || "").split(" ")[1] || "";
+            const hora        = horasPorChave[data] || "";
             const aberto      = idx === 0; // primeira sessão começa aberta
 
             // Exercícios únicos desta sessão (para visão do treinador)
