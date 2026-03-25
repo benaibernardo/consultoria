@@ -306,7 +306,6 @@
         <button class="t-btn" onclick="addTime(-10)">-10</button>
         <button class="t-btn" onclick="addTime(10)">+10</button>
     </div>
-    <button class="btn-close-timer" id="btn-close-timer" onclick="closeTimer()">VOLTAR AO TREINO</button>
     <div id="timer-forced-msg" style="display:none; margin-top:20px; font-size:0.85rem; color:var(--accent); font-weight:700; text-align:center;">Descanso obrigatório.<br>Prepare-se para a próxima série!</div>
 </div>
 
@@ -1204,30 +1203,13 @@
             for(let s=1; s<=numSets; s++) {
                 const val = document.getElementById(`carga-reps-${uid}-${s}`)?.value || '';
                 if(val) {
-                    let formattedVal = val;
-                    if (!isNaN(val) && val.trim() !== '') {
-                        formattedVal = `${val} repetições`;
-                    }
-                    cargaRepsArr.push(`Série ${s}, ${formattedVal}`);
+                    cargaRepsArr.push(`Série ${s}, ${val}`);
                 }
             }
             const cargaRepsStr = cargaRepsArr.join(' | ');
             
             const rpeVal = document.getElementById(`pse-${uid}`)?.value || '5';
             const rpeText = pseData[rpeVal - 1].text;
-            
-            const stageNames = {
-                'mobilidade': 'Mobilidade',
-                'ativacao': 'Ativação',
-                'forca': 'Força',
-                'desaceleracao': 'Desaceleração'
-            };
-            const stageDisplay = stageNames[stageId] || 'Geral';
-            
-            let notasStr = item.method ? `Método: ${item.method}` : "";
-            if (currentData.blocks[bIdx].stages) {
-                notasStr += (notasStr ? " | " : "") + `Fase: ${stageDisplay}`;
-            }
 
             const payload = {
                 tipo: "historico",
@@ -1237,7 +1219,7 @@
                 exercicio: item.name || "",
                 cargaReps: cargaRepsStr,
                 rpe: `${rpeVal} - ${rpeText}`,
-                notas: notasStr
+                notas: ""
             };
             
             fetch("https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec", {
@@ -1490,77 +1472,36 @@
 
             Object.keys(treinosNoDia).forEach((treinoNome, idx) => {
                 const treinoItems = treinosNoDia[treinoNome];
-                const timeOnly = treinoItems[0]._timeOnly || '';
-                
-                const fasesNoTreino = {};
-                treinoItems.forEach(item => {
-                    const notas = item['Notas'] || '';
-                    let fase = 'Geral';
-                    if (notas) {
-                        const parts = notas.split('|').map(p => p.trim());
-                        parts.forEach(p => {
-                            if (p.startsWith('Fase:')) {
-                                fase = p.replace('Fase:', '').trim();
-                            }
-                        });
-                    }
-                    if (!fasesNoTreino[fase]) fasesNoTreino[fase] = [];
-                    fasesNoTreino[fase].push(item);
-                });
-
                 let exHtml = '';
                 
-                // Define a custom order for phases
-                const phaseOrder = ['Mobilidade', 'Ativação', 'Força', 'Desaceleração', 'Geral'];
-                const sortedFases = Object.keys(fasesNoTreino).sort((a, b) => {
-                    let idxA = phaseOrder.indexOf(a);
-                    let idxB = phaseOrder.indexOf(b);
-                    if (idxA === -1) idxA = 99;
-                    if (idxB === -1) idxB = 99;
-                    return idxA - idxB;
-                });
-
-                sortedFases.forEach(fase => {
-                    const phaseColors = {
-                        'Mobilidade': '#10b981',
-                        'Ativação': '#f97316',
-                        'Força': '#ef4444',
-                        'Desaceleração': '#3b82f6',
-                        'Geral': 'var(--primary)'
-                    };
-                    const phaseColor = phaseColors[fase] || 'var(--primary)';
-                    exHtml += `<div style="font-size:0.75rem; font-weight:800; color:${phaseColor}; text-transform:uppercase; margin-top:12px; margin-bottom:4px; padding-bottom:2px; border-bottom:1px solid ${phaseColor}; opacity:0.9;">${fase}</div>`;
+                treinoItems.forEach(item => {
+                    const rpeRaw = item['RPE'] || '5';
+                    const rpeNum = parseInt(rpeRaw) || 5;
+                    const rpeText = rpeRaw.includes('-') ? rpeRaw.split('-')[1].trim() : '';
+                    const pseEmoji = rpeEmojis[rpeNum-1] || '';
                     
-                    fasesNoTreino[fase].forEach(item => {
-                        const rpeRaw = item['RPE'] || '5';
-                        const rpeNum = parseInt(rpeRaw) || 5;
-                        const rpeText = rpeRaw.includes('-') ? rpeRaw.split('-')[1].trim() : '';
-                        const pseEmoji = rpeEmojis[rpeNum-1] || '';
-                        
-                        const cargaReps = item['Carga/Reps'] || '-';
-                        const notas = item['Notas'] || '';
-                        
-                        const setsArr = cargaReps.split('|').map(s => s.trim()).filter(s => s);
-                        let setsHtml = '';
-                        setsArr.forEach(s => {
-                            let shortSet = s.replace('Série ', 'S').replace(' repetições', 'r').replace(' repetição', 'r').replace(', ', ':');
-                            setsHtml += `<span style="font-size:0.7rem; background:rgba(16,185,129,0.1); color:var(--success); padding:2px 6px; border-radius:4px; border:1px solid var(--success); font-weight:700; white-space:nowrap;"><i class="fa-solid fa-check" style="font-size:0.6rem; margin-right:3px;"></i>${shortSet}</span>`;
-                        });
-
-                        exHtml += `
-                        <div style="padding:8px 0; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:6px;">
-                            <div style="display:flex; align-items:center; font-size:0.85rem; line-height:1.2;">
-                                <span style="font-weight:700; color:var(--text);">${item['Exercício'] || '-'}</span>
-                            </div>
-                            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;">
-                                <div style="display:flex; flex-wrap:wrap; gap:4px; flex:1;">${setsHtml}</div>
-                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:0.6rem; color:var(--text-muted); font-weight:700; background:var(--bg); padding:4px 8px; border-radius:6px; min-width:60px; border:1px solid var(--border); text-transform:uppercase;">
-                                    <span style="font-size:0.9rem; line-height:1; margin-bottom:2px;">${pseEmoji}</span>
-                                    <span>${rpeText}</span>
-                                </div>
-                            </div>
-                        </div>`;
+                    const cargaReps = item['Carga/Reps'] || '-';
+                    
+                    const setsArr = cargaReps.split('|').map(s => s.trim()).filter(s => s);
+                    let setsHtml = '';
+                    setsArr.forEach(s => {
+                        let shortSet = s.replace('Série ', 'S').replace(', ', ': ');
+                        setsHtml += `<span style="font-size:0.7rem; background:rgba(16,185,129,0.1); color:var(--success); padding:2px 6px; border-radius:4px; border:1px solid var(--success); font-weight:700; white-space:nowrap;"><i class="fa-solid fa-check" style="font-size:0.6rem; margin-right:3px;"></i>${shortSet}</span>`;
                     });
+
+                    exHtml += `
+                    <div style="padding:8px 0; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:6px;">
+                        <div style="display:flex; align-items:center; font-size:0.85rem; line-height:1.2;">
+                            <span style="font-weight:700; color:var(--text);">${item['Exercício'] || '-'}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+                            <div style="display:flex; flex-wrap:wrap; gap:4px; flex:1;">${setsHtml}</div>
+                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:0.6rem; color:var(--text-muted); font-weight:700; background:var(--bg); padding:4px 8px; border-radius:6px; min-width:60px; border:1px solid var(--border); text-transform:uppercase;">
+                                <span style="font-size:0.9rem; line-height:1; margin-bottom:2px;">${pseEmoji}</span>
+                                <span>${rpeText}</span>
+                            </div>
+                        </div>
+                    </div>`;
                 });
 
                 // The ID is used by the calendar to scroll to this card.
@@ -1746,18 +1687,14 @@
         let initialTime = seconds;
         document.getElementById('timer-overlay').style.display = 'flex';
         
-        const closeBtn = document.getElementById('btn-close-timer');
         const forcedMsg = document.getElementById('timer-forced-msg');
         
         let speechText = "Hora de descanso. " + nextExerciseText;
         
         if(forced) {
-            closeBtn.style.display = 'none';
             forcedMsg.style.display = 'block';
             speak(speechText);
         } else {
-            closeBtn.style.display = 'block';
-            closeBtn.innerText = 'VOLTAR AO TREINO';
             forcedMsg.style.display = 'none';
             speak(speechText);
         }
@@ -1793,9 +1730,7 @@
                 speak("Vamos lá!");
                 haptic('heavy');
                 playBeep();
-                closeBtn.style.display = 'block';
-                closeBtn.innerText = 'CONTINUAR TREINO';
-                forcedMsg.style.display = 'none';
+                closeTimer();
             }
         }, 1000);
     }
