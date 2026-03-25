@@ -2802,13 +2802,13 @@
         renderLibrary();
         updateDatalist();
 
-        // Auto-sync on load if token and master gist exist
+        // Auto-sync on load — Gist (Fernanda/Erondi) + Sheets (Lucimara e futuros)
         if (t && mGist) {
           syncMasterGist(true).then(() => {
-            handleInitialLoad();
+            syncFromSheets(true).then(() => handleInitialLoad());
           });
         } else {
-          handleInitialLoad();
+          syncFromSheets(true).then(() => handleInitialLoad());
         }
       };
 
@@ -4713,6 +4713,80 @@
         } catch (e) {
           if (!silent) customAlert("Erro ao sincronizar: " + e.message);
           return false;
+        }
+      }
+
+      // 2.5 SYNC FROM SHEETS — carrega alunos do Google Sheets (sistema novo, sheetsId)
+      // Análogo ao syncMasterGist mas para alunos no novo sistema (Lucimara, futuros).
+      // Não depende do token do GitHub — usa só o GAS.
+      async function syncFromSheets(silent = false) {
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
+
+        try {
+          if (!silent) showToast("Buscando alunos do Sheets...");
+
+          // 1. Busca lista de gestão (todos os alunos cadastrados)
+          const resGestao = await fetch(GAS_URL + "?tipo=gestao&t=" + Date.now());
+          const gestaoData = await resGestao.json();
+
+          if (!Array.isArray(gestaoData) || gestaoData.length === 0) return;
+
+          // 2. Filtra só alunos com sheetsId válido (sistema novo — começa com "treino_")
+          const alunosNovos = gestaoData.filter(
+            (g) => g.sheetsId && String(g.sheetsId).startsWith("treino_")
+          );
+
+          if (alunosNovos.length === 0) return;
+
+          let adicionados = 0;
+          let atualizados = 0;
+
+          for (const gestao of alunosNovos) {
+            const sheetsId = String(gestao.sheetsId).trim();
+            const email    = (gestao.Email || gestao.email || "").trim().toLowerCase();
+
+            // Verifica se já existe no gerador (por email ou sheetsId)
+            const idx = appData.students.findIndex(
+              (s) => (email && (s.email || "").toLowerCase() === email) || s.sheetsId === sheetsId
+            );
+
+            // Busca o JSON completo do treino no Sheets
+            try {
+              const resTreino = await fetch(GAS_URL + "?tipo=treino&id=" + sheetsId + "&t=" + Date.now());
+              const treinoData = await resTreino.json();
+
+              // GAS retorna o JSON do treino diretamente (não envolvido em {status})
+              // Se vier {status:"erro"} significa que o treino não foi encontrado
+              if (!treinoData || treinoData.status === "erro" || !treinoData.name) continue;
+
+              // Garante estrutura mínima para compatibilidade com o gerador
+              if (!treinoData.logic || typeof treinoData.logic === "string") treinoData.logic = [];
+              if (!treinoData.pillars) treinoData.pillars = JSON.parse(JSON.stringify(appData.pillars));
+              treinoData.sheetsId = sheetsId; // garante que o campo existe
+
+              if (idx !== -1) {
+                // Aluno já existe — atualiza com dados mais recentes do Sheets
+                appData.students[idx] = { ...appData.students[idx], ...treinoData };
+                atualizados++;
+              } else {
+                // Aluno novo — adiciona no início da lista
+                appData.students.unshift(treinoData);
+                adicionados++;
+              }
+            } catch (e) {
+              // Continua para o próximo aluno silenciosamente
+            }
+          }
+
+          if (adicionados > 0 || atualizados > 0) {
+            saveLocal();
+            renderStudentList();
+            if (!silent) showToast(adicionados + " novo(s) + " + atualizados + " atualizado(s) do Sheets!");
+          }
+
+        } catch (e) {
+          if (!silent) customAlert("Erro ao sincronizar do Sheets: " + e.message);
+          // Falha silenciosa no boot — não bloqueia o restante do app
         }
       }
 
