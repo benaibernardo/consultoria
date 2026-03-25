@@ -2802,13 +2802,13 @@
         renderLibrary();
         updateDatalist();
 
-        // Auto-sync on load — Gist (Fernanda/Erondi) + Sheets (Lucimara e futuros)
+        // Auto-sync on load if token and master gist exist
         if (t && mGist) {
           syncMasterGist(true).then(() => {
-            syncFromSheets(true).then(() => handleInitialLoad());
+            handleInitialLoad();
           });
         } else {
-          syncFromSheets(true).then(() => handleInitialLoad());
+          handleInitialLoad();
         }
       };
 
@@ -4716,80 +4716,6 @@
         }
       }
 
-      // 2.5 SYNC FROM SHEETS — carrega alunos do Google Sheets (sistema novo, sheetsId)
-      // Análogo ao syncMasterGist mas para alunos no novo sistema (Lucimara, futuros).
-      // Não depende do token do GitHub — usa só o GAS.
-      async function syncFromSheets(silent = false) {
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
-
-        try {
-          if (!silent) showToast("Buscando alunos do Sheets...");
-
-          // 1. Busca lista de gestão (todos os alunos cadastrados)
-          const resGestao = await fetch(GAS_URL + "?tipo=gestao&t=" + Date.now());
-          const gestaoData = await resGestao.json();
-
-          if (!Array.isArray(gestaoData) || gestaoData.length === 0) return;
-
-          // 2. Filtra só alunos com sheetsId válido (sistema novo — começa com "treino_")
-          const alunosNovos = gestaoData.filter(
-            (g) => g.sheetsId && String(g.sheetsId).startsWith("treino_")
-          );
-
-          if (alunosNovos.length === 0) return;
-
-          let adicionados = 0;
-          let atualizados = 0;
-
-          for (const gestao of alunosNovos) {
-            const sheetsId = String(gestao.sheetsId).trim();
-            const email    = (gestao.Email || gestao.email || "").trim().toLowerCase();
-
-            // Verifica se já existe no gerador (por email ou sheetsId)
-            const idx = appData.students.findIndex(
-              (s) => (email && (s.email || "").toLowerCase() === email) || s.sheetsId === sheetsId
-            );
-
-            // Busca o JSON completo do treino no Sheets
-            try {
-              const resTreino = await fetch(GAS_URL + "?tipo=treino&id=" + sheetsId + "&t=" + Date.now());
-              const treinoData = await resTreino.json();
-
-              // GAS retorna o JSON do treino diretamente (não envolvido em {status})
-              // Se vier {status:"erro"} significa que o treino não foi encontrado
-              if (!treinoData || treinoData.status === "erro" || !treinoData.name) continue;
-
-              // Garante estrutura mínima para compatibilidade com o gerador
-              if (!treinoData.logic || typeof treinoData.logic === "string") treinoData.logic = [];
-              if (!treinoData.pillars) treinoData.pillars = JSON.parse(JSON.stringify(appData.pillars));
-              treinoData.sheetsId = sheetsId; // garante que o campo existe
-
-              if (idx !== -1) {
-                // Aluno já existe — atualiza com dados mais recentes do Sheets
-                appData.students[idx] = { ...appData.students[idx], ...treinoData };
-                atualizados++;
-              } else {
-                // Aluno novo — adiciona no início da lista
-                appData.students.unshift(treinoData);
-                adicionados++;
-              }
-            } catch (e) {
-              // Continua para o próximo aluno silenciosamente
-            }
-          }
-
-          if (adicionados > 0 || atualizados > 0) {
-            saveLocal();
-            renderStudentList();
-            if (!silent) showToast(adicionados + " novo(s) + " + atualizados + " atualizado(s) do Sheets!");
-          }
-
-        } catch (e) {
-          if (!silent) customAlert("Erro ao sincronizar do Sheets: " + e.message);
-          // Falha silenciosa no boot — não bloqueia o restante do app
-        }
-      }
-
       // 3. UPDATE MASTER GIST (PUSH)
       async function updateMasterGist() {
         const t = document.getElementById("gh-token").value;
@@ -5192,6 +5118,10 @@
         });
       }
       // --- HISTORY LOGIC ---
+      let cachedHistoryData = [];
+      let currentCalMonth = new Date().getMonth();
+      let currentCalYear = new Date().getFullYear();
+
       async function loadHistory() {
         const container = document.getElementById("history-canvas");
         if (!currentStudent) {
@@ -5213,135 +5143,338 @@
           const data = await res.json();
 
           // O servidor já filtra — garante array
-          const studentHistory = Array.isArray(data) ? data : [];
+          cachedHistoryData = Array.isArray(data) ? data : [];
 
-          if (studentHistory.length === 0) {
-            container.innerHTML =
-              '<div style="text-align:center; padding:40px; color:var(--text-muted);"><i class="fa-solid fa-folder-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5;"></i><br>Nenhum histórico encontrado para este aluno.</div>';
-            return;
-          }
-
-          // Agrupa por Data (assumindo formato ISO ou similar que vem do Google Sheets)
-          const grouped = {};
-          studentHistory.forEach((row) => {
-            let fullDate = row["Data/Hora"] || "Data Desconhecida";
-
-            try {
-              // Se for string ISO ou formato reconhecido válido (mas não formato BR já pronto)
-              if (
-                typeof fullDate === "string" &&
-                fullDate.includes("T") &&
-                fullDate.includes("Z")
-              ) {
-                const d = new Date(fullDate);
-                if (!isNaN(d.getTime())) {
-                  const dia = String(d.getDate()).padStart(2, "0");
-                  const mes = String(d.getMonth() + 1).padStart(2, "0");
-                  const ano = d.getFullYear();
-                  const hora = String(d.getHours()).padStart(2, "0");
-                  const min = String(d.getMinutes()).padStart(2, "0");
-                  fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
-                }
-              } else if (
-                fullDate instanceof Date ||
-                (typeof fullDate === "string" &&
-                  !isNaN(Date.parse(fullDate)) &&
-                  !fullDate.includes("/"))
-              ) {
-                const d = new Date(fullDate);
-                if (!isNaN(d.getTime())) {
-                  const dia = String(d.getDate()).padStart(2, "0");
-                  const mes = String(d.getMonth() + 1).padStart(2, "0");
-                  const ano = d.getFullYear();
-                  const hora = String(d.getHours()).padStart(2, "0");
-                  const min = String(d.getMinutes()).padStart(2, "0");
-                  fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
-                }
-              }
-            } catch (e) {
-              // Keep original if parsing fails
-            }
-
-            // Agrupa pela data formatada
-            if (!grouped[fullDate]) grouped[fullDate] = [];
-            grouped[fullDate].push(row);
-          });
-
-          // Ordena as datas da mais recente para a mais antiga
-          const sortedDates = Object.keys(grouped).sort((a, b) => {
-            if (a === "Data Desconhecida") return 1;
-            if (b === "Data Desconhecida") return -1;
-
-            // Extrai as partes da data formatada (DD/MM/YYYY às HH:MM)
-            try {
-              const [dataPart, horaPart] = a.split(" às ");
-              const [d1, m1, y1] = dataPart.split("/");
-              const [h1, min1] = horaPart ? horaPart.split(":") : [0, 0];
-
-              const [dataPart2, horaPart2] = b.split(" às ");
-              const [d2, m2, y2] = dataPart2.split("/");
-              const [h2, min2] = horaPart2 ? horaPart2.split(":") : [0, 0];
-
-              return (
-                new Date(y2, m2 - 1, d2, h2, min2) -
-                new Date(y1, m1 - 1, d1, h1, min1)
-              );
-            } catch (e) {
-              return 0; // Fallback se o formato for inesperado
-            }
-          });
-
-          let html = "";
-          sortedDates.forEach((date, index) => {
-            const items = grouped[date];
-            // Pega o nome do treino do primeiro exercício desse dia
-            const treinoNome = items[0]["Treino"] || "Treino";
-
-            html += `
-                <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:10px; overflow:hidden;">
-                    <div onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.querySelector('.fa-chevron-down').style.transform = this.nextElementSibling.style.display === 'none' ? 'rotate(-90deg)' : 'rotate(0deg)';" style="padding:15px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; background:rgba(0,168,232,0.05);">
-                        <div style="font-weight:800; color:var(--primary); font-size:0.9rem;">
-                            <i class="fa-regular fa-calendar" style="color:var(--accent); margin-right:8px;"></i> ${date} 
-                            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600; margin-left:8px; padding-left:8px; border-left:1px solid var(--border);">${treinoNome}</span>
-                        </div>
-                        <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); transition:0.3s; transform:rotate(-90deg);"></i>
-                    </div>
-                    <div style="display:none; padding:15px; border-top:1px solid var(--border);">
-                        <div style="overflow-x:auto;">
-                            <table style="width:100%; text-align:left; border-collapse:collapse; font-size:0.8rem;">
-                                <thead>
-                                    <tr style="border-bottom:2px solid var(--border); color:var(--text-muted);">
-                                        <th style="padding:8px 4px;">Exercício</th>
-                                        <th style="padding:8px 4px;">Carga/Reps</th>
-                                        <th style="padding:8px 4px;">RPE</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${items
-                                      .map(
-                                        (item) => `
-                                    <tr style="border-bottom:1px solid var(--border);">
-                                        <td style="padding:10px 4px; font-weight:700; color:var(--text);">${item["Exercício"] || "-"}</td>
-                                        <td style="padding:10px 4px; font-family:var(--font-mono); color:var(--success); font-weight:700;">${item["Carga/Reps"] || "-"}</td>
-                                        <td style="padding:10px 4px; color:var(--warning); font-weight:700;">${item["RPE"] || "-"}</td>
-                                    </tr>
-                                    `,
-                                      )
-                                      .join("")}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>`;
-          });
-
-          container.innerHTML = html;
+          renderHistoryUI();
         } catch (e) {
           console.error(e);
           container.innerHTML =
             '<div style="text-align:center; padding:40px; color:var(--danger);"><i class="fa-solid fa-triangle-exclamation" style="font-size:2rem; margin-bottom:10px;"></i><br>Erro ao carregar histórico. Verifique a conexão ou se a aba da planilha está correta.</div>';
         }
       }
+
+      function renderHistoryUI() {
+        const container = document.getElementById("history-canvas");
+        if (cachedHistoryData.length === 0) {
+          container.innerHTML =
+            '<div style="text-align:center; padding:40px; color:var(--text-muted);"><i class="fa-solid fa-folder-open" style="font-size:3rem; margin-bottom:15px; opacity:0.5;"></i><br>Nenhum histórico encontrado para este aluno.</div>';
+          return;
+        }
+
+        const grouped = {};
+        cachedHistoryData.forEach((row) => {
+          let fullDate = row["Data/Hora"] || "Data Desconhecida";
+          let dateOnly = fullDate;
+          let timeOnly = "";
+
+          try {
+            if (
+              typeof fullDate === "string" &&
+              fullDate.includes("T") &&
+              fullDate.includes("Z")
+            ) {
+              const d = new Date(fullDate);
+              if (!isNaN(d.getTime())) {
+                const dia = String(d.getDate()).padStart(2, "0");
+                const mes = String(d.getMonth() + 1).padStart(2, "0");
+                const ano = d.getFullYear();
+                const hora = String(d.getHours()).padStart(2, "0");
+                const min = String(d.getMinutes()).padStart(2, "0");
+                dateOnly = `${dia}/${mes}/${ano}`;
+                timeOnly = `${hora}:${min}`;
+              }
+            } else if (
+              fullDate instanceof Date ||
+              (typeof fullDate === "string" &&
+                !isNaN(Date.parse(fullDate)) &&
+                !fullDate.includes("/"))
+            ) {
+              const d = new Date(fullDate);
+              if (!isNaN(d.getTime())) {
+                const dia = String(d.getDate()).padStart(2, "0");
+                const mes = String(d.getMonth() + 1).padStart(2, "0");
+                const ano = d.getFullYear();
+                const hora = String(d.getHours()).padStart(2, "0");
+                const min = String(d.getMinutes()).padStart(2, "0");
+                dateOnly = `${dia}/${mes}/${ano}`;
+                timeOnly = `${hora}:${min}`;
+              }
+            } else if (typeof fullDate === "string" && fullDate.includes(" às ")) {
+              const parts = fullDate.split(" às ");
+              dateOnly = parts[0];
+              timeOnly = parts[1];
+            } else if (typeof fullDate === "string" && fullDate.includes(" ")) {
+              const parts = fullDate.split(" ");
+              dateOnly = parts[0];
+              timeOnly = parts[1];
+            }
+          } catch (e) {
+            // Keep original if parsing fails
+          }
+
+          row._timeOnly = timeOnly;
+
+          if (!grouped[dateOnly]) grouped[dateOnly] = [];
+          grouped[dateOnly].push(row);
+        });
+
+        const sortedDates = Object.keys(grouped).sort((a, b) => {
+          if (a === "Data Desconhecida") return 1;
+          if (b === "Data Desconhecida") return -1;
+          try {
+            const [d1, m1, y1] = a.split("/");
+            const [d2, m2, y2] = b.split("/");
+            return new Date(y2, m2 - 1, d2) - new Date(y1, m1 - 1, d1);
+          } catch (e) {
+            return 0;
+          }
+        });
+
+        let html = buildCalendarHTML(cachedHistoryData);
+        html +=
+          '<div style="text-align:center; padding:10px 15px 5px; color:var(--text-muted); font-size:0.78rem; font-weight:600;">';
+        html +=
+          '<i class="fa-solid fa-hand-pointer" style="color:var(--accent); margin-right:5px;"></i> Toque em um dia verde para ver o treino';
+        html += "</div>";
+        html += '<div class="history-feed">';
+
+        const rpeEmojis = ["🥱", "😌", "🙂", "😐", "🤔", "😅", "🥵", "😫", "🤬", "💀"];
+
+        sortedDates.forEach((date) => {
+          const items = grouped[date];
+
+          // Group by workout name within the day
+          const treinosNoDia = {};
+          items.forEach((item) => {
+            const treinoNome = item["Treino"] || "Treino";
+            if (!treinosNoDia[treinoNome]) treinosNoDia[treinoNome] = [];
+            treinosNoDia[treinoNome].push(item);
+          });
+
+          Object.keys(treinosNoDia).forEach((treinoNome, idx) => {
+            const treinoItems = treinosNoDia[treinoNome];
+            const timeOnly = treinoItems[0]._timeOnly || "";
+
+            let exHtml = "";
+            treinoItems.forEach((item) => {
+              const rpeVal = parseInt(item["RPE"]) || 5;
+              const pseEmoji = rpeEmojis[rpeVal - 1] || "";
+              const cargaReps = item["Carga/Reps"] || "-";
+
+              const setsArr = cargaReps
+                .split("|")
+                .map((s) => s.trim())
+                .filter((s) => s);
+              let setsHtml = `<div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:4px;">`;
+              setsArr.forEach((s) => {
+                setsHtml += `<span style="font-size:0.7rem; background:var(--bg); padding:2px 6px; border-radius:4px; border:1px solid var(--border); color:var(--text-muted); font-weight:600;">${s}</span>`;
+              });
+              setsHtml += `</div>`;
+
+              exHtml += `
+                    <div style="padding:10px 0; border-bottom:1px solid var(--border); font-size:0.85rem;">
+                        <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--text); margin-bottom:4px;">
+                            <span>${item["Exercício"] || "-"}</span>
+                            <span title="RPE: ${item["RPE"]}">${pseEmoji}</span>
+                        </div>
+                        ${setsHtml}
+                    </div>`;
+            });
+
+            const cardId = idx === 0 ? `id="hist-card-${date}"` : "";
+
+            html += `
+                <div ${cardId} class="history-card" style="display:none; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:10px; scroll-margin-top: 20px;">
+                    <div class="hc-header" onclick="this.nextElementSibling.classList.toggle('collapsed'); this.querySelector('.fa-chevron-down').style.transform = this.nextElementSibling.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(0deg)';" style="padding:15px; background:rgba(0,168,232,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                        <div>
+                            <div style="font-weight:800; color:var(--primary); font-size:0.95rem;">${treinoNome}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"><i class="fa-regular fa-calendar" style="color:var(--accent);"></i> ${date}${
+              timeOnly ? " às " + timeOnly : ""
+            }</div>
+                        </div>
+                        <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.8rem; transition:0.3s; transform:rotate(-90deg);"></i>
+                    </div>
+                    <div class="hc-body collapsed" style="padding:0 15px; transition: max-height 0.3s ease-in-out, padding 0.3s; max-height: 2000px; overflow: hidden;">
+                        ${exHtml}
+                        <div style="height:10px;"></div>
+                    </div>
+                </div>`;
+          });
+        });
+        html += "</div>"; // close history-feed
+
+        container.innerHTML = html;
+
+        if (!document.getElementById("history-css")) {
+          const style = document.createElement("style");
+          style.id = "history-css";
+          style.innerHTML = `
+            .hc-body.collapsed { max-height: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; }
+            .calendar-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+            .cal-header { display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--primary); margin-bottom: 15px; text-transform: uppercase; font-size: 1.1rem; }
+            .cal-nav-btn { background: none; border: none; font-size: 1.2rem; color: var(--primary); cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: 0.2s; }
+            .cal-nav-btn:hover { background: var(--bg); }
+            .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+            .cal-day-name { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+            .cal-day { height: 36px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; }
+            .cal-day.empty { cursor: default; }
+            .cal-day:not(.empty):hover { background: var(--bg); }
+            .cal-day.today { border: 2px solid var(--accent); color: var(--accent); }
+            .cal-day.trained { background: var(--success); color: white; border: none; box-shadow: 0 2px 5px rgba(16,185,129,0.3); }
+            .cal-day.trained.today { border: 2px solid #064e3b; }
+            `;
+          document.head.appendChild(style);
+        }
+      }
+
+      function buildCalendarHTML(historyData) {
+        const today = new Date();
+        const month = currentCalMonth;
+        const year = currentCalYear;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const monthNames = [
+          "Janeiro",
+          "Fevereiro",
+          "Março",
+          "Abril",
+          "Maio",
+          "Junho",
+          "Julho",
+          "Agosto",
+          "Setembro",
+          "Outubro",
+          "Novembro",
+          "Dezembro",
+        ];
+
+        const trainedDays = new Set();
+        historyData.forEach((row) => {
+          let dStr = row["Data/Hora"];
+          if (dStr) {
+            try {
+              if (
+                typeof dStr === "string" &&
+                dStr.includes("T") &&
+                dStr.includes("Z")
+              ) {
+                const d = new Date(dStr);
+                if (!isNaN(d.getTime())) {
+                  if (d.getMonth() === month && d.getFullYear() === year) {
+                    trainedDays.add(d.getDate());
+                  }
+                }
+              } else if (
+                dStr instanceof Date ||
+                (typeof dStr === "string" &&
+                  !isNaN(Date.parse(dStr)) &&
+                  !dStr.includes("/"))
+              ) {
+                const d = new Date(dStr);
+                if (!isNaN(d.getTime())) {
+                  if (d.getMonth() === month && d.getFullYear() === year) {
+                    trainedDays.add(d.getDate());
+                  }
+                }
+              } else {
+                // Fallback for non-standard formats like DD/MM/YYYY
+                const parts = dStr.split(" ")[0].split("/");
+                if (parts.length === 3) {
+                  if (
+                    parseInt(parts[1]) - 1 === month &&
+                    parseInt(parts[2]) === year
+                  ) {
+                    trainedDays.add(parseInt(parts[0]));
+                  }
+                }
+              }
+            } catch (e) {
+              // Ignore parsing errors
+            }
+          }
+        });
+
+        let html = `<div class="calendar-container">
+            <div class="cal-header">
+                <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <span>${monthNames[month]} ${year}</span>
+                <button class="cal-nav-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="cal-grid">
+                <div class="cal-day-name">Dom</div><div class="cal-day-name">Seg</div><div class="cal-day-name">Ter</div>
+                <div class="cal-day-name">Qua</div><div class="cal-day-name">Qui</div><div class="cal-day-name">Sex</div><div class="cal-day-name">Sáb</div>`;
+
+        for (let i = 0; i < firstDay; i++) {
+          html += `<div class="cal-day empty"></div>`;
+        }
+
+        for (let i = 1; i <= daysInMonth; i++) {
+          const isTrained = trainedDays.has(i);
+          const isToday =
+            i === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear();
+          let classes = "cal-day";
+          if (isTrained) classes += " trained";
+          if (isToday) classes += " today";
+
+          const dayStr = String(i).padStart(2, "0");
+          const monthStr = String(month + 1).padStart(2, "0");
+          const dateId = `${dayStr}/${monthStr}/${year}`;
+
+          html += `<div class="${classes}" onclick="scrollToDate('${dateId}')">${i}</div>`;
+        }
+
+        html += `</div></div>`;
+        return html;
+      }
+
+      window.changeMonth = function (dir) {
+        currentCalMonth += dir;
+        if (currentCalMonth < 0) {
+          currentCalMonth = 11;
+          currentCalYear--;
+        } else if (currentCalMonth > 11) {
+          currentCalMonth = 0;
+          currentCalYear++;
+        }
+        renderHistoryUI();
+      };
+
+      window.scrollToDate = function (dateStr) {
+        // Esconde todos os cards; mostra apenas o do dia clicado
+        document.querySelectorAll(".history-card").forEach((c) => {
+          c.style.display = "none";
+        });
+
+        const el = document.getElementById("hist-card-" + dateStr);
+        if (el) {
+          el.style.display = "block";
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          el.style.transition = "box-shadow 0.3s";
+          el.style.boxShadow = "0 0 0 3px var(--accent)";
+          setTimeout(() => (el.style.boxShadow = "none"), 1500);
+          // Abre o acordeao automaticamente
+          const body = el.querySelector(".hc-body");
+          const icon = el.querySelector(".fa-chevron-down");
+          if (body && body.classList.contains("collapsed")) {
+            body.classList.remove("collapsed");
+            if (icon) icon.style.transform = "rotate(0deg)";
+          }
+        } else {
+          const feed = document.querySelector(".history-feed");
+          if (feed) {
+            const aviso = document.createElement("div");
+            aviso.style.cssText =
+              "text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;";
+            aviso.textContent = "Nenhum treino registrado neste dia.";
+            feed.appendChild(aviso);
+            setTimeout(() => aviso.remove(), 2000);
+          }
+        }
+      };
 
       function toggleTheme() {
         const isDark =
