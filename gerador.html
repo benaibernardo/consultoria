@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
+    <script>
+        // ── GUARD DE SESSÃO BENAI ────────────────────────────────────────────
+        (function() {
+            if (sessionStorage.getItem('BENAI_AUTH') !== '1') {
+                window.location.replace('portal.html');
+            }
+        })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Benai Manager | Studio CRM</title>
@@ -1698,6 +1706,14 @@
             <i class="fa-solid fa-dumbbell"></i> Benai Manager
           </div>
           <div style="display: flex; gap: 5px">
+            <a
+              href="portal.html"
+              class="btn-icon-sm"
+              title="Voltar ao Portal"
+              style="text-decoration:none;"
+            >
+              <i class="fa-solid fa-arrow-left"></i>
+            </a>
             <div
               class="btn-icon-sm"
               onclick="openCloudModal()"
@@ -2772,10 +2788,11 @@
             ];
           }
         }
-        const t = localStorage.getItem(TOKEN_KEY);
+        // Lê do sessionStorage (preenchido no login) com fallback pro localStorage
+        const t = sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
         if (t) document.getElementById("gh-token").value = t;
 
-        const mGist = localStorage.getItem(MASTER_GIST_KEY);
+        const mGist = sessionStorage.getItem(MASTER_GIST_KEY) || localStorage.getItem(MASTER_GIST_KEY);
         if (mGist) {
           appData.masterGistId = mGist;
           document.getElementById("master-gist-id").value = mGist;
