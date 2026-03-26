@@ -197,9 +197,181 @@
         @keyframes slideUpFade {
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* ── AUTH MODAL ─────────────────────────────────────── */
+        #auth-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(10,15,28,0.97);
+            backdrop-filter: blur(16px);
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        #auth-overlay.hide {
+            opacity: 0; pointer-events: none;
+        }
+        .auth-inner {
+            text-align: center;
+            width: 100%; max-width: 340px;
+            padding: 0 24px;
+        }
+        .auth-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+            line-height: 1;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+        .auth-title span { color: #00A8E8; }
+        .auth-sub {
+            font-size: 0.72rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 36px;
+        }
+        .auth-divider {
+            width: 40px; height: 3px;
+            background: linear-gradient(90deg, #001F5B, #00A8E8);
+            border-radius: 2px;
+            margin: 10px auto 28px;
+        }
+        .auth-field {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 14px 44px 14px 18px;
+            background: rgba(30,41,59,0.6);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+        .auth-input:focus {
+            border-color: #00A8E8;
+            box-shadow: 0 0 0 3px rgba(0,168,232,0.12);
+        }
+        .auth-input::placeholder { letter-spacing: 2px; color: rgba(148,163,184,0.35); }
+        .auth-eye {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: #475569; cursor: pointer; font-size: 0.85rem;
+            background: none; border: none; padding: 4px;
+            transition: color 0.2s;
+        }
+        .auth-eye:hover { color: #00A8E8; }
+        .auth-gear-btn {
+            background: none; border: none;
+            color: #475569; font-size: 1rem;
+            cursor: pointer; margin: 4px auto 0;
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 50%;
+            transition: color 0.2s, background 0.2s;
+        }
+        .auth-gear-btn:hover { color: #00A8E8; background: rgba(0,168,232,0.08); }
+        .auth-gear-btn .gear { transition: transform 0.5s ease; }
+        .auth-gear-btn.open .gear { transform: rotate(90deg); }
+        .auth-cloud-fields {
+            overflow: hidden; max-height: 0;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .auth-cloud-fields.open { max-height: 160px; opacity: 1; }
+        .auth-cloud-inner { padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .auth-cloud-input {
+            width: 100%;
+            padding: 11px 16px;
+            background: rgba(30,41,59,0.6);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.8rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .auth-cloud-input:focus { border-color: #00A8E8; }
+        .auth-cloud-input::placeholder { color: rgba(148,163,184,0.3); }
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #001F5B, #003da5);
+            color: white;
+            border: none; border-radius: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800; font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(0,31,91,0.4);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,31,91,0.5); }
+        .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .auth-error {
+            display: none;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-size: 0.8rem;
+            color: #fca5a5;
+            margin-top: 12px;
+            align-items: center; gap: 8px;
+        }
+        .auth-error.show { display: flex; }
+        @keyframes auth-shake {
+            0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+            40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+        }
+        .auth-shake { animation: auth-shake 0.4s ease; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-6 font-body relative" data-theme="dark">
+    <!-- ── AUTH MODAL ─────────────────────────────────────────────────── -->
+    <div id="auth-overlay">
+        <div class="auth-inner">
+            <div class="auth-title">Benai <span>Bernardo</span></div>
+            <div class="auth-sub">Consultoria de Treinamento</div>
+            <div class="auth-divider"></div>
+
+            <div class="auth-field">
+                <input type="password" id="auth-senha" class="auth-input" placeholder="••••••••" autocomplete="off">
+                <button class="auth-eye" id="auth-eye-btn" tabindex="-1"><i id="auth-eye-icon" class="fa-solid fa-eye"></i></button>
+            </div>
+
+            <button class="auth-gear-btn" id="auth-gear-btn" title="Configurações de Nuvem">
+                <i class="fa-solid fa-gear gear"></i>
+            </button>
+
+            <div class="auth-cloud-fields" id="auth-cloud-fields">
+                <div class="auth-cloud-inner">
+                    <input type="password" id="auth-token" class="auth-cloud-input" placeholder="Token GitHub (ghp_...)" autocomplete="off">
+                    <input type="text" id="auth-gist" class="auth-cloud-input" placeholder="Gist Master ID" autocomplete="off">
+                </div>
+            </div>
+
+            <button class="auth-btn" id="auth-btn">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> ENTRAR
+            </button>
+
+            <div class="auth-error" id="auth-error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Senha incorreta. Tente novamente.</span>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- Top Right Controls -->
     <div class="absolute top-6 right-6 flex items-center gap-3 z-50">
@@ -309,10 +481,10 @@
     </div>
 
     <!-- Bento Grid Container -->
-    <main class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+    <main class="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
 
         <!-- 1. GERADOR (Main Tool - Spans 2 cols) -->
-        <a href="gerador.html" class="bento-item glass-card accent-cyan rounded-3xl p-6 md:p-8 md:col-span-2 lg:col-span-2 flex flex-col items-center justify-center text-center stagger-enter group min-h-[180px]" style="animation-delay: 0.2s;">
+        <a href="gerador.html" class="bento-item glass-card accent-cyan rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center text-center stagger-enter group min-h-[180px]" style="animation-delay: 0.2s;">
             <div class="icon-box border border-brand-cyan/20 text-brand-cyan mb-4" style="background: var(--icon-bg-cyan);">
                 <i class="fa-solid fa-bolt text-2xl"></i>
             </div>
@@ -327,37 +499,23 @@
             <h2 class="text-xl font-heading font-bold" style="color: var(--text-main);">Base de Alunos</h2>
         </a>
 
-        <!-- 3. WEB APP (Preview) -->
-        <a href="webapp.html" target="_blank" class="bento-item glass-card accent-green rounded-3xl p-6 flex flex-col items-center justify-center text-center stagger-enter group min-h-[180px]" style="animation-delay: 0.4s;">
-            <div class="icon-box border border-emerald-500/20 text-emerald-500 mb-4" style="background: var(--icon-bg-green);">
-                <i class="fa-solid fa-mobile-screen text-2xl"></i>
-            </div>
-            <h2 class="text-xl font-heading font-bold" style="color: var(--text-main);">Web App</h2>
-        </a>
 
         <!-- 4. LANDING PAGE (Marketing) -->
-        <a href="index.html" target="_blank" class="bento-item glass-card accent-orange rounded-3xl p-6 md:col-span-2 flex flex-col items-center justify-center text-center stagger-enter group min-h-[160px]" style="animation-delay: 0.5s;">
+        <a href="index.html" target="_blank" class="bento-item glass-card accent-orange rounded-3xl p-6 flex flex-col items-center justify-center text-center stagger-enter group min-h-[180px]" style="animation-delay: 0.5s;">
             <div class="icon-box border border-orange-500/20 text-orange-500 mb-4" style="background: var(--icon-bg-orange);">
                 <i class="fa-solid fa-rocket text-2xl"></i>
             </div>
-            <h2 class="text-xl font-heading font-bold" style="color: var(--text-main);">Landing Page</h2>
+            <h2 class="text-xl font-heading font-bold" style="color: var(--text-main);">Apresentação</h2>
         </a>
 
         <!-- 5. ANAMNESE (Form) -->
-        <a href="anamnese.html" target="_blank" class="bento-item glass-card accent-cyan rounded-3xl p-6 flex flex-col items-center justify-center text-center stagger-enter group min-h-[160px]" style="animation-delay: 0.6s;">
+        <a href="anamnese.html" target="_blank" class="bento-item glass-card accent-cyan rounded-3xl p-6 flex flex-col items-center justify-center text-center stagger-enter group min-h-[180px]" style="animation-delay: 0.6s;">
             <div class="icon-box border border-blue-500/20 text-blue-500 mb-4" style="background: var(--icon-bg-blue);">
                 <i class="fa-solid fa-clipboard-list text-2xl"></i>
             </div>
             <h2 class="text-lg font-heading font-bold" style="color: var(--text-main);">Anamnese</h2>
         </a>
 
-        <!-- 6. PROPOSTA (Sales) -->
-        <a href="proposta.html" target="_blank" class="bento-item glass-card accent-purple rounded-3xl p-6 flex flex-col items-center justify-center text-center stagger-enter group min-h-[160px]" style="animation-delay: 0.7s;">
-            <div class="icon-box border border-indigo-500/20 text-indigo-500 mb-4" style="background: var(--icon-bg-indigo);">
-                <i class="fa-solid fa-file-signature text-2xl"></i>
-            </div>
-            <h2 class="text-lg font-heading font-bold" style="color: var(--text-main);">Proposta</h2>
-        </a>
 
     </main>
 
@@ -385,8 +543,8 @@
         let masterData = null;
 
         async function loadDashboard() {
-            const token = localStorage.getItem(TOKEN_KEY);
-            const masterId = localStorage.getItem(MASTER_GIST_KEY);
+            const token    = sessionStorage.getItem(TOKEN_KEY)    || localStorage.getItem(TOKEN_KEY);
+            const masterId = sessionStorage.getItem(MASTER_GIST_KEY) || localStorage.getItem(MASTER_GIST_KEY);
             
             if(!token || !masterId) {
                 document.getElementById('setup-warning').classList.remove('hidden');
@@ -491,13 +649,94 @@
             a.click();
         }
 
-        // Init
+
+        // ── AUTH MODAL ───────────────────────────────────────────────────────
+        // TROQUE A SENHA AQUI:
+        const MINHA_SENHA = '16359001';
+
+        const KEY_AUTH  = 'BENAI_AUTH';
+        const KEY_TOKEN = 'BENAI_GLOBAL_TOKEN';
+        const KEY_GIST  = 'BENAI_MASTER_GIST_ID';
+
+        async function sha256(msg) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
+
+        async function doAuth() {
+            const btn     = document.getElementById('auth-btn');
+            const senha   = document.getElementById('auth-senha').value;
+            const token   = document.getElementById('auth-token').value.trim();
+            const gist    = document.getElementById('auth-gist').value.trim();
+            const erro    = document.getElementById('auth-error');
+            const overlay = document.getElementById('auth-overlay');
+            const inner   = overlay.querySelector('.auth-inner');
+
+            if (!senha) { document.getElementById('auth-senha').focus(); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verificando...';
+
+            const hashInput   = await sha256(senha);
+            const hashCorrect = await sha256(MINHA_SENHA);
+
+            if (hashInput !== hashCorrect) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> ENTRAR';
+                erro.classList.add('show');
+                inner.classList.add('auth-shake');
+                setTimeout(() => inner.classList.remove('auth-shake'), 400);
+                document.getElementById('auth-senha').value = '';
+                document.getElementById('auth-senha').focus();
+                return;
+            }
+
+            sessionStorage.setItem(KEY_AUTH, '1');
+            if (token) sessionStorage.setItem(KEY_TOKEN, token);
+            if (gist)  sessionStorage.setItem(KEY_GIST, gist);
+
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Acesso liberado!';
+            overlay.classList.add('hide');
+            setTimeout(() => { overlay.style.display = 'none'; loadDashboard(); }, 500);
+        }
+
+        // Init — runs after DOM is ready
         window.onload = () => {
             const savedTheme = localStorage.getItem('portal_theme');
-            if (savedTheme) {
-                document.body.setAttribute('data-theme', savedTheme);
+            if (savedTheme) document.body.setAttribute('data-theme', savedTheme);
+
+            const overlay  = document.getElementById('auth-overlay');
+            const senhaInp = document.getElementById('auth-senha');
+            const eyeBtn   = document.getElementById('auth-eye-btn');
+            const gearBtn  = document.getElementById('auth-gear-btn');
+            const authBtn  = document.getElementById('auth-btn');
+            const fields   = document.getElementById('auth-cloud-fields');
+
+            // Check session
+            if (sessionStorage.getItem(KEY_AUTH) === '1') {
+                overlay.style.display = 'none';
+                loadDashboard();
+            } else {
+                senhaInp.focus();
             }
-            loadDashboard();
+
+            // Bind all events here — avoids onclick-before-script issues
+            authBtn.addEventListener('click', doAuth);
+
+            senhaInp.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') doAuth();
+            });
+
+            eyeBtn.addEventListener('click', () => {
+                senhaInp.type = senhaInp.type === 'password' ? 'text' : 'password';
+                document.getElementById('auth-eye-icon').className =
+                    senhaInp.type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+            });
+
+            gearBtn.addEventListener('click', () => {
+                fields.classList.toggle('open');
+                gearBtn.classList.toggle('open');
+            });
         };
     </script>
 </body>
