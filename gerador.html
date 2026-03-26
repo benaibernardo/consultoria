@@ -1,14 +1,6 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
-    <script>
-        // ── GUARD DE SESSÃO BENAI ────────────────────────────────────────────
-        (function() {
-            if (sessionStorage.getItem('BENAI_AUTH') !== '1') {
-                window.location.replace('portal.html');
-            }
-        })();
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Benai Manager | Studio CRM</title>
@@ -1706,14 +1698,6 @@
             <i class="fa-solid fa-dumbbell"></i> Benai Manager
           </div>
           <div style="display: flex; gap: 5px">
-            <a
-              href="portal.html"
-              class="btn-icon-sm"
-              title="Voltar ao Portal"
-              style="text-decoration:none;"
-            >
-              <i class="fa-solid fa-arrow-left"></i>
-            </a>
             <div
               class="btn-icon-sm"
               onclick="openCloudModal()"
@@ -2449,8 +2433,10 @@
               class="btn-primary-block"
               onclick="
                 syncMasterGist().then(() => {
-                  if (!currentStudent && appData.students.length > 0)
-                    loadStudent(appData.students[0].id);
+                  syncFromSheets().then(() => {
+                    if (!currentStudent && appData.students.length > 0)
+                      loadStudent(appData.students[0].id);
+                  });
                 })
               "
               style="margin: 0; width: auto; padding: 0 15px; font-size: 0.8rem"
@@ -2788,11 +2774,10 @@
             ];
           }
         }
-        // Lê do sessionStorage (preenchido no login) com fallback pro localStorage
-        const t = sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+        const t = localStorage.getItem(TOKEN_KEY);
         if (t) document.getElementById("gh-token").value = t;
 
-        const mGist = sessionStorage.getItem(MASTER_GIST_KEY) || localStorage.getItem(MASTER_GIST_KEY);
+        const mGist = localStorage.getItem(MASTER_GIST_KEY);
         if (mGist) {
           appData.masterGistId = mGist;
           document.getElementById("master-gist-id").value = mGist;
@@ -2822,10 +2807,14 @@
         // Auto-sync on load if token and master gist exist
         if (t && mGist) {
           syncMasterGist(true).then(() => {
-            handleInitialLoad();
+            syncFromSheets(true).then(() => {
+              handleInitialLoad();
+            });
           });
         } else {
-          handleInitialLoad();
+          syncFromSheets(true).then(() => {
+            handleInitialLoad();
+          });
         }
       };
 
@@ -3357,33 +3346,59 @@
         if (!newStudent) return;
 
         // Se for um aluno placeholder (sincronizado do Master Gist mas sem os dados locais)
-        if (newStudent.focus === "Carregando..." && newStudent.gistId) {
-          const t = document.getElementById("gh-token").value;
-          if (!t)
-            return customAlert(
-              "Configure o Token do GitHub para baixar os dados deste aluno.",
-            );
+        if (newStudent.focus === "Carregando...") {
+          if (newStudent.gistId) {
+            const t = document.getElementById("gh-token").value;
+            if (!t)
+              return customAlert(
+                "Configure o Token do GitHub para baixar os dados deste aluno.",
+              );
 
-          try {
-            showToast("Baixando treino do aluno...");
-            const res = await fetch(
-              `https://api.github.com/gists/${newStudent.gistId}`,
-              { headers: { Authorization: `token ${t}` } },
-            );
-            if (!res.ok) throw new Error("Falha ao baixar do GitHub");
-            const j = await res.json();
-            const studentData = JSON.parse(j.files["treino.json"].content);
+            try {
+              showToast("Baixando treino do aluno...");
+              const res = await fetch(
+                `https://api.github.com/gists/${newStudent.gistId}`,
+                { headers: { Authorization: `token ${t}` } },
+              );
+              if (!res.ok) throw new Error("Falha ao baixar do GitHub");
+              const j = await res.json();
+              const studentData = JSON.parse(j.files["treino.json"].content);
 
-            // Substitui o placeholder pelos dados reais
-            const idx = appData.students.findIndex(
-              (s) => String(s.id) === String(id),
-            );
-            appData.students[idx] = studentData;
-            newStudent = studentData;
-            saveLocal();
-          } catch (e) {
-            customAlert("Erro ao carregar aluno: " + e.message);
-            return;
+              // Substitui o placeholder pelos dados reais
+              const idx = appData.students.findIndex(
+                (s) => String(s.id) === String(id),
+              );
+              appData.students[idx] = studentData;
+              newStudent = studentData;
+              saveLocal();
+            } catch (e) {
+              customAlert("Erro ao carregar aluno: " + e.message);
+              return;
+            }
+          } else if (newStudent.sheetsId) {
+            try {
+              showToast("Baixando treino do aluno do Sheets...");
+              const res = await fetch(
+                `https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec?tipo=treino&id=${newStudent.sheetsId}`
+              );
+              if (!res.ok) throw new Error("Falha ao buscar do Sheets");
+              const text = await res.text();
+              const studentData = JSON.parse(text);
+
+              // Substitui o placeholder pelos dados reais
+              const idx = appData.students.findIndex(
+                (s) => String(s.id) === String(id),
+              );
+              // Preserve the local ID so the UI doesn't break
+              studentData.id = id;
+              appData.students[idx] = studentData;
+              newStudent = studentData;
+              saveLocal();
+              showToast("Treino carregado!");
+            } catch (e) {
+              customAlert("Erro ao carregar do Sheets: " + e.message);
+              return;
+            }
           }
         }
 
@@ -4635,6 +4650,8 @@
             id: s.id,
             name: s.name,
             gistId: s.gistId || null,
+            sheetsId: s.sheetsId || null,
+            email: s.email || "",
           })),
         };
 
@@ -4704,7 +4721,9 @@
                 appData.students.push({
                   id: idxStudent.id,
                   name: idxStudent.name,
-                  gistId: idxStudent.gistId,
+                  gistId: idxStudent.gistId || null,
+                  sheetsId: idxStudent.sheetsId || null,
+                  email: idxStudent.email || "",
                   focus: "Carregando...",
                   blocks: [],
                 });
@@ -4733,6 +4752,66 @@
         }
       }
 
+      // 2.5 SYNC FROM SHEETS (PULL NEW STUDENTS)
+      async function syncFromSheets(silent = false) {
+        try {
+          if (!silent) showToast("Sincronizando alunos do Sheets...");
+          const res = await fetch("https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec?tipo=treinos_lista");
+          if (!res.ok) throw new Error("Falha ao buscar treinos do Sheets");
+          const treinos = await res.json();
+          
+          let updated = false;
+          const localSheetsIds = appData.students.map((s) => s.sheetsId).filter(Boolean);
+
+          treinos.forEach(treino => {
+            const email = (treino['E-mail'] || treino.Email || "").trim().toLowerCase();
+            const nome = (treino.Nome || "").trim().toLowerCase();
+            
+            if (treino.sheetsId) {
+              // Check if student already exists by sheetsId, email, or name
+              let existing = appData.students.find(s => 
+                (s.sheetsId === treino.sheetsId) || 
+                (email && s.email && s.email.trim().toLowerCase() === email) ||
+                (nome && s.name && s.name.trim().toLowerCase() === nome)
+              );
+
+              if (existing) {
+                // Update existing placeholder with sheetsId if missing
+                if (!existing.sheetsId) {
+                  existing.sheetsId = treino.sheetsId;
+                  updated = true;
+                }
+                if (!existing.email && email) {
+                  existing.email = email;
+                  updated = true;
+                }
+              } else {
+                // Add new placeholder
+                appData.students.push({
+                  id: "sheets_" + treino.sheetsId,
+                  name: treino.Nome || email || "Aluno Sheets",
+                  email: email,
+                  sheetsId: treino.sheetsId,
+                  focus: "Carregando...",
+                  blocks: []
+                });
+                updated = true;
+              }
+            }
+          });
+
+          if (updated) {
+            saveLocal();
+            renderStudentList();
+          }
+          if (!silent) showToast("Sincronização do Sheets concluída!");
+          return true;
+        } catch (e) {
+          if (!silent) customAlert("Erro ao sincronizar do Sheets: " + e.message);
+          return false;
+        }
+      }
+
       // 3. UPDATE MASTER GIST (PUSH)
       async function updateMasterGist() {
         const t = document.getElementById("gh-token").value;
@@ -4749,6 +4828,8 @@
             id: s.id,
             name: s.name,
             gistId: s.gistId || null,
+            sheetsId: s.sheetsId || null,
+            email: s.email || "",
           })),
         };
 
@@ -4921,7 +5002,7 @@
       // 5. IMPORT ID & EXTRACT EXERCISES
       function promptImportID() {
         let rawId = prompt(
-          "Insira o Gist ID do aluno (ou o link completo do WebApp):",
+          "Insira o Gist ID ou Sheets ID do aluno (ou o link completo do WebApp):",
         );
         if (!rawId) return;
 
@@ -4932,86 +5013,153 @@
           id = id.split("/").pop();
         }
 
-        // Validate Gist ID format (usually 32 hex characters)
-        if (!/^[a-f0-9]{32}$/i.test(id)) {
+        const isGist = /^[a-f0-9]{32}$/i.test(id);
+        const isSheets = /^treino_\d+$/i.test(id);
+
+        if (!isGist && !isSheets) {
           customAlert(
             "ID inválido!\n\nVocê inseriu: " +
               id +
-              "\n\nO Gist ID correto é um código de 32 letras e números.\nSe você tem um link do TinyURL (ex: tinyurl.com/Erondi), abra ele no navegador, espere carregar o WebApp, e copie o ID longo que aparece lá em cima na barra de endereços (?id=...).",
+              "\n\nO ID correto é um código de 32 letras e números (Gist) ou começa com 'treino_' (Sheets).\nSe você tem um link do TinyURL, abra ele no navegador e copie o ID longo que aparece na barra de endereços (?id=...).",
           );
           return;
         }
 
-        const token = document.getElementById("gh-token").value.trim();
-        if (!token) return customAlert("Configure o Token primeiro.");
+        if (isGist) {
+          const token = document.getElementById("gh-token").value.trim();
+          if (!token) return customAlert("Configure o Token primeiro.");
 
-        showToast("Importando e extraindo...");
-        fetch(`https://api.github.com/gists/${id}`, {
-          headers: { Authorization: `token ${token}` },
-        })
-          .then(async (r) => {
-            if (!r.ok) {
-              const err = await r.json().catch(() => ({}));
-              throw new Error(err.message || `Erro HTTP: ${r.status}`);
-            }
-            return r.json();
+          showToast("Importando e extraindo...");
+          fetch(`https://api.github.com/gists/${id}`, {
+            headers: { Authorization: `token ${token}` },
           })
-          .then((j) => {
-            const s = JSON.parse(j.files["treino.json"].content);
-            s.gistId = id;
+            .then(async (r) => {
+              if (!r.ok) {
+                const err = await r.json().catch(() => ({}));
+                throw new Error(err.message || `Erro HTTP: ${r.status}`);
+              }
+              return r.json();
+            })
+            .then((j) => {
+              const s = JSON.parse(j.files["treino.json"].content);
+              s.gistId = id;
 
-            // Check if student already exists locally
-            const existingIdx = appData.students.findIndex(
-              (st) => st.id === s.id || st.gistId === id,
-            );
-            if (existingIdx >= 0) {
-              appData.students[existingIdx] = s;
-            } else {
-              appData.students.unshift(s);
-            }
+              // Check if student already exists locally
+              const existingIdx = appData.students.findIndex(
+                (st) => st.id === s.id || st.gistId === id,
+              );
+              if (existingIdx >= 0) {
+                appData.students[existingIdx] = s;
+              } else {
+                appData.students.unshift(s);
+              }
 
-            // --- EXERCISE EXTRACTION LOGIC ---
-            let extractedCount = 0;
-            if (s.blocks) {
-              s.blocks.forEach((blk) => {
-                if (blk.stages) {
-                  Object.values(blk.stages).forEach((stageArray) => {
-                    stageArray.forEach((ex) => {
-                      // Check if exercise already exists in library by name
-                      const exists = appData.library.some(
-                        (libEx) =>
-                          libEx.name.toLowerCase() === ex.name.toLowerCase(),
-                      );
-                      if (!exists) {
-                        appData.library.push({
-                          name: ex.name,
-                          group: "Geral", // Default group
-                          equip: "Livre", // Default equip
-                          method: ex.method || "Musculação",
-                          video: ex.link || "",
-                        });
-                        extractedCount++;
-                      }
+              // --- EXERCISE EXTRACTION LOGIC ---
+              let extractedCount = 0;
+              if (s.blocks) {
+                s.blocks.forEach((blk) => {
+                  if (blk.stages) {
+                    Object.values(blk.stages).forEach((stageArray) => {
+                      stageArray.forEach((ex) => {
+                        // Check if exercise already exists in library by name
+                        const exists = appData.library.some(
+                          (libEx) =>
+                            libEx.name.toLowerCase() === ex.name.toLowerCase(),
+                        );
+                        if (!exists) {
+                          appData.library.push({
+                            name: ex.name,
+                            group: "Geral", // Default group
+                            equip: "Livre", // Default equip
+                            method: ex.method || "Musculação",
+                            video: ex.link || "",
+                          });
+                          extractedCount++;
+                        }
+                      });
                     });
-                  });
-                }
-              });
-            }
+                  }
+                });
+              }
 
-            saveLocal();
-            renderStudentList();
-            renderLibrary();
-            loadStudent(s.id);
+              saveLocal();
+              renderStudentList();
+              renderLibrary();
+              loadStudent(s.id);
 
-            // Update Master Gist with new student and extracted exercises
-            updateMasterGist();
+              // Update Master Gist with new student and extracted exercises
+              updateMasterGist();
 
-            showToast(
-              `Aluno Importado! ${extractedCount} exercícios adicionados à biblioteca.`,
-            );
-            closeModal("modal-cloud");
-          })
-          .catch((e) => customAlert("Erro ao importar: " + e.message));
+              showToast(
+                `Aluno Importado! ${extractedCount} exercícios adicionados à biblioteca.`,
+              );
+              closeModal("modal-cloud");
+            })
+            .catch((e) => customAlert("Erro ao importar: " + e.message));
+        } else if (isSheets) {
+          showToast("Importando e extraindo do Sheets...");
+          fetch(`https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec?tipo=treino&id=${id}`)
+            .then(async (r) => {
+              if (!r.ok) throw new Error(`Erro HTTP: ${r.status}`);
+              return r.text();
+            })
+            .then((text) => {
+              const s = JSON.parse(text);
+              s.sheetsId = id;
+
+              // Check if student already exists locally
+              const existingIdx = appData.students.findIndex(
+                (st) => st.id === s.id || st.sheetsId === id,
+              );
+              if (existingIdx >= 0) {
+                appData.students[existingIdx] = s;
+              } else {
+                appData.students.unshift(s);
+              }
+
+              // --- EXERCISE EXTRACTION LOGIC ---
+              let extractedCount = 0;
+              if (s.blocks) {
+                s.blocks.forEach((blk) => {
+                  if (blk.stages) {
+                    Object.values(blk.stages).forEach((stageArray) => {
+                      stageArray.forEach((ex) => {
+                        // Check if exercise already exists in library by name
+                        const exists = appData.library.some(
+                          (libEx) =>
+                            libEx.name.toLowerCase() === ex.name.toLowerCase(),
+                        );
+                        if (!exists) {
+                          appData.library.push({
+                            name: ex.name,
+                            group: "Geral", // Default group
+                            equip: "Livre", // Default equip
+                            method: ex.method || "Musculação",
+                            video: ex.link || "",
+                          });
+                          extractedCount++;
+                        }
+                      });
+                    });
+                  }
+                });
+              }
+
+              saveLocal();
+              renderStudentList();
+              renderLibrary();
+              loadStudent(s.id);
+
+              // Update Master Gist with new student and extracted exercises
+              updateMasterGist();
+
+              showToast(
+                `Aluno Importado! ${extractedCount} exercícios adicionados à biblioteca.`,
+              );
+              closeModal("modal-cloud");
+            })
+            .catch((e) => customAlert("Erro ao importar do Sheets: " + e.message));
+        }
       }
 
       // --- DELETE STUDENT ---
