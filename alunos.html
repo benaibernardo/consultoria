@@ -1200,6 +1200,7 @@
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
               tipo:              "gestao",
+              chave:             "BENAI_SECRET_2026",
               email:             currentStudent.Email || "",
               nome:              currentStudent.Nome  || "",
               linkPersonalizado: link,
@@ -1425,15 +1426,16 @@
         if (btn) btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Enviando...';
 
         try {
-          await fetch(API_URL, {
+          const resGlobal = await fetch(API_URL, {
             method: "POST",
-            mode: "no-cors",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
               tipo: "notificacao_global",
+              chave: "BENAI_SECRET_2026",
               mensagem: text
             })
           });
+          await resGlobal.json();
           alert("Aviso Global enviado com sucesso! Ele aparecerá no WebApp dos alunos.");
           closeGlobalNoticeModal();
           document.getElementById("globalNoticeText").value = "";
@@ -1466,16 +1468,17 @@
         if (btn) btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Enviando...';
 
         try {
-          await fetch(API_URL, {
+          const resIndividual = await fetch(API_URL, {
             method: "POST",
-            mode: "no-cors",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
               tipo: "notificacao_individual",
+              chave: "BENAI_SECRET_2026",
               email: currentStudent.Email,
               mensagem: text
             })
           });
+          await resIndividual.json();
           alert("Notificação individual enviada com sucesso!");
           closeIndividualNoticeModal();
           document.getElementById("individualNoticeText").value = "";
