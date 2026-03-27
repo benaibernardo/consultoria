@@ -1249,6 +1249,7 @@
 
             const payload = {
                 tipo: "historico",
+                chave: "BENAI_SECRET_2026",
                 email: currentData.email || "",
                 nomeAluno: currentData.name || "Aluno",
                 nomeTreino: currentData.blocks[bIdx].name || "Treino",
@@ -1943,6 +1944,7 @@
             // 2. Send to Google Apps Script
             const payload = {
                 tipo: "feedback",
+                chave: "BENAI_SECRET_2026",
                 nomeAluno: currentData ? currentData.name : "Aluno Desconhecido",
                 nota: rating,
                 texto: text,
