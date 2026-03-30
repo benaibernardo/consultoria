@@ -1955,12 +1955,12 @@
             
             const req = await fetch(url, {
                 method: 'POST',
-                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            // As we use no-cors, we assume success if it doesn't throw
+            const result = await req.json();
+            if (!result.ok) throw new Error(result.message || 'Erro no servidor');
             haptic('success');
 
             // Tela de agradecimento substitui o conteúdo da aba
