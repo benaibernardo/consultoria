@@ -2815,6 +2815,16 @@
         if (!appData.methods || appData.methods.length === 0)
           appData.methods = ["Musculação", "Calistenia", "Híbrido"];
 
+        // Limpa duplicatas acumuladas no localStorage (fix bug Lucimara)
+        // Mantém o primeiro registro único por email ou sheetsId
+        const seen = new Set();
+        appData.students = appData.students.filter(s => {
+          const key = s.email || s.sheetsId || s.id;
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
         renderStudentList();
         renderLibrary();
         updateDatalist();
@@ -4799,10 +4809,6 @@
             const sheetsId = gestao.sheetsId   || gestao.SheetsId   || "";
             if (!sheetsId || !email) continue;
 
-            // Verifica se já existe localmente com dados completos
-            const existente = appData.students.find(s => s.email === email || s.sheetsId === sheetsId);
-            if (existente && existente.blocks && existente.blocks.length > 0) continue;
-
             // 2. Busca o treino JSON pelo sheetsId
             try {
               const resTreino = await fetch(GAS_URL + "?tipo=treino&id=" + encodeURIComponent(sheetsId));
@@ -4818,7 +4824,7 @@
               if (!treino.sheetsId) treino.sheetsId = sheetsId;
               if (!treino.blocks)   treino.blocks   = [];
 
-              // Upsert — substitui placeholder ou adiciona
+              // Upsert — sempre substitui por email OU sheetsId, nunca duplica
               const idx = appData.students.findIndex(s => s.email === email || s.sheetsId === sheetsId);
               if (idx >= 0) {
                 appData.students[idx] = treino;
