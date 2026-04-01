@@ -4846,6 +4846,8 @@
 
         showToast("Salvando treino na nuvem...");
 
+        const isPrimeiroSave = !currentStudent.sheetsId;
+
         if (!currentStudent.sheetsId) {
           currentStudent.sheetsId = "treino_" + Date.now();
           saveLocal();
@@ -4882,16 +4884,18 @@
           // Sincroniza dados de gestão (sheetsId + link) de volta ao Gestao_alunos
           await autoSaveGestao();
 
-          showToast("Treino salvo com sucesso!");
-
           const id = currentStudent.sheetsId;
           const longUrl = window.location.origin +
             window.location.pathname.replace("gerador.html", "webapp.html") +
             "?id=" + id;
 
-          const msgLink = "Treino salvo!\n\nLink do aluno:\n" + longUrl + "\n\nCopie o link acima e cole no TinyURL para personalizar.\n\nAbrir TinyURL agora?";
-          if (await customConfirm(msgLink))
-            window.open("https://tinyurl.com/app", "_blank");
+          if (isPrimeiroSave) {
+            const msgLink = "Treino salvo!\n\nLink do aluno:\n" + longUrl + "\n\nCopie o link acima e cole no TinyURL para personalizar.\n\nAbrir TinyURL agora?";
+            if (await customConfirm(msgLink))
+              window.open("https://tinyurl.com/app", "_blank");
+          } else {
+            showToast("✅ Treino atualizado!");
+          }
 
         } catch (e) {
           customAlert("Erro ao salvar o treino:\n\n" + e.message);
