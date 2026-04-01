@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
     <style>
         :root {
@@ -1407,6 +1408,10 @@
         
         haptic('success');
         playCheers();
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#00A8E8', '#f97316', '#ffffff', '#facc15'] });
+            setTimeout(() => confetti({ particleCount: 60, spread: 120, origin: { y: 0.5 }, colors: ['#00A8E8', '#f97316', '#ffffff'] }), 400);
+        }
         document.getElementById('congrats-overlay').style.display = 'flex';
         
         const doneCards = document.querySelectorAll('.ex-card.done');
