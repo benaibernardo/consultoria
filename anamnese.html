@@ -599,20 +599,93 @@
             lucide.createIcons();
             
             // Tenta puxar o nome e email da URL (parâmetros do Asaas ou link manual)
-            // Exemplo: anamnese.html?name=João%20Silva&email=joao@teste.com
             const urlParams = new URLSearchParams(window.location.search);
             const nomeAluno = urlParams.get('name') || urlParams.get('nome');
             const emailAluno = urlParams.get('email');
             
             if (nomeAluno) {
-                // Pega apenas o primeiro nome para as boas-vindas
                 const primeiroNome = nomeAluno.split(' ')[0];
                 document.getElementById('welcomeTitle').innerText = `Bem-vindo(a), ${primeiroNome}!`;
-                document.getElementById('name').value = nomeAluno; // Preenche o input de nome
+                document.getElementById('name').value = nomeAluno;
             }
             if (emailAluno) {
-                document.getElementById('email').value = emailAluno; // Preenche o input de e-mail
+                document.getElementById('email').value = emailAluno;
             }
+
+            // ── SISTEMA DE DRAFTS ──────────────────────────────────────────
+            const DRAFT_KEY = 'anamnese_draft';
+
+            // Campos de texto/select/textarea/date/number
+            const CAMPOS_TEXTO = [
+                'name','email','dob','job','weight','height','whatsapp',
+                'experience','sports','routine','lifestyle','medical_conditions',
+                'meds','equip_desc','likes','dislikes','pain_desc',
+                'cal_flexao_qtd','cal_barra_qtd','cal_mergulho_qtd',
+                'cal_agachamento_qtd','cal_pistol_qtd','cal_prancha_qtd'
+            ];
+
+            // Grupos de radio/checkbox
+            const GRUPOS_RADIO    = ['place','time','has_pain'];
+            const GRUPOS_CHECK    = ['objective','days'];
+            const GRUPOS_CALIST   = ['cal_flexao','cal_barra','cal_mergulho','cal_agachamento','cal_pistol','cal_prancha'];
+
+            function saveDraft() {
+                const draft = {};
+                CAMPOS_TEXTO.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) draft[id] = el.value;
+                });
+                [...GRUPOS_RADIO, ...GRUPOS_CALIST].forEach(name => {
+                    const checked = document.querySelector(`input[name="${name}"]:checked`);
+                    if (checked) draft[`radio_${name}`] = checked.value;
+                });
+                GRUPOS_CHECK.forEach(name => {
+                    const checked = [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(el => el.value);
+                    if (checked.length) draft[`check_${name}`] = checked;
+                });
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+            }
+
+            function restoreDraft() {
+                const raw = localStorage.getItem(DRAFT_KEY);
+                if (!raw) return;
+                try {
+                    const draft = JSON.parse(raw);
+                    CAMPOS_TEXTO.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && draft[id] !== undefined && !el.value) el.value = draft[id];
+                    });
+                    [...GRUPOS_RADIO, ...GRUPOS_CALIST].forEach(name => {
+                        const val = draft[`radio_${name}`];
+                        if (val) {
+                            const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
+                            if (radio) {
+                                radio.checked = true;
+                                radio.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
+                    });
+                    GRUPOS_CHECK.forEach(name => {
+                        const vals = draft[`check_${name}`];
+                        if (vals) vals.forEach(v => {
+                            const cb = document.querySelector(`input[name="${name}"][value="${v}"]`);
+                            if (cb) cb.checked = true;
+                        });
+                    });
+                } catch(e) { /* draft corrompido — ignora */ }
+            }
+
+            window.clearDraft = function() {
+                localStorage.removeItem(DRAFT_KEY);
+            };
+
+            // Salva a cada interação
+            document.addEventListener('input',  saveDraft);
+            document.addEventListener('change', saveDraft);
+
+            // Restaura ao carregar (após URL params para não sobrescrever)
+            restoreDraft();
+            // ── FIM DRAFTS ─────────────────────────────────────────────────
         });
 
         // INICIAR ANAMNESE
@@ -817,6 +890,9 @@
                     }
                 })
                 .then(response => {
+                    // Limpa o draft salvo — envio concluído com sucesso
+                    if (typeof clearDraft === 'function') clearDraft();
+
                     // Avança a tela apenas após o envio ser concluído
                     document.getElementById(`step${currentStep}`).classList.remove('active');
                     document.getElementById('step9').classList.add('active');
