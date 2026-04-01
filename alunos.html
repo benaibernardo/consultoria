@@ -441,10 +441,10 @@
             <i data-lucide="bell" class="w-4 h-4"></i> Notificar Aluno
           </button>
           <button
-            onclick="viewHistory()"
+            onclick="viewTreinoAtual()"
             class="flex-1 sm:flex-none px-4 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
           >
-            <i data-lucide="history" class="w-4 h-4"></i> Histórico
+            <i data-lucide="dumbbell" class="w-4 h-4"></i> Treino Atual
           </button>
           <div
             class="w-full sm:w-px sm:h-8 bg-slate-200 mx-1 hidden sm:block"
@@ -1223,158 +1223,133 @@
       }
 
       // HISTÓRICO DE TREINOS — abre seção dentro do modal
-      async function viewHistory() {
+      async function viewTreinoAtual() {
         if (!currentStudent) return;
 
-        // Scroll para a seção de histórico se já existir
-        const existente = document.getElementById("secaoHistorico");
+        // Scroll para seção se já existir
+        const existente = document.getElementById("secaoTreinoAtual");
         if (existente) {
           existente.scrollIntoView({ behavior: "smooth" });
           return;
         }
 
+        const sheetsId = currentStudent.sheetsId || currentStudent.SheetsId || "";
         const contentList = document.getElementById("modalContent");
 
-        // Cria placeholder de loading
         const secao = document.createElement("div");
-        secao.id = "secaoHistorico";
+        secao.id = "secaoTreinoAtual";
         secao.className = "mb-6 bg-white p-5 rounded-2xl border-2 border-brand-cyan/20 shadow-sm";
+
+        // Sem sheetsId = aluno no sistema antigo (Gist)
+        if (!sheetsId) {
+          secao.innerHTML = `
+            <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-3 flex items-center gap-2">
+              <i data-lucide="dumbbell" class="w-4 h-4 text-brand-cyan"></i> Treino Atual
+            </h3>
+            <div class="text-center py-6 text-slate-400">
+              <i data-lucide="info" class="w-7 h-7 mx-auto mb-2 opacity-40"></i>
+              <p class="text-sm font-medium">Aluno no sistema legado (Gist).</p>
+              <p class="text-xs mt-1">Treino disponível apenas pelo link personalizado.</p>
+            </div>`;
+          contentList.insertBefore(secao, contentList.children[1] || null);
+          lucide.createIcons();
+          secao.scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+
+        // Loading
         secao.innerHTML = `
-          <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center gap-2">
-            <i data-lucide="history" class="w-4 h-4 text-brand-cyan"></i> Histórico de Treinos
+          <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-3 flex items-center gap-2">
+            <i data-lucide="dumbbell" class="w-4 h-4 text-brand-cyan"></i> Treino Atual
           </h3>
           <div class="flex items-center gap-3 py-6 justify-center text-slate-400">
             <div class="loader" style="width:24px;height:24px;border-width:3px;"></div>
-            <span class="text-sm">Buscando histórico...</span>
+            <span class="text-sm">Carregando treino...</span>
           </div>`;
-        // Insere logo após o Painel do Plano (primeiro filho)
         contentList.insertBefore(secao, contentList.children[1] || null);
         lucide.createIcons();
         secao.scrollIntoView({ behavior: "smooth" });
 
         try {
-          const hEmail = encodeURIComponent(currentStudent.Email || "");
-          const hNome  = encodeURIComponent(currentStudent.Nome  || "");
-          const res  = await fetch(API_URL + "?tipo=historico&email=" + hEmail + "&nome=" + hNome);
-          const rows = await res.json();
+          const res   = await fetch(API_URL + "?tipo=treino&id=" + encodeURIComponent(sheetsId));
+          const treino = await res.json();
 
-          // Servidor já filtra — garante array
-          const filtrado = Array.isArray(rows) ? rows : [];
-
-          if (!filtrado.length) {
+          if (!treino || treino.status === "erro" || !treino.blocks) {
             secao.innerHTML = `
-              <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center gap-2">
-                <i data-lucide="history" class="w-4 h-4 text-brand-cyan"></i> Histórico de Treinos
+              <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-3 flex items-center gap-2">
+                <i data-lucide="dumbbell" class="w-4 h-4 text-brand-cyan"></i> Treino Atual
               </h3>
-              <div class="text-center py-8 text-slate-400">
-                <i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-                <p class="text-sm font-medium">Nenhum treino registrado ainda.</p>
+              <div class="text-center py-6 text-slate-400">
+                <i data-lucide="file-x" class="w-7 h-7 mx-auto mb-2 opacity-40"></i>
+                <p class="text-sm font-medium">Nenhum treino criado ainda.</p>
               </div>`;
             lucide.createIcons();
             return;
           }
 
-          // Agrupa por data (DD/MM/YYYY) — suporta ISO "2026-03-24T15:14:13.000Z" e "DD/MM/YYYY HH:MM:SS"
-          const grupos = {};
-          const horasPorChave = {};
-          filtrado.forEach(r => {
-            const raw = r["Data/Hora"] || "";
-            let chave     = "Data desconhecida";
-            let horaLabel = "";
-            try {
-              let d = null;
-              if (typeof raw === "string" && raw.includes("T")) {
-                d = new Date(raw);
-              } else if (typeof raw === "string" && raw.includes("/")) {
-                const [datePart, timePart] = raw.split(" ");
-                const [dd, mm, yyyy] = datePart.split("/");
-                d = new Date(`${yyyy}-${mm}-${dd}T${timePart || "00:00:00"}`);
-              } else if (raw) {
-                d = new Date(raw);
-              }
-              if (d && !isNaN(d.getTime())) {
-                const dia  = String(d.getDate()).padStart(2, "0");
-                const mes  = String(d.getMonth() + 1).padStart(2, "0");
-                const ano  = d.getFullYear();
-                const hora = String(d.getHours()).padStart(2, "0");
-                const min  = String(d.getMinutes()).padStart(2, "0");
-                chave     = `${dia}/${mes}/${ano}`;
-                horaLabel = `${hora}:${min}`;
-              }
-            } catch(e) { /* mantém Data desconhecida */ }
-            if (!grupos[chave]) {
-              grupos[chave] = [];
-              horasPorChave[chave] = horaLabel;
-            }
-            grupos[chave].push(r);
-          });
+          // Cores por estágio
+          const stageCores = {
+            mobilidade:    { bg: "bg-emerald-50",  border: "border-emerald-200", text: "text-emerald-700",  dot: "bg-emerald-400" },
+            ativacao:      { bg: "bg-yellow-50",   border: "border-yellow-200",  text: "text-yellow-700",   dot: "bg-yellow-400"  },
+            forca:         { bg: "bg-blue-50",     border: "border-blue-200",    text: "text-blue-700",     dot: "bg-blue-400"    },
+            desaceleracao: { bg: "bg-purple-50",   border: "border-purple-200",  text: "text-purple-700",   dot: "bg-purple-400"  },
+          };
 
-          // Ordena datas mais recentes primeiro
-          const datasOrdenadas = Object.keys(grupos).sort((a, b) => {
-            if (a === "Data desconhecida") return 1;
-            if (b === "Data desconhecida") return -1;
-            const [d1,m1,y1] = a.split("/"); const [d2,m2,y2] = b.split("/");
-            return new Date(y2,m2-1,d2) - new Date(y1,m1-1,d1);
-          });
+          const stageLabels = {
+            mobilidade:    "Mobilidade",
+            ativacao:      "Ativação",
+            forca:         "Força & Carga",
+            desaceleracao: "Desaceleração",
+          };
 
-          // Monta o acordeão — mostra só exercícios únicos por sessão (visão do treinador)
           let html = `
             <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center justify-between gap-2">
-              <span class="flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-brand-cyan"></i> Histórico de Treinos</span>
-              <span class="text-xs font-normal text-slate-400 normal-case">${datasOrdenadas.length} sessão(ões)</span>
+              <span class="flex items-center gap-2"><i data-lucide="dumbbell" class="w-4 h-4 text-brand-cyan"></i> Treino Atual</span>
+              <span class="text-xs font-normal text-slate-400 normal-case">${treino.blocks.length} bloco(s)</span>
             </h3>
-            <div class="space-y-2">`;
+            <div class="space-y-3">`;
 
-          datasOrdenadas.forEach((data, idx) => {
-            const itens       = grupos[data];
-            const nomeTreino  = itens[0]["Treino"] || "Treino";
-            const hora        = horasPorChave[data] || "";
-            const aberto      = idx === 0; // primeira sessão começa aberta
-
-            // Exercícios únicos desta sessão (para visão do treinador)
-            const exerciciosUnicos = [...new Set(itens.map(i => i["Exercício"]).filter(Boolean))];
+          treino.blocks.forEach((blk, bIdx) => {
+            const aberto = bIdx === 0;
+            const bodyId = `treino-blk-${bIdx}`;
 
             html += `
               <div class="border border-slate-200 rounded-xl overflow-hidden">
-                <button onclick="toggleHistoricoItem(this)" class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors text-left">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-brand-navy/10 flex items-center justify-center shrink-0">
-                      <i data-lucide="calendar" class="w-4 h-4 text-brand-navy"></i>
-                    </div>
-                    <div>
-                      <p class="text-sm font-bold text-brand-navy">${data}${hora ? " · " + hora : ""}</p>
-                      <p class="text-xs text-slate-500 font-medium">${nomeTreino} · ${exerciciosUnicos.length} exercício(s)</p>
-                    </div>
+                <button onclick="toggleTreinoBlk('${bodyId}')" class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors text-left">
+                  <div>
+                    <p class="text-sm font-bold text-brand-navy">${blk.name || "Treino " + (bIdx + 1)}</p>
+                    ${blk.description ? `<p class="text-xs text-slate-500 mt-0.5">${blk.description}</p>` : ""}
                   </div>
-                  <i data-lucide="${aberto ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-slate-400 shrink-0 transition-transform"></i>
+                  <i data-lucide="${aberto ? 'chevron-up' : 'chevron-down'}" id="icon-${bodyId}" class="w-4 h-4 text-slate-400 shrink-0"></i>
                 </button>
-                <div class="historico-body ${aberto ? '' : 'hidden'} divide-y divide-slate-100">`;
+                <div id="${bodyId}" class="${aberto ? '' : 'hidden'} divide-y divide-slate-100">`;
 
-            itens.forEach(item => {
-              const exercicio = item["Exercício"]  || "—";
-              const carga     = item["Carga/Reps"] || "—";
-              const rpe       = item["RPE"]        || "—";
-              const notas     = item["Notas"]      || "";
+            // Estágios do bloco — stages[stgId] é array direto de exercícios
+            if (blk.stages && typeof blk.stages === "object") {
+              const stageOrder = ["mobilidade", "ativacao", "forca", "desaceleracao"];
+              stageOrder.forEach(stgId => {
+                const items = blk.stages[stgId];
+                if (!Array.isArray(items) || items.length === 0) return;
+                const cor = stageCores[stgId] || { bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-700", dot: "bg-slate-400" };
+                const label = stageLabels[stgId] || stgId;
 
-              // Cor do RPE
-              let rpeColor = "text-slate-500";
-              const rpeNum = parseInt(rpe);
-              if (!isNaN(rpeNum)) {
-                if (rpeNum <= 3)      rpeColor = "text-emerald-600";
-                else if (rpeNum <= 6) rpeColor = "text-amber-600";
-                else                  rpeColor = "text-red-600";
-              }
+                html += `
+                  <div class="px-4 py-2 ${cor.bg} border-b ${cor.border}">
+                    <span class="text-[10px] font-bold uppercase tracking-wider ${cor.text} flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full ${cor.dot} inline-block"></span>${label}
+                    </span>
+                  </div>`;
 
-              html += `
-                <div class="px-4 py-3 bg-white">
-                  <div class="flex items-start justify-between gap-3">
-                    <p class="text-sm font-semibold text-slate-800 flex-1">${exercicio}</p>
-                    <span class="text-xs font-bold ${rpeColor} shrink-0 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100">RPE ${rpe}</span>
-                  </div>
-                  ${carga !== "—" ? `<p class="text-xs text-brand-cyan font-medium mt-1">${carga}</p>` : ""}
-                  ${notas ? `<p class="text-xs text-slate-400 italic mt-1">${notas}</p>` : ""}
-                </div>`;
-            });
+                items.forEach(item => {
+                  const metodo = item.method && item.method !== "Normal" ? `<span class="text-[10px] font-bold bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded ml-1">${item.method}</span>` : "";
+                  html += `
+                  <div class="px-4 py-2.5 bg-white flex items-center justify-between gap-3">
+                    <p class="text-sm font-semibold text-slate-800 flex-1">${item.name || "—"}${metodo}</p>
+                    <span class="text-xs text-slate-400 font-medium shrink-0">${item.sets || "—"}×${item.reps || "—"}</span>
+                  </div>`;
+                });
+              });
+            }
 
             html += `</div></div>`;
           });
@@ -1385,25 +1360,28 @@
 
         } catch (e) {
           secao.innerHTML = `
-            <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-4 flex items-center gap-2">
-              <i data-lucide="history" class="w-4 h-4 text-brand-cyan"></i> Histórico de Treinos
+            <h3 class="text-sm font-head font-bold text-brand-navy uppercase tracking-wider mb-3 flex items-center gap-2">
+              <i data-lucide="dumbbell" class="w-4 h-4 text-brand-cyan"></i> Treino Atual
             </h3>
             <div class="text-center py-6 text-red-500">
               <i data-lucide="alert-triangle" class="w-6 h-6 mx-auto mb-2"></i>
-              <p class="text-sm font-medium">Erro ao carregar histórico.</p>
+              <p class="text-sm font-medium">Erro ao carregar treino.</p>
               <p class="text-xs text-slate-400 mt-1">${e.message}</p>
             </div>`;
           lucide.createIcons();
         }
       }
 
-      function toggleHistoricoItem(btn) {
-        const body = btn.nextElementSibling;
-        const icon = btn.querySelector("[data-lucide]");
+      function toggleTreinoBlk(bodyId) {
+        const body = document.getElementById(bodyId);
+        const icon = document.getElementById("icon-" + bodyId);
+        if (!body) return;
         const aberto = !body.classList.contains("hidden");
         body.classList.toggle("hidden");
-        icon.setAttribute("data-lucide", aberto ? "chevron-down" : "chevron-up");
-        lucide.createIcons();
+        if (icon) {
+          icon.setAttribute("data-lucide", aberto ? "chevron-down" : "chevron-up");
+          lucide.createIcons();
+        }
       }
 
       // AVISO GLOBAL E INDIVIDUAL
