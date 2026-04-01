@@ -1046,6 +1046,97 @@
         saveProgress(uid, 'pse', val);
     }
 
+    function toggleNota(uid) {
+        const wrap = document.getElementById(`nota-wrap-${uid}`);
+        const icon = document.getElementById(`nota-icon-${uid}`);
+        if (!wrap) return;
+        const isOpen = wrap.style.maxHeight && wrap.style.maxHeight !== '0px';
+        if (isOpen) {
+            wrap.style.maxHeight = '0px';
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        } else {
+            wrap.style.maxHeight = '120px';
+            if (icon) icon.style.transform = 'rotate(180deg)';
+            const ta = document.getElementById(`nota-${uid}`);
+            if (ta) ta.focus();
+        }
+    }
+
+    function toggleHistNota(editId) {
+        const editDiv = document.getElementById(`${editId}-edit`);
+        const txtDiv  = document.getElementById(`${editId}-txt`);
+        if (!editDiv) return;
+        const isOpen = editDiv.style.display !== 'none';
+        editDiv.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+            const ta = document.getElementById(`${editId}-ta`);
+            if (ta) ta.focus();
+        }
+    }
+
+    async function saveHistNota(editId, nomeAluno, exercicio, dataHora) {
+        const ta  = document.getElementById(`${editId}-ta`);
+        const txt = document.getElementById(`${editId}-txt`);
+        if (!ta) return;
+        const novaNote = ta.value.trim();
+        const btnSave  = ta.parentElement.querySelector('button:last-child');
+        if (btnSave) { btnSave.disabled = true; btnSave.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; }
+
+        try {
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: 'atualizar_nota',
+                    chave: 'BENAI_SECRET_2026',
+                    nomeAluno,
+                    exercicio,
+                    dataHora,
+                    notas: novaNote
+                })
+            });
+            const result = await res.json();
+            if (!result.ok && result.status !== 'sucesso') throw new Error(result.mensagem || 'Erro');
+
+            // Atualiza UI sem recarregar histórico
+            if (txt) { txt.textContent = novaNote; }
+            toggleHistNota(editId);
+            haptic('success');
+        } catch(e) {
+            alert('Erro ao salvar: ' + e.message);
+            if (btnSave) { btnSave.disabled = false; btnSave.innerHTML = '<i class="fa-solid fa-check" style="margin-right:4px;"></i>Salvar'; }
+        }
+    }
+
+    async function deleteHistNota(editId, nomeAluno, exercicio, dataHora) {
+        const txtDiv = document.getElementById(`${editId}-txt`);
+        try {
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: 'atualizar_nota',
+                    chave: 'BENAI_SECRET_2026',
+                    nomeAluno,
+                    exercicio,
+                    dataHora,
+                    notas: ''
+                })
+            });
+            const result = await res.json();
+            if (!result.ok && result.status !== 'sucesso') throw new Error(result.mensagem || 'Erro');
+
+            // Remove bloco de nota da UI
+            const notaBloco = txtDiv ? txtDiv.closest('div[style*="border-left"]') : null;
+            if (notaBloco) notaBloco.remove();
+            haptic('medium');
+        } catch(e) {
+            alert('Erro ao excluir: ' + e.message);
+        }
+    }
+
     function saveLocalInput(id, val) {
         localStorage.setItem(id, val);
     }
@@ -1121,6 +1212,17 @@
                         <span style="color:#eab308; font-size:0.78rem; font-weight:800; text-transform:uppercase;">Um pouco difícil</span>
                     </div>
                     <input type="range" class="pse-range" min="1" max="10" value="5" id="pse-${uid}" oninput="updatePSE('${uid}', this.value)">
+                </div>
+
+                <div style="margin-top:12px;">
+                    <button onclick="toggleNota('${uid}')" style="width:100%; background:rgba(0,168,232,0.06); border:1px dashed rgba(0,168,232,0.35); border-radius:10px; padding:8px 14px; color:var(--text-muted); font-size:0.78rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:background 0.2s;">
+                        <i class="fa-regular fa-comment-dots" style="font-size:0.85rem; color:var(--accent);"></i>
+                        <span id="nota-lbl-${uid}">Adicionar observação sobre o exercício</span>
+                        <i class="fa-solid fa-chevron-down" id="nota-icon-${uid}" style="font-size:0.6rem; margin-left:auto; transition:transform 0.25s;"></i>
+                    </button>
+                    <div id="nota-wrap-${uid}" style="max-height:0; overflow:hidden; transition:max-height 0.3s ease;">
+                        <textarea id="nota-${uid}" placeholder="Ex: senti dificuldade na descida, aumentei 2kg, joelho doendo..." oninput="saveProgress('${uid}', 'nota', this.value)" style="width:100%; margin-top:8px; padding:10px 12px; background:var(--bg); border:1px solid rgba(0,168,232,0.25); border-radius:10px; color:var(--text); font-size:0.82rem; resize:none; height:72px; outline:none; font-family:inherit; line-height:1.5; box-sizing:border-box;"></textarea>
+                    </div>
                 </div>
 
                 <div class="btn-actions">
@@ -1256,7 +1358,7 @@
                 exercicio: item.name || "",
                 cargaReps: cargaRepsStr,
                 rpe: `${rpeVal} - ${rpeText}`,
-                notas: ""
+                notas: document.getElementById(`nota-${uid}`)?.value.trim() || ""
             };
             
             fetch("https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec", {
@@ -1378,6 +1480,17 @@
                 updatePSE(uid, pseEl.value);
             } else if (pseEl) {
                 updatePSE(uid, 5);
+            }
+
+            // Restaura nota do aluno
+            const notaVal = localStorage.getItem(`nota_${uid}`);
+            if (notaVal) {
+                const ta = document.getElementById(`nota-${uid}`);
+                if (ta) {
+                    ta.value = notaVal;
+                    // Abre o campo automaticamente se tiver conteúdo
+                    toggleNota(uid);
+                }
             }
         });
         
@@ -1527,6 +1640,10 @@
                     const pseEmoji = rpeEmojis[rpeNum-1] || '';
                     
                     const cargaReps = item['Carga/Reps'] || '-';
+                    const notaItem  = item['Notas'] || '';
+                    const notaEditId = `hist-nota-edit-${date}-${item['Exercício'] || ''}-${rpeNum}`.replace(/[\s\/]/g,'_');
+                    const dataHoraItem = item['Data/Hora'] || '';
+                    const exercicioItem = item['Exercício'] || '';
                     
                     const setsArr = cargaReps.split('|').map(s => s.trim()).filter(s => s);
                     let setsHtml = '';
@@ -1547,6 +1664,35 @@
                                 <span>${rpeText}</span>
                             </div>
                         </div>
+                        ${notaItem
+                            ? `<div style="display:flex; align-items:flex-start; gap:6px; background:rgba(0,168,232,0.05); border-left:2px solid var(--accent); border-radius:0 6px 6px 0; padding:5px 8px;">
+                                <i class="fa-regular fa-comment-dots" style="font-size:0.7rem; color:var(--accent); margin-top:2px;"></i>
+                                <span id="${notaEditId}-txt" style="font-size:0.78rem; color:var(--text-muted); font-style:italic; flex:1;">${notaItem}</span>
+                                <button onclick="toggleHistNota('${notaEditId}')" title="Editar observação" style="background:none; border:none; padding:2px 4px; cursor:pointer; color:var(--accent); opacity:0.7; line-height:1;">
+                                    <i class="fa-solid fa-pen" style="font-size:0.65rem;"></i>
+                                </button>
+                                <button onclick="deleteHistNota('${notaEditId}', '${currentData ? currentData.name : ''}', \`${exercicioItem}\`, \`${dataHoraItem}\`)" title="Excluir observação" style="background:none; border:none; padding:2px 4px; cursor:pointer; color:#ef4444; opacity:0.7; line-height:1;">
+                                    <i class="fa-solid fa-trash" style="font-size:0.65rem;"></i>
+                                </button>
+                               </div>
+                               <div id="${notaEditId}-edit" style="display:none; margin-top:2px;">
+                                 <textarea id="${notaEditId}-ta" style="width:100%; padding:8px 10px; background:var(--bg); border:1px solid rgba(0,168,232,0.25); border-radius:8px; color:var(--text); font-size:0.8rem; resize:none; height:60px; outline:none; font-family:inherit; box-sizing:border-box;">${notaItem}</textarea>
+                                 <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:5px;">
+                                   <button onclick="toggleHistNota('${notaEditId}')" style="background:none; border:1px solid var(--border); padding:4px 10px; border-radius:6px; font-size:0.72rem; font-weight:700; color:var(--text-muted); cursor:pointer;">Cancelar</button>
+                                   <button onclick="saveHistNota('${notaEditId}', '${currentData ? currentData.name : ''}', \`${exercicioItem}\`, \`${dataHoraItem}\`)" style="background:var(--accent); border:none; padding:4px 12px; border-radius:6px; font-size:0.72rem; font-weight:700; color:white; cursor:pointer;"><i class="fa-solid fa-check" style="margin-right:4px;"></i>Salvar</button>
+                                 </div>
+                               </div>`
+                            : `<div id="${notaEditId}-edit" style="display:none; margin-top:2px;">
+                                 <textarea id="${notaEditId}-ta" style="width:100%; padding:8px 10px; background:var(--bg); border:1px solid rgba(0,168,232,0.25); border-radius:8px; color:var(--text); font-size:0.8rem; resize:none; height:60px; outline:none; font-family:inherit; box-sizing:border-box;" placeholder="Adicionar observação..."></textarea>
+                                 <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:5px;">
+                                   <button onclick="toggleHistNota('${notaEditId}')" style="background:none; border:1px solid var(--border); padding:4px 10px; border-radius:6px; font-size:0.72rem; font-weight:700; color:var(--text-muted); cursor:pointer;">Cancelar</button>
+                                   <button onclick="saveHistNota('${notaEditId}', '${currentData ? currentData.name : ''}', \`${exercicioItem}\`, \`${dataHoraItem}\`)" style="background:var(--accent); border:none; padding:4px 12px; border-radius:6px; font-size:0.72rem; font-weight:700; color:white; cursor:pointer;"><i class="fa-solid fa-check" style="margin-right:4px;"></i>Salvar</button>
+                                 </div>
+                               </div>
+                               <button onclick="toggleHistNota('${notaEditId}')" style="background:none; border:none; padding:0; cursor:pointer; color:var(--accent); font-size:0.7rem; font-weight:700; opacity:0.6; display:flex; align-items:center; gap:4px;">
+                                 <i class="fa-solid fa-plus" style="font-size:0.6rem;"></i> Adicionar observação
+                               </button>`
+                        }
                     </div>`;
                 });
 
