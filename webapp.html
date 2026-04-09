@@ -230,8 +230,8 @@
         .congrats-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.95); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; }
         .congrats-content { animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; align-items: center; }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .congrats-icon { font-size: 6rem; color: #facc15; margin-bottom: 20px; animation: bounce 2s infinite; }
-
         /* FULLSCREEN TIMER */
         #timer-overlay {
             position: fixed; inset: 0; background: #0f172a; z-index: 9999; 
@@ -278,6 +278,23 @@
         <i class="fa-solid fa-trophy congrats-icon"></i>
         <h2 style="font-family:var(--font-head); font-weight:700; font-size:3rem; margin-bottom:10px; letter-spacing: 1px;">TREINO CONCLUÍDO!</h2>
         <p style="font-size:1.1rem; color:#cbd5e1; font-weight:600;">Excelente trabalho. O descanso agora é fundamental para o seu resultado.</p>
+    </div>
+
+    <div id="feedback-treino-form" style="display:none; width:100%; max-width:380px; margin-top:24px; animation: fadeInUp 0.4s ease;">
+        <div style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:20px;">
+            <p style="font-size:0.85rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">
+                <i class="fa-regular fa-comment-dots" style="color:var(--accent); margin-right:6px;"></i>Como foi o treino hoje?
+            </p>
+            <textarea id="feedback-treino-text" placeholder="Alguma dor, dificuldade ou observação? (opcional)" style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:white; font-size:0.88rem; resize:none; height:80px; outline:none; font-family:inherit; line-height:1.5; box-sizing:border-box;"></textarea>
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <button onclick="skipPostWorkoutFeedback()" style="flex:1; padding:11px; background:transparent; border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#94a3b8; font-size:0.85rem; font-weight:700; cursor:pointer;">
+                    Pular
+                </button>
+                <button id="btn-send-feedback-treino" onclick="sendPostWorkoutFeedback()" style="flex:2; padding:11px; background:var(--accent); border:none; border-radius:10px; color:white; font-size:0.85rem; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,168,232,0.35); display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <i class="fa-solid fa-paper-plane"></i> Enviar Feedback
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1446,10 +1463,57 @@
         
         checkBlocksState();
         
+        // Após 1.5s mostra o formulário de feedback (não fecha automaticamente)
         setTimeout(() => {
+            const form = document.getElementById('feedback-treino-form');
+            if (form) form.style.display = 'block';
+        }, 1500);
+    }
+
+    function skipPostWorkoutFeedback() {
+        document.getElementById('congrats-overlay').style.display = 'none';
+        document.getElementById('feedback-treino-text').value = '';
+        document.getElementById('feedback-treino-form').style.display = 'none';
+        go(3);
+    }
+
+    async function sendPostWorkoutFeedback() {
+        const texto = document.getElementById('feedback-treino-text').value.trim();
+        const btn   = document.getElementById('btn-send-feedback-treino');
+
+        // Se vazio, age como Pular
+        if (!texto) { skipPostWorkoutFeedback(); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
+
+        try {
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo:      'feedback_treino',
+                    chave:     'BENAI_SECRET_2026',
+                    email:     currentData ? currentData.email : '',
+                    nomeAluno: currentData ? currentData.name  : 'Aluno',
+                    mensagem:  texto
+                })
+            });
+            const result = await res.json();
+            if (result.status !== 'sucesso') throw new Error(result.mensagem || 'Erro no servidor');
+            haptic('success');
+        } catch(e) {
+            console.warn('Feedback pós-treino não enviado:', e.message);
+            // Falha silenciosa — não bloqueia o aluno
+        } finally {
             document.getElementById('congrats-overlay').style.display = 'none';
-            go(3); // Go to history tab
-        }, 3500);
+            document.getElementById('feedback-treino-text').value = '';
+            document.getElementById('feedback-treino-form').style.display = 'none';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Feedback';
+            go(3);
+        }
     }
 
     function saveProgress(uid, field, val) {
