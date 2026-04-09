@@ -1505,7 +1505,6 @@
             haptic('success');
         } catch(e) {
             console.warn('Feedback pós-treino não enviado:', e.message);
-            alert('DEBUG — Erro ao enviar feedback: ' + e.message);
             // Falha silenciosa — não bloqueia o aluno
         } finally {
             document.getElementById('congrats-overlay').style.display = 'none';
