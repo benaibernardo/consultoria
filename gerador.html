@@ -5212,6 +5212,7 @@
       }
       // --- HISTORY LOGIC ---
       let cachedHistoryData = [];
+      let cachedFeedbackData = [];
       let currentCalMonth = new Date().getMonth();
       let currentCalYear = new Date().getFullYear();
 
@@ -5227,16 +5228,22 @@
           '<div style="text-align:center; padding:40px; color:var(--text-muted);"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem; color:var(--accent); margin-bottom:10px;"></i><br>Buscando histórico na nuvem...</div>';
 
         try {
-          // URL do seu Google Apps Script
           const url =
             "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
           const emailParam = encodeURIComponent(currentStudent.email || "");
           const nomeParam  = encodeURIComponent(currentStudent.name  || "");
-          const res = await fetch(url + "?tipo=historico&email=" + emailParam + "&nome=" + nomeParam + "&t=" + Date.now());
-          const data = await res.json();
 
-          // O servidor já filtra — garante array
-          cachedHistoryData = Array.isArray(data) ? data : [];
+          // Busca histórico de exercícios e feedbacks pós-treino em paralelo
+          const [resHistorico, resFeedback] = await Promise.all([
+            fetch(url + "?tipo=historico&email=" + emailParam + "&nome=" + nomeParam + "&t=" + Date.now()),
+            fetch(url + "?tipo=feedback_treino&email=" + emailParam + "&t=" + Date.now())
+          ]);
+
+          const data     = await resHistorico.json();
+          const feedback = await resFeedback.json();
+
+          cachedHistoryData  = Array.isArray(data)     ? data     : [];
+          cachedFeedbackData = Array.isArray(feedback) ? feedback : [];
 
           renderHistoryUI();
         } catch (e) {
@@ -5331,6 +5338,27 @@
         html += "</div>";
         html += '<div class="history-feed">';
 
+        // Monta lookup de feedbacks por data (DD/MM/YYYY) — pode ter mais de um por dia
+        const feedbackPorData = {};
+        cachedFeedbackData.forEach(fb => {
+          const raw = fb["Data"] || fb["data"] || "";
+          let chave = "";
+          try {
+            if (typeof raw === "string" && raw.includes("T")) {
+              const d = new Date(raw);
+              if (!isNaN(d.getTime())) {
+                chave = String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0") + "/" + d.getFullYear();
+              }
+            } else if (typeof raw === "string" && raw.includes("/")) {
+              chave = raw.split(" ")[0]; // DD/MM/YYYY HH:MM:SS → DD/MM/YYYY
+            }
+          } catch(e) {}
+          if (chave) {
+            if (!feedbackPorData[chave]) feedbackPorData[chave] = [];
+            feedbackPorData[chave].push(fb["Mensagem"] || fb["mensagem"] || "");
+          }
+        });
+
         const rpeEmojis = ["🥱", "😌", "🙂", "😐", "🤔", "😅", "🥵", "😫", "🤬", "💀"];
 
         sortedDates.forEach((date) => {
@@ -5385,16 +5413,30 @@
 
             const cardId = idx === 0 ? `id="hist-card-${date}"` : "";
 
+            // Card de feedback pós-treino — aparece no topo da sessão se existir
+            const feedbacks = feedbackPorData[date] || [];
+            const feedbackHtml = feedbacks.length > 0
+              ? feedbacks.map(msg => `
+                <div style="margin:12px 0 4px; padding:10px 14px; background:rgba(249,115,22,0.08); border-left:3px solid #f97316; border-radius:0 8px 8px 0; display:flex; align-items:flex-start; gap:10px;">
+                  <i class="fa-solid fa-comment-smile" style="color:#f97316; font-size:0.85rem; margin-top:2px; flex-shrink:0;"></i>
+                  <div>
+                    <span style="font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#f97316; display:block; margin-bottom:3px;">Feedback do aluno</span>
+                    <span style="font-size:0.82rem; color:var(--text); line-height:1.4;">${msg}</span>
+                  </div>
+                </div>`).join("")
+              : "";
+
             html += `
                 <div ${cardId} class="history-card" style="display:none; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:10px; scroll-margin-top: 20px;">
                     <div class="hc-header" onclick="this.nextElementSibling.classList.toggle('collapsed'); this.querySelector('.fa-chevron-down').style.transform = this.nextElementSibling.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(0deg)';" style="padding:15px; background:rgba(0,168,232,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                         <div>
-                            <div style="font-weight:800; color:var(--primary); font-size:0.95rem;">${treinoNome}</div>
+                            <div style="font-weight:800; color:var(--primary); font-size:0.95rem;">${treinoNome}${feedbacks.length > 0 ? ' <span style="font-size:0.7rem; background:rgba(249,115,22,0.15); color:#f97316; padding:2px 7px; border-radius:10px; font-weight:700; vertical-align:middle;">💬 feedback</span>' : ""}</div>
                             <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;"><i class="fa-regular fa-calendar" style="color:var(--accent);"></i> ${date}</div>
                         </div>
                         <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.8rem; transition:0.3s; transform:rotate(-90deg);"></i>
                     </div>
                     <div class="hc-body collapsed" style="padding:0 15px; transition: max-height 0.3s ease-in-out, padding 0.3s; max-height: 2000px; overflow: hidden;">
+                        ${feedbackHtml}
                         ${exHtml}
                         <div style="height:10px;"></div>
                     </div>
