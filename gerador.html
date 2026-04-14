@@ -2881,7 +2881,7 @@
                   experiencia:  registro["Experiencia"]       || "",
                   local:        registro["Local"]             || "",
                   equipamentos: registro["Equipamentos"]      || "",
-                  diasSemana:   registro["Dias_Semana"]       || "",
+                  diasSemana:   registro["Dias_Treino"]        || "",
                   tempoTreino:  registro["Tempo_Treino"]      || "",
                   condicoes:    registro["Condicoes_Medicas"] || "",
                   dores:        registro["Dores_Lesoes"]      || "",
@@ -3506,6 +3506,7 @@
           const result = await res.json();
           if (result.status === "erro") {
             console.error("Erro no auto-save da gestão:", result.mensagem);
+            showToast("⚠️ Atenção: dados de gestão não foram salvos no Sheets.");
           } else {
             console.log("Gestão salva para", currentStudent.email);
           }
@@ -4720,7 +4721,10 @@
             const localIds = appData.students.map((s) => s.id);
             masterData.studentIndex.forEach((idxStudent) => {
               if (!localIds.includes(idxStudent.id)) {
-                // Add placeholder student to list
+                // FIX: só cria placeholder para alunos Gist (têm gistId real).
+                // Alunos do Sheets (gistId null) são carregados pelo syncFromSheets —
+                // criar placeholder aqui causa duplicatas fantasmas.
+                if (!idxStudent.gistId) return;
                 appData.students.push({
                   id: idxStudent.id,
                   name: idxStudent.name,
@@ -4851,6 +4855,13 @@
             seenSync.add(key);
             return true;
           });
+
+          // FIX: remove placeholders órfãos de alunos Sheets.
+          // Esses fantasmas surgem quando o Master Gist criava placeholder sem gistId.
+          // Alunos Gist reais SEMPRE têm gistId preenchido — são preservados.
+          appData.students = appData.students.filter(s =>
+            !(s.focus === "Carregando..." && !s.gistId)
+          );
 
           saveLocal();
           renderStudentList();
