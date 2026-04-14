@@ -1443,6 +1443,16 @@
         background: #8b5cf6;
         color: white;
       }
+      .tile-refresh {
+        background: #f0fdf4;
+        color: #059669;
+        border-color: #6ee7b7;
+        grid-column: span 2;
+      }
+      .tile-refresh:hover {
+        background: #059669;
+        color: white;
+      }
 
       /* --- LIB MODAL STYLES (NEW) --- */
       .lib-field-row {
@@ -2489,6 +2499,10 @@
             <i class="fa-solid fa-id-card" style="font-size: 1.5rem"></i>
             <span>Importar ID</span>
           </div>
+          <div class="cloud-tile tile-refresh" onclick="syncFromSheets(false, true).then(() => { showToast('✅ Dados atualizados do Sheets!'); closeModal('modal-cloud'); })">
+            <i class="fa-solid fa-rotate" style="font-size: 1.5rem"></i>
+            <span>Forçar Atualização do Sheets</span>
+          </div>
         </div>
 
         <div
@@ -2567,11 +2581,48 @@
       </div>
     </div>
 
+    <!-- CUSTOM PROMPT MODAL -->
+    <div id="custom-prompt-modal" class="modal" style="z-index: 10000">
+      <div class="modal-box" style="max-width: 400px; text-align: center">
+        <div style="font-size: 3rem; color: var(--accent); margin-bottom: 15px">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <div id="custom-prompt-msg" style="font-size: 1rem; color: var(--text); margin-bottom: 15px; font-weight: 700;"></div>
+        <input
+          id="custom-prompt-input"
+          class="search-inp"
+          style="margin-bottom: 20px; text-align: center; font-weight: 700;"
+        />
+        <div style="display: flex; gap: 10px">
+          <button
+            class="btn-demo-block"
+            id="custom-prompt-cancel"
+            style="margin: 0; background: var(--surface); color: var(--text); border: 1px solid var(--border);"
+          >Cancelar</button>
+          <button class="btn-primary-block" id="custom-prompt-ok" style="margin: 0">Salvar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- TOAST -->
     <div id="toast" class="toast">Ação Realizada!</div>
 
     <script>
       // --- STATE ---
+
+      // Pilares padrão — fonte única de verdade. Referenciados em appData e no onload fallback.
+      const DEFAULT_PILLARS = [
+        { title: "Respiração Tática",        text: "O ar é seu aliado. INSPIRE na fase fácil (descida). EXPIRE na fase de força (subida). Não prenda a respiração!",                                                                                             icon: "fa-wind",                color: "p-cyan"   },
+        { title: "Estabilidade e Proteção",   text: "Mantenha o abdômen contraído em todos os exercícios. Ative a musculatura do core como um cinturão de força: essa rigidez protege sua coluna e melhora a postura.",                                            icon: "fa-shield-halved",       color: "p-purple" },
+        { title: "Controle do Movimento",     text: "O músculo cresce sob tensão. Descida sempre lenta e controlada (3s). Subida explosiva, porém controlada.",                                                                                                     icon: "fa-stopwatch",           color: "p-blue"   },
+        { title: "Intervalo Estratégico",     text: "O descanso é parte do treino. Use o cronômetro. Em Bi-Set/Tri-Set, descanse apenas após o último exercício do grupo.",                                                                                         icon: "fa-hourglass-half",      color: "p-orange" },
+        { title: "Dor Articular é Sinal Vermelho", text: "Dor muscular é normal, articular NUNCA. Sentiu dor na articulação? PARE na hora, reduza a carga ou avise o treinador.",                                                                                  icon: "fa-triangle-exclamation",color: "p-red"    },
+        { title: "Intensidade Real (RPE)",    text: "A carga está perfeita se você atinge as repetições e sente que só faria mais 1 ou 2. Se fizer mais, está leve!",                                                                                              icon: "fa-fire",                color: "p-pink"   },
+        { title: "Desafio da Progressão",     text: "Tente superar o treino anterior (1kg a mais ou 1 repetição a mais). Mas lembre-se: a técnica perfeita vem ANTES da carga.",                                                                                   icon: "fa-arrow-trend-up",      color: "p-green"  },
+        { title: "Hidratação",                text: "Músculo desidratado não tem força e não cresce. Beba água antes, durante e após o treino.",                                                                                                                     icon: "fa-droplet",             color: "p-cyan"   },
+        { title: "Sono e Recuperação",        text: "O músculo não cresce no treino, cresce no descanso. Priorize a qualidade do seu sono.",                                                                                                                        icon: "fa-bed",                 color: "p-purple" },
+        { title: "Aquecimento e Preparação",  text: "Prepare suas articulações antes de colocar carga. O aquecimento previne lesões e melhora a performance.",                                                                                                      icon: "fa-person-running",      color: "p-orange" },
+      ];
       const DB_KEY = "BENAI_CRM_V1";
       const TOKEN_KEY = "BENAI_GLOBAL_TOKEN";
       const MASTER_GIST_KEY = "BENAI_MASTER_GIST_ID";
@@ -2592,68 +2643,7 @@
         ],
         equips: ["Barra", "Halter", "Máquina", "Polia", "Livre", "Elástico"],
         methods: ["Musculação", "Calistenia", "Híbrido"],
-        pillars: [
-          {
-            title: "Respiração Tática",
-            text: "O ar é seu aliado. INSPIRE na fase fácil (descida). EXPIRE na fase de força (subida). Não prenda a respiração!",
-            icon: "fa-wind",
-            color: "p-cyan",
-          },
-          {
-            title: "Estabilidade e Proteção",
-            text: "Mantenha o abdômen contraído em todos os exercícios. Ative a musculatura do core como um cinturão de força: essa rigidez protege sua coluna e melhora a postura.",
-            icon: "fa-shield-halved",
-            color: "p-purple",
-          },
-          {
-            title: "Controle do Movimento",
-            text: "O músculo cresce sob tensão. Descida sempre lenta e controlada (3s). Subida explosiva, porém controlada.",
-            icon: "fa-stopwatch",
-            color: "p-blue",
-          },
-          {
-            title: "Intervalo Estratégico",
-            text: "O descanso é parte do treino. Use o cronômetro. Em Bi-Set/Tri-Set, descanse apenas após o último exercício do grupo.",
-            icon: "fa-hourglass-half",
-            color: "p-orange",
-          },
-          {
-            title: "Dor Articular é Sinal Vermelho",
-            text: "Dor muscular é normal, articular NUNCA. Sentiu dor na articulação? PARE na hora, reduza a carga ou avise o treinador.",
-            icon: "fa-triangle-exclamation",
-            color: "p-red",
-          },
-          {
-            title: "Intensidade Real (RPE)",
-            text: "A carga está perfeita se você atinge as repetições e sente que só faria mais 1 ou 2. Se fizer mais, está leve!",
-            icon: "fa-fire",
-            color: "p-pink",
-          },
-          {
-            title: "Desafio da Progressão",
-            text: "Tente superar o treino anterior (1kg a mais ou 1 repetição a mais). Mas lembre-se: a técnica perfeita vem ANTES da carga.",
-            icon: "fa-arrow-trend-up",
-            color: "p-green",
-          },
-          {
-            title: "Hidratação",
-            text: "Músculo desidratado não tem força e não cresce. Beba água antes, durante e após o treino.",
-            icon: "fa-droplet",
-            color: "p-cyan",
-          },
-          {
-            title: "Sono e Recuperação",
-            text: "O músculo não cresce no treino, cresce no descanso. Priorize a qualidade do seu sono.",
-            icon: "fa-bed",
-            color: "p-purple",
-          },
-          {
-            title: "Aquecimento e Preparação",
-            text: "Prepare suas articulações antes de colocar carga. O aquecimento previne lesões e melhora a performance.",
-            icon: "fa-person-running",
-            color: "p-orange",
-          },
-        ],
+        pillars: JSON.parse(JSON.stringify(DEFAULT_PILLARS)),
         masterGistId: null, // Armazena o ID do Gist Master
       };
 
@@ -2728,68 +2718,7 @@
           appData = { ...appData, ...parsed };
           // Ensure pillars exist in appData if old data loaded
           if (!appData.pillars || appData.pillars.length === 0) {
-            appData.pillars = [
-              {
-                title: "Respiração Tática",
-                text: "O ar é seu aliado. INSPIRE na fase fácil (descida). EXPIRE na fase de força (subida). Não prenda a respiração!",
-                icon: "fa-wind",
-                color: "p-cyan",
-              },
-              {
-                title: "Estabilidade e Proteção",
-                text: "Mantenha o abdômen contraído em todos os exercícios. Ative a musculatura do core como um cinturão de força: essa rigidez protege sua coluna e melhora a postura.",
-                icon: "fa-shield-halved",
-                color: "p-purple",
-              },
-              {
-                title: "Controle do Movimento",
-                text: "O músculo cresce sob tensão. Descida sempre lenta e controlada (3s). Subida explosiva, porém controlada.",
-                icon: "fa-stopwatch",
-                color: "p-blue",
-              },
-              {
-                title: "Intervalo Estratégico",
-                text: "O descanso é parte do treino. Use o cronômetro. Em Bi-Set/Tri-Set, descanse apenas após o último exercício do grupo.",
-                icon: "fa-hourglass-half",
-                color: "p-orange",
-              },
-              {
-                title: "Dor Articular é Sinal Vermelho",
-                text: "Dor muscular é normal, articular NUNCA. Sentiu dor na articulação? PARE na hora, reduza a carga ou avise o treinador.",
-                icon: "fa-triangle-exclamation",
-                color: "p-red",
-              },
-              {
-                title: "Intensidade Real (RPE)",
-                text: "A carga está perfeita se você atinge as repetições e sente que só faria mais 1 ou 2. Se fizer mais, está leve!",
-                icon: "fa-fire",
-                color: "p-pink",
-              },
-              {
-                title: "Desafio da Progressão",
-                text: "Tente superar o treino anterior (1kg a mais ou 1 repetição a mais). Mas lembre-se: a técnica perfeita vem ANTES da carga.",
-                icon: "fa-arrow-trend-up",
-                color: "p-green",
-              },
-              {
-                title: "Hidratação",
-                text: "Músculo desidratado não tem força e não cresce. Beba água antes, durante e após o treino.",
-                icon: "fa-droplet",
-                color: "p-cyan",
-              },
-              {
-                title: "Sono e Recuperação",
-                text: "O músculo não cresce no treino, cresce no descanso. Priorize a qualidade do seu sono.",
-                icon: "fa-bed",
-                color: "p-purple",
-              },
-              {
-                title: "Aquecimento e Preparação",
-                text: "Prepare suas articulações antes de colocar carga. O aquecimento previne lesões e melhora a performance.",
-                icon: "fa-person-running",
-                color: "p-orange",
-              },
-            ];
+            appData.pillars = JSON.parse(JSON.stringify(DEFAULT_PILLARS));
           }
         }
         // Lê do sessionStorage (preenchido no login) com fallback pro localStorage
@@ -4466,6 +4395,10 @@
         saveLocal();
         renderEditor();
         showToast("Exercício adicionado!");
+
+        // FIX: reseta o destino após adicionar — próximo clique vai para o último bloco por padrão
+        targetBlockIdx = null;
+        targetStageId  = null;
       }
 
       async function deleteLibItem(idx) {
@@ -4615,13 +4548,14 @@
 
       function editCategory(idx) {
         const oldVal = appData[editingCatType][idx];
-        const newVal = prompt("Editar nome:", oldVal);
-        if (newVal && newVal.trim() !== "" && newVal !== oldVal) {
-          appData[editingCatType][idx] = newVal.trim();
-          saveLocal();
-          renderCatList();
-          refreshSelects(editingCatType);
-        }
+        customPrompt("Editar nome:", oldVal).then(newVal => {
+          if (newVal !== null && newVal.trim() !== "" && newVal !== oldVal) {
+            appData[editingCatType][idx] = newVal.trim();
+            saveLocal();
+            renderCatList();
+            refreshSelects(editingCatType);
+          }
+        });
       }
       async function delCategory(type, idx) {
         if (await customConfirm("Remover esta opção da lista?")) {
@@ -4795,7 +4729,7 @@
 
 
       // 4B. SYNC FROM SHEETS (alunos do novo sistema — sheetsId)
-      async function syncFromSheets(silent = false) {
+      async function syncFromSheets(silent = false, forceRefresh = false) {
         try {
           const GAS_URL = "https://script.google.com/macros/s/AKfycbxBLR5u1BVTJoD8HYwBF603lSfXKkJBXqf9voHfcUiywxgsAsJ8tLeClhNL-1gdeHRf/exec";
 
@@ -4818,7 +4752,7 @@
 
             // Verifica se já existe localmente com dados completos
             const existente = appData.students.find(s => s.email === email || s.sheetsId === sheetsId);
-            if (existente && existente.blocks && existente.blocks.length > 0) continue;
+            if (!forceRefresh && existente && existente.blocks && existente.blocks.length > 0) continue;
 
             // 2. Busca o treino JSON pelo sheetsId
             try {
@@ -5214,6 +5148,36 @@
 
       function closeCustomAlert() {
         document.getElementById("custom-alert-modal").style.display = "none";
+      }
+
+      function customPrompt(msg, defaultValue = "") {
+        return new Promise((resolve) => {
+          document.getElementById("custom-prompt-msg").innerText   = msg;
+          const inp = document.getElementById("custom-prompt-input");
+          inp.value = defaultValue;
+          document.getElementById("custom-prompt-modal").style.display = "flex";
+          setTimeout(() => { inp.focus(); inp.select(); }, 50);
+
+          const btnOk     = document.getElementById("custom-prompt-ok");
+          const btnCancel = document.getElementById("custom-prompt-cancel");
+
+          const newOk     = btnOk.cloneNode(true);
+          const newCancel = btnCancel.cloneNode(true);
+          btnOk.parentNode.replaceChild(newOk, btnOk);
+          btnCancel.parentNode.replaceChild(newCancel, btnCancel);
+
+          const close = (val) => {
+            document.getElementById("custom-prompt-modal").style.display = "none";
+            resolve(val);
+          };
+
+          newOk.addEventListener("click",     () => close(inp.value));
+          newCancel.addEventListener("click",  () => close(null));
+          inp.addEventListener("keydown", (e) => {
+            if (e.key === "Enter")  close(inp.value);
+            if (e.key === "Escape") close(null);
+          });
+        });
       }
 
       function customConfirm(msg) {
