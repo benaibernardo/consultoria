@@ -2131,7 +2131,7 @@
     </div>
 
     <!-- MODAL: ADD EXERCISE (UPDATED) -->
-    <div id="modal-lib" class="modal">
+    <div id="modal-lib" class="modal" style="z-index:300">
       <div class="modal-box">
         <div class="modal-head">
           <span style="display: flex; align-items: center; gap: 10px">
@@ -2238,7 +2238,7 @@
     </div>
 
     <!-- MODAL: CATEGORY MANAGER -->
-    <div id="modal-cat" class="modal">
+    <div id="modal-cat" class="modal" style="z-index:300">
       <div class="modal-box">
         <div class="modal-head">
           <span id="cat-modal-title">Gerenciar</span>
@@ -2266,7 +2266,7 @@
     </div>
 
     <!-- MODAL: PILLAR MANAGER (NEW) -->
-    <div id="modal-pillar" class="modal">
+    <div id="modal-pillar" class="modal" style="z-index:300">
       <div class="modal-box">
         <div class="modal-head">
           <span id="pillar-modal-title">Novo Pilar</span>
@@ -2451,7 +2451,7 @@
     </div>
 
     <!-- MODAL: TEMPLATES -->
-    <div id="modal-templates" class="modal">
+    <div id="modal-templates" class="modal" style="z-index:200">
       <div class="modal-box" style="width:620px; max-height:88vh; display:flex; flex-direction:column;">
         <div class="modal-head">
           <span style="display:flex; align-items:center; gap:10px;">
@@ -2475,7 +2475,7 @@
     </div>
 
     <!-- MODAL: TEMPLATE EDITOR -->
-    <div id="modal-tpl-editor" class="modal">
+    <div id="modal-tpl-editor" class="modal" style="z-index:200">
       <div class="modal-box" style="width:680px; max-height:92vh; display:flex; flex-direction:column;">
         <div class="modal-head">
           <span id="tpl-editor-title" style="display:flex; align-items:center; gap:10px;">
@@ -2516,6 +2516,30 @@
             <i class="fa-solid fa-check"></i> Salvar Template
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- MODAL: MINI BIBLIOTECA (para uso dentro do editor de template) -->
+    <div id="modal-tpl-lib" class="modal" style="z-index:400">
+      <div class="modal-box" style="width:420px; max-height:80vh; display:flex; flex-direction:column;">
+        <div class="modal-head">
+          <span style="display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-book-open" style="color:#0891b2"></i> Biblioteca de Exercícios
+          </span>
+          <i class="fa-solid fa-xmark" onclick="closeModal('modal-tpl-lib')" style="cursor:pointer"></i>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px; padding:6px 10px; background:rgba(8,145,178,0.08); border-radius:8px;">
+          <i class="fa-solid fa-location-crosshairs" style="color:#0891b2"></i>
+          Adicionando em: <strong id="tpl-lib-dest-label">—</strong>
+        </div>
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <input id="tpl-lib-search" class="search-inp" style="margin:0;flex:1;" placeholder="Buscar exercício..."
+            oninput="renderTplLibModal()"/>
+          <select id="tpl-lib-group" class="filter-select" style="width:auto;" onchange="renderTplLibModal()">
+            <option value="">Todos os grupos</option>
+          </select>
+        </div>
+        <div id="tpl-lib-results" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
       </div>
     </div>
 
@@ -5737,6 +5761,104 @@
       }
 
       // --- Renderiza editor de template ---
+      // Mini biblioteca para o editor de template
+      let tplLibTargetBIdx   = null;
+      let tplLibTargetStage  = null;
+
+      function openTplLibModal(bIdx, stageId) {
+        tplLibTargetBIdx  = bIdx;
+        tplLibTargetStage = stageId;
+
+        // Atualiza label de destino
+        const stageNames = { mobilidade: "Mobilidade", ativacao: "Ativação", forca: "Força & Carga", desaceleracao: "Desaceleração" };
+        const blkName    = tplBlocks[bIdx]?.name || "Bloco " + (bIdx + 1);
+        const destLabel  = document.getElementById("tpl-lib-dest-label");
+        if (destLabel) destLabel.innerText = blkName + " → " + (stageNames[stageId] || stageId);
+
+        // Popula filtro de grupos
+        const grpSel = document.getElementById("tpl-lib-group");
+        if (grpSel && grpSel.options.length <= 1) {
+          appData.groups.forEach(g => grpSel.add(new Option(g, g)));
+        }
+
+        document.getElementById("modal-tpl-lib").style.display = "flex";
+        setTimeout(() => {
+          const inp = document.getElementById("tpl-lib-search");
+          if (inp) { inp.value = ""; inp.focus(); }
+        }, 50);
+        renderTplLibModal();
+      }
+
+      function renderTplLibModal() {
+        const term  = (document.getElementById("tpl-lib-search")?.value || "").toLowerCase();
+        const group = document.getElementById("tpl-lib-group")?.value || "";
+        const cont  = document.getElementById("tpl-lib-results");
+        if (!cont) return;
+
+        const filtered = appData.library.filter(ex =>
+          (!term  || ex.name.toLowerCase().includes(term)) &&
+          (!group || ex.group === group)
+        );
+
+        if (filtered.length === 0) {
+          cont.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;">
+            Nenhum exercício encontrado.<br/>
+            <span style="font-size:0.75rem; opacity:0.7;">Feche e crie o exercício na biblioteca principal.</span>
+          </div>`;
+          return;
+        }
+
+        cont.innerHTML = filtered.map((ex, i) => {
+          const realIdx = appData.library.indexOf(ex);
+          return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:0.2s;"
+            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div>
+              <div style="font-weight:700;font-size:0.88rem;color:var(--text);">${ex.name}</div>
+              <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;">
+                <span style="font-size:0.62rem;padding:1px 6px;border-radius:3px;background:rgba(0,31,91,0.08);color:var(--primary);font-weight:700;">${ex.group}</span>
+                <span style="font-size:0.62rem;padding:1px 6px;border-radius:3px;background:rgba(245,158,11,0.1);color:#b45309;font-weight:700;">${ex.equip}</span>
+                ${ex.video ? `<i class="fa-solid fa-circle-play" style="color:#0891b2;cursor:pointer;" onclick="window.open('${ex.video}','_blank')" title="Ver vídeo"></i>` : ""}
+              </div>
+            </div>
+            <button onclick="addFromTplLib(${realIdx})"
+              style="padding:6px 14px;border-radius:8px;border:none;background:var(--success);color:white;font-weight:700;cursor:pointer;font-size:0.8rem;white-space:nowrap;">
+              + Adicionar
+            </button>
+          </div>`;
+        }).join("");
+      }
+
+      function addFromTplLib(libIdx) {
+        if (tplLibTargetBIdx === null || tplLibTargetStage === null) return;
+        const ex = appData.library[libIdx];
+        tplBlocks[tplLibTargetBIdx].stages[tplLibTargetStage].push({
+          name:   ex.name,
+          group:  ex.group  || appData.groups[0] || "",
+          equip:  ex.equip  || appData.equips[0] || "",
+          method: ex.method || "Normal",
+          sets:   "3",
+          reps:   "10",
+          rest:   "60s",
+          restEx: "",
+          extra:  "",
+          video:  ex.video  || "",
+        });
+        closeModal("modal-tpl-lib");
+        renderTplEditor();
+        showToast("\"" + ex.name + "\" adicionado!");
+      }
+
+      function tplMethodExtraField(method, bIdx, stageId, eIdx, val) {
+        const v = val || "";
+        const onch = `tplBlocks[${bIdx}].stages['${stageId}'][${eIdx}].extra = this.value`;
+        const base = `style="width:100%;margin-top:4px;" class="extra-inp"`;
+        if (method === "Isometria")  return `<input ${base} placeholder="Tempo isometria (ex: 30s)" value="${v}" onchange="${onch}"/>`;
+        if (method === "Drop-set")   return `<input ${base} placeholder="Qtd drops / detalhes (ex: 2 drops)" value="${v}" onchange="${onch}"/>`;
+        if (method === "Rest-Pause") return `<input ${base} placeholder="Pausa entre falhas (ex: 15s)" value="${v}" onchange="${onch}"/>`;
+        if (method === "Pirâmide")   return `<input ${base} placeholder="Cargas (ex: 10/12/14kg)" value="${v}" onchange="${onch}"/>`;
+        return "";
+      }
+
       function renderTplEditor() {
         const container = document.getElementById("tpl-blocks-container");
         const stagesDef = [
@@ -5762,8 +5884,12 @@
               return `<div style="background:${stg.color}; border-left:3px solid ${stg.text}; border-radius:6px; padding:8px; margin-bottom:8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                   <span style="font-size:0.78rem; font-weight:800; color:${stg.text};">${stg.name}</span>
-                  <button style="font-size:0.7rem; padding:3px 10px; border-radius:6px; border:none; background:${stg.text}; color:white; cursor:pointer; font-weight:700;"
-                    onclick="addTplEx(${bIdx},'${stg.id}')">+ Exercício</button>
+                  <div style="display:flex; gap:5px;">
+                    <button style="font-size:0.7rem; padding:3px 8px; border-radius:6px; border:1px solid ${stg.text}; background:transparent; color:${stg.text}; cursor:pointer; font-weight:700;"
+                      onclick="openTplLibModal(${bIdx},'${stg.id}')"><i class="fa-solid fa-book-open" style="font-size:0.65rem;"></i> Biblioteca</button>
+                    <button style="font-size:0.7rem; padding:3px 10px; border-radius:6px; border:none; background:${stg.text}; color:white; cursor:pointer; font-weight:700;"
+                      onclick="addTplEx(${bIdx},'${stg.id}')">+ Exercício</button>
+                  </div>
                 </div>
                 ${items.map((ex, eIdx) => `
                   <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:8px; border-left:3px solid ${stg.text};">
@@ -5781,9 +5907,10 @@
                     <div style="display:grid; grid-template-columns:1.4fr 0.7fr 0.7fr 0.7fr 0.7fr; gap:5px; margin-bottom:8px;">
                       <div class="stat-input-grp">
                         <label class="stat-lbl">Método</label>
-                        <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].method = this.value">
+                        <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].method = this.value; renderTplEditor()">
                           ${methods.map(m => `<option ${ex.method===m?"selected":""}>${m}</option>`).join("")}
                         </select>
+                        ${tplMethodExtraField(ex.method, bIdx, stg.id, eIdx, ex.extra)}
                       </div>
                       <div class="stat-input-grp">
                         <label class="stat-lbl">Séries</label>
@@ -5935,22 +6062,33 @@
       async function applyTemplate(listKey, idx) {
         const t = appData.templates[listKey][idx];
 
-        // Monta lista de alunos para seleção
-        const students = appData.students.filter(s => s.name && s.name !== "Novo Aluno");
+        const students = appData.students
+          .filter(s => s.name && s.name !== "Novo Aluno" && !s.focus?.includes("Carregando"))
+          .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+
         if (students.length === 0) return customAlert("Nenhum aluno disponível. Crie um aluno primeiro.");
 
-        // Cria options do select
-        const options = students
-          .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
-          .map(s => `<option value="${s.id}"${currentStudent && s.id === currentStudent.id ? " selected" : ""}>${s.name}</option>`)
-          .join("");
+        // Monta datalist de alunos para autocomplete
+        const datalistId = "apply-tpl-students-list";
+        const currentName = currentStudent ? currentStudent.name : "";
 
-        // Usa customConfirm adaptado com select embutido
         const targetId = await new Promise(resolve => {
-          const msg = `Aplicar template <strong>"${t.name}"</strong> em qual aluno?`;
           document.getElementById("custom-confirm-msg").innerHTML =
-            msg + `<br/><br/><select id="apply-tpl-student" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:700;font-size:0.9rem;margin-top:4px;">${options}</select>`;
+            `Aplicar <strong>"${t.name}"</strong> em qual aluno?<br/><br/>
+            <input id="apply-tpl-input" list="${datalistId}"
+              value="${currentName}"
+              placeholder="Digite o nome do aluno..."
+              style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);
+                     background:var(--surface);color:var(--text);font-weight:700;font-size:0.9rem;outline:none;"/>
+            <datalist id="${datalistId}">
+              ${students.map(s => `<option value="${s.name}"></option>`).join("")}
+            </datalist>`;
+
           document.getElementById("custom-confirm-modal").style.display = "flex";
+          setTimeout(() => {
+            const inp = document.getElementById("apply-tpl-input");
+            if (inp) { inp.focus(); inp.select(); }
+          }, 50);
 
           const btnYes = document.getElementById("custom-confirm-yes");
           const btnNo  = document.getElementById("custom-confirm-no");
@@ -5960,9 +6098,11 @@
           btnNo.parentNode.replaceChild(newNo, btnNo);
 
           newYes.addEventListener("click", () => {
-            const sel = document.getElementById("apply-tpl-student");
+            const inp  = document.getElementById("apply-tpl-input");
+            const name = inp ? inp.value.trim() : "";
+            const found = students.find(s => s.name.toLowerCase() === name.toLowerCase());
             document.getElementById("custom-confirm-modal").style.display = "none";
-            resolve(sel ? sel.value : null);
+            resolve(found ? found.id : null);
           });
           newNo.addEventListener("click", () => {
             document.getElementById("custom-confirm-modal").style.display = "none";
@@ -5970,17 +6110,16 @@
           });
         });
 
-        if (!targetId) return;
+        if (!targetId) return customAlert("Aluno não encontrado. Verifique o nome digitado.");
 
-        // Carrega o aluno alvo (pode não ser o currentStudent)
         const targetStudent = appData.students.find(s => s.id === targetId);
-        if (!targetStudent) return customAlert("Aluno não encontrado.");
+        if (!targetStudent) return;
 
         if (listKey === "treinos") {
           const hasBlocks = targetStudent.blocks && targetStudent.blocks.length > 0;
           if (hasBlocks) {
             if (!(await customConfirm(
-              `Aplicar o template "${t.name}" vai substituir os blocos atuais de ${targetStudent.name}.\n\nDeseja continuar?`
+              `Aplicar "${t.name}" vai substituir os blocos atuais de ${targetStudent.name}.\n\nDeseja continuar?`
             ))) return;
           }
           targetStudent.blocks = JSON.parse(JSON.stringify(t.blocks));
@@ -5992,12 +6131,10 @@
         saveLocal();
         closeModal("modal-templates");
 
-        // Se o aluno alvo for o atual, re-renderiza o editor
         if (currentStudent && currentStudent.id === targetId) {
           renderEditor();
           switchView("train");
         } else {
-          // Carrega o aluno alvo na tela
           loadStudent(targetId);
         }
         showToast(`Template "${t.name}" aplicado em ${targetStudent.name}!`);
