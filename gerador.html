@@ -94,7 +94,7 @@
       /* --- LAYOUT GRID --- */
       #main-layout {
         display: grid;
-        grid-template-columns: 340px 1fr 320px;
+        grid-template-columns: 260px 1fr;
         width: 100%;
         height: 100%;
       }
@@ -105,12 +105,13 @@
         border-right: 1px solid var(--border);
         display: flex;
         flex-direction: column;
-        padding: 20px;
+        padding: 14px;
         z-index: 20;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
         height: 100%;
         overflow: hidden;
         box-sizing: border-box;
+        width: 260px;
       }
 
       .sb-header {
@@ -304,28 +305,26 @@
       /* --- COL 2: EDITOR WORKSPACE --- */
       .workspace {
         display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 20px;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
         overflow-y: auto;
         background: var(--mgr-bg);
         position: relative;
-        gap: 20px;
+        height: 100%;
       }
 
       .phone-frame {
-        width: 520px;
-        min-height: 850px;
         background: var(--bg);
-        border-radius: 40px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-        border: 8px solid #1e293b;
-        overflow: hidden;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        overflow: visible;
         display: flex;
         flex-direction: column;
-        position: relative;
-        flex-shrink: 0;
-        transition: all 0.3s ease-in-out;
+        flex: 1;
+        min-height: 0;
+        transition: none;
       }
 
       .app-header {
@@ -560,7 +559,7 @@
       .editor-content {
         flex: 1;
         overflow-y: auto;
-        padding: 0 15px 100px 15px;
+        padding: 16px 16px 80px 16px;
         scroll-behavior: smooth;
       }
 
@@ -1080,6 +1079,234 @@
         border: 1px solid var(--border); border-radius: 8px; padding: 8px;
       }
       .tpl-ex-row .stat-inp { font-size: 0.78rem; }
+
+      /* ── PRODUCTION LAYOUT ─────────────────────────── */
+
+      /* Header compacto do aluno */
+      .prod-header {
+        background: var(--primary);
+        padding: 10px 16px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        flex-shrink: 0;
+        position: relative;
+        z-index: 10;
+      }
+      .prod-header-name {
+        font-family: var(--font-head);
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: white;
+        background: transparent;
+        border: none;
+        min-width: 80px;
+        outline: none;
+        flex-shrink: 0;
+      }
+      .prod-header-name:focus { border-bottom: 2px solid var(--accent); }
+      .prod-header-focus {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 6px;
+        color: var(--accent);
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        outline: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .prod-dates {
+        display: flex;
+        gap: 10px;
+        margin-left: auto;
+        align-items: center;
+        font-size: 0.72rem;
+        opacity: 0.85;
+      }
+      .prod-date-pill {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255,255,255,0.08);
+        padding: 3px 8px;
+        border-radius: 6px;
+      }
+      .prod-date-pill input {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 0.72rem;
+        font-weight: 700;
+        outline: none;
+        width: 90px;
+      }
+      .prod-expand-btn {
+        width: 28px; height: 28px;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.8rem;
+        transition: 0.2s;
+        flex-shrink: 0;
+      }
+      .prod-expand-btn:hover { background: rgba(255,255,255,0.2); }
+
+      /* Painel de detalhes do aluno — colapsável */
+      .prod-details-panel {
+        background: var(--primary);
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.35s ease, padding 0.35s ease;
+        padding: 0 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .prod-details-panel.open {
+        max-height: 300px;
+        padding: 14px 16px;
+      }
+
+      /* Tab nav horizontal compacto */
+      .prod-tabs {
+        display: flex;
+        gap: 0;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .prod-tab {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: var(--text-muted);
+        border-bottom: 2px solid transparent;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .prod-tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+        background: var(--bg);
+      }
+      .prod-tab:hover:not(.active) { color: var(--text); background: var(--bg); }
+
+      /* Canvas de conteúdo — ocupa restante */
+      .prod-canvas {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        min-height: 0;
+      }
+
+      /* Botão flutuante para abrir biblioteca */
+      .lib-toggle-btn {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 52px; height: 52px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        border: none;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem;
+        z-index: 50;
+        transition: 0.2s;
+      }
+      .lib-toggle-btn:hover { background: var(--accent); transform: scale(1.05); }
+
+      /* Drawer da biblioteca */
+      .lib-drawer {
+        position: fixed;
+        top: 0; right: 0; bottom: 0;
+        width: 340px;
+        background: var(--mgr-sidebar);
+        border-left: 1px solid var(--border);
+        box-shadow: -6px 0 24px rgba(0,0,0,0.12);
+        z-index: 60;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+      .lib-drawer.open { transform: translateX(0); }
+      .lib-drawer-header {
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+        font-weight: 800;
+        color: var(--primary);
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+
+      /* Painel de Ações compacto — integrado no workspace */
+      .actions-bar {
+        display: flex;
+        gap: 6px;
+        padding: 10px 16px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        flex-shrink: 0;
+        align-items: center;
+      }
+      .act-btn {
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s;
+        white-space: nowrap;
+      }
+      .act-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+      .act-btn.danger { background: var(--danger); }
+
+      /* Construtor integrado abaixo das ações */
+      .builder-bar {
+        padding: 10px 16px;
+        background: var(--bg);
+        border-bottom: 2px solid var(--border);
+        flex-shrink: 0;
+      }
+      .builder-bar-head {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+      .builder-bar-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      /* ─────────────────────────────────────────────── */
 
       /* --- DESTINATION BADGE --- */
       .dest-badge {
@@ -1652,47 +1879,30 @@
       <!-- 1. SIDEBAR (CRM) -->
       <div class="sidebar">
         <div class="sb-header">
-          <div class="brand">
+          <div class="brand" style="font-size:1rem;">
             <i class="fa-solid fa-dumbbell"></i> Benai Manager
           </div>
-          <div style="display: flex; gap: 5px">
-            <a
-              href="portal.html"
-              class="btn-icon-sm"
-              title="Voltar ao Portal"
-              style="text-decoration:none;"
-            >
+          <div style="display:flex; gap:4px; flex-shrink:0;">
+            <a href="portal.html" class="btn-icon-sm" title="Portal" style="text-decoration:none;">
               <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <div
-              class="btn-icon-sm"
-              onclick="openCloudModal()"
-              title="Dados e Nuvem"
-              style="
-                background: var(--accent);
-                color: white;
-                border-color: var(--accent);
-              "
-            >
+            <div class="btn-icon-sm" onclick="openCloudModal()" title="Dados e Nuvem"
+              style="background:var(--accent); color:white; border-color:var(--accent);">
               <i class="fa-solid fa-cloud"></i>
             </div>
-            <div class="btn-icon-sm" onclick="toggleTheme()">
+            <div class="btn-icon-sm" onclick="createStudent()" title="Novo Aluno (emergência)">
+              <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <div class="btn-icon-sm" onclick="createFullDemo()" title="Aluno Modelo">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div class="btn-icon-sm" onclick="toggleTheme()" title="Tema">
               <i class="fa-solid fa-circle-half-stroke"></i>
             </div>
           </div>
         </div>
 
-        <button class="btn-primary-block" onclick="createStudent()">
-          <i class="fa-solid fa-user-plus"></i> Novo Aluno
-        </button>
-        <button class="btn-demo-block" onclick="createFullDemo()">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> Aluno Modelo
-        </button>
-        <button class="btn-demo-block" onclick="openTemplatesModal()" style="background: #0891b2;">
-          <i class="fa-solid fa-book-bookmark"></i> Templates
-        </button>
-
-        <div class="search-box">
+        <div class="search-box" style="margin-top:10px;">
           <i class="fa-solid fa-search search-icon"></i>
           <input
             class="search-inp"
@@ -1704,431 +1914,210 @@
         <div class="student-list" id="studentList"></div>
       </div>
 
-      <!-- 2. CENTER (EDITOR + ACTIONS) -->
-      <div class="workspace">
-        <div class="phone-frame" id="phone-preview">
-          <!-- HEADER -->
-          <div class="app-header">
-            <div class="brand-header">
-              <div class="brand-title">BENAI BERNARDO</div>
-              <div class="brand-sub">Consultoria de Treinamento</div>
+      <!-- 2. CENTER: PRODUCTION WORKSPACE -->
+      <div class="workspace" id="phone-preview">
+
+        <!-- COMPACT STUDENT HEADER -->
+        <div class="prod-header">
+          <input id="ed-name" class="prod-header-name" value="Aluno"
+            oninput="resizeNameInput(this); updateStudent('name', this.value);"
+            onchange="autoSaveGestao()"/>
+          <input id="ed-focus" class="prod-header-focus" placeholder="OBJETIVO"
+            oninput="updateStudent('focus', this.value)" onchange="autoSaveGestao()"/>
+          <div class="prod-dates">
+            <div class="prod-date-pill">
+              <i class="fa-regular fa-calendar" style="opacity:0.6;"></i>
+              <input type="date" id="ed-start" onchange="updateStudent('startDate',this.value); autoSaveGestao();"/>
             </div>
-
-            <div class="student-header">
-              <div class="greeting-wrapper">
-                <span class="greeting-text">Olá, </span>
-                <input
-                  id="ed-name"
-                  class="inp-name-edit"
-                  value="Aluno"
-                  oninput="
-                    resizeNameInput(this);
-                    updateStudent('name', this.value);
-                  "
-                  onchange="autoSaveGestao()"
-                />
-              </div>
-              <input
-                id="ed-focus"
-                class="inp-focus-edit"
-                placeholder="OBJETIVO"
-                oninput="updateStudent('focus', this.value)"
-                onchange="autoSaveGestao()"
-              />
+            <div class="prod-date-pill">
+              <i class="fa-solid fa-flag-checkered" style="opacity:0.6;"></i>
+              <input type="date" id="ed-end" onchange="updateStudent('expiryDate',this.value); autoSaveGestao();"/>
             </div>
+          </div>
+          <button class="prod-expand-btn" onclick="toggleDetailsPanel()" title="Dados de gestão">
+            <i class="fa-solid fa-chevron-down" id="details-chevron"></i>
+          </button>
+        </div>
 
-            <div class="date-grid">
-              <div class="header-box">
-                <label class="hb-label"
-                  ><i class="fa-regular fa-calendar"></i> Início</label
-                >
-                <input
-                  type="date"
-                  id="ed-start"
-                  class="hb-input"
-                  onchange="
-                    updateStudent('startDate', this.value);
-                    autoSaveGestao();
-                  "
-                />
-              </div>
-              <div class="header-box">
-                <label class="hb-label"
-                  ><i class="fa-solid fa-flag-checkered"></i> Fim</label
-                >
-                <input
-                  type="date"
-                  id="ed-end"
-                  class="hb-input"
-                  onchange="
-                    updateStudent('expiryDate', this.value);
-                    autoSaveGestao();
-                  "
-                />
-              </div>
-
-              <!-- PLANO ATUAL BOX -->
-              <div
-                class="header-box"
-                style="
-                  background: rgba(255, 255, 255, 0.05);
-                  border: 1px solid rgba(255, 255, 255, 0.1);
-                "
-              >
-                <label class="hb-label" style="color: var(--accent)"
-                  ><i class="fa-solid fa-star"></i> Plano Atual</label
-                >
-                <select
-                  id="ed-plano"
-                  class="chk-select"
-                  style="width: 100%; margin-top: 5px"
-                  onchange="updateStudent('planoAtual', this.value)"
-                >
-                  <option value="individual">Individual</option>
-                  <option value="casal">Casal</option>
+        <!-- COLLAPSIBLE DETAILS PANEL -->
+        <div class="prod-details-panel" id="prod-details-panel">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; align-items:start;">
+            <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
+              <label class="hb-label" style="color:var(--accent);"><i class="fa-solid fa-star"></i> Plano</label>
+              <select id="ed-plano" class="chk-select" style="width:100%; margin-top:4px;" onchange="updateStudent('planoAtual',this.value)">
+                <option value="individual">Individual</option>
+                <option value="casal">Casal</option>
+              </select>
+            </div>
+            <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
+              <label class="hb-label"><i class="fa-solid fa-laptop"></i> Tipo</label>
+              <select id="ed-tipo-consultoria" class="chk-select" style="width:100%; margin-top:4px;"
+                onchange="updateStudent('tipoConsultoria',this.value); autoSaveGestao();">
+                <option value="Online">Online</option>
+                <option value="Presencial">Presencial</option>
+                <option value="Hibrida">Híbrida</option>
+              </select>
+            </div>
+            <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
+              <label class="hb-label"><i class="fa-solid fa-chart-line"></i> Status</label>
+              <select id="ed-status-treino" class="chk-select" style="width:100%; margin-top:4px;"
+                onchange="updateStudent('statusTreino',this.value); autoSaveGestao();">
+                <option value="Ativo">Ativo</option>
+                <option value="Pendente">Pendente</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+            <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); grid-column:span 2;">
+              <label class="hb-label"><i class="fa-solid fa-envelope"></i> E-mail do Aluno</label>
+              <input type="email" id="ed-email" class="hb-input" placeholder="email@exemplo.com"
+                onchange="updateStudent('email',this.value); autoSaveGestao();"/>
+            </div>
+            <div class="header-box checkup-box" style="background:rgba(139,92,246,0.15); border-color:rgba(139,92,246,0.3);">
+              <label class="hb-label checkup-label">
+                <span><i class="fa-solid fa-user-doctor"></i> Check-up</span>
+                <span id="chk-next-date" class="chk-date-display">--/--</span>
+              </label>
+              <div class="checkup-controls">
+                <select id="ed-check-day" class="chk-select" onchange="updateCheckup()">
+                  <option value="">Dia...</option>
+                  <option value="Seg">Segunda</option>
+                  <option value="Ter">Terça</option>
+                  <option value="Qua">Quarta</option>
+                  <option value="Qui">Quinta</option>
+                  <option value="Sex">Sexta</option>
+                  <option value="Sáb">Sábado</option>
+                  <option value="Dom">Domingo</option>
                 </select>
-              </div>
-
-              <!-- NOVOS CAMPOS DE GESTÃO -->
-              <div class="header-box" style="grid-column: span 2">
-                <label class="hb-label"
-                  ><i class="fa-solid fa-envelope"></i> E-mail do Aluno</label
-                >
-                <input
-                  type="email"
-                  id="ed-email"
-                  class="hb-input"
-                  placeholder="email@exemplo.com"
-                  onchange="
-                    updateStudent('email', this.value);
-                    autoSaveGestao();
-                  "
-                />
-              </div>
-              <div class="header-box">
-                <label class="hb-label"
-                  ><i class="fa-solid fa-laptop"></i> Tipo</label
-                >
-                <select
-                  id="ed-tipo-consultoria"
-                  class="chk-select"
-                  style="width: 100%; margin-top: 5px"
-                  onchange="
-                    updateStudent('tipoConsultoria', this.value);
-                    autoSaveGestao();
-                  "
-                >
-                  <option value="Online">Online</option>
-                  <option value="Presencial">Presencial</option>
-                  <option value="Hibrida">Híbrida</option>
-                </select>
-              </div>
-              <div class="header-box">
-                <label class="hb-label"
-                  ><i class="fa-solid fa-chart-line"></i> Status</label
-                >
-                <select
-                  id="ed-status-treino"
-                  class="chk-select"
-                  style="width: 100%; margin-top: 5px"
-                  onchange="
-                    updateStudent('statusTreino', this.value);
-                    autoSaveGestao();
-                  "
-                >
-                  <option value="Ativo">Ativo</option>
-                  <option value="Pendente">Pendente</option>
-                  <option value="Inativo">Inativo</option>
-                </select>
-              </div>
-
-              <!-- RESTORED CHECK-UP BOX -->
-              <div class="header-box checkup-box">
-                <label class="hb-label checkup-label">
-                  <span
-                    ><i class="fa-solid fa-user-doctor"></i> Check-up
-                    Semanal</span
-                  >
-                  <span id="chk-next-date" class="chk-date-display">--/--</span>
-                </label>
-                <div class="checkup-controls">
-                  <select
-                    id="ed-check-day"
-                    class="chk-select"
-                    onchange="updateCheckup()"
-                  >
-                    <option value="">Dia...</option>
-                    <option value="Seg">Segunda</option>
-                    <option value="Ter">Terça</option>
-                    <option value="Qua">Quarta</option>
-                    <option value="Qui">Quinta</option>
-                    <option value="Sex">Sexta</option>
-                    <option value="Sáb">Sábado</option>
-                    <option value="Dom">Domingo</option>
-                  </select>
-                  <span style="color: rgba(255, 255, 255, 0.3)">|</span>
-                  <input
-                    type="time"
-                    id="ed-check-time"
-                    class="hb-input"
-                    style="width: 70px; text-align: center"
-                    onchange="updateCheckup()"
-                  />
-                </div>
+                <span style="color:rgba(255,255,255,0.3)">|</span>
+                <input type="time" id="ed-check-time" class="hb-input" style="width:70px; text-align:center;" onchange="updateCheckup()"/>
               </div>
             </div>
-          </div>
-
-          <!-- TAB NAV -->
-          <div class="app-tabs">
-            <div
-              class="app-tab active"
-              id="tab-train"
-              onclick="switchView('train')"
-            >
-              <i class="fa-solid fa-dumbbell"></i>
-            </div>
-            <div class="app-tab" id="tab-logic" onclick="switchView('logic')">
-              <i class="fa-solid fa-brain"></i>
-            </div>
-            <div
-              class="app-tab"
-              id="tab-history"
-              onclick="switchView('history')"
-            >
-              <i class="fa-solid fa-clock-rotate-left"></i>
-            </div>
-            <div
-              class="app-tab"
-              id="tab-feedback"
-              onclick="switchView('feedback')"
-            >
-              <i class="fa-solid fa-comment-dots"></i>
-            </div>
-          </div>
-
-          <!-- CANVAS -->
-          <div id="editor-canvas" class="editor-content">
-            <!-- Blocks rendered here -->
-          </div>
-
-          <!-- METHODOLOGY CANVAS (NEW) -->
-          <div id="method-canvas" class="editor-content" style="display: none">
-            <!-- Methodology rendered here -->
-          </div>
-
-          <!-- HISTORY CANVAS (NEW) -->
-          <div
-            id="history-canvas"
-            class="editor-content"
-            style="display: none; padding: 15px"
-          >
-            <!-- History rendered here -->
-          </div>
-
-          <!-- FEEDBACK CANVAS (NEW) -->
-          <div
-            id="feedback-canvas"
-            class="editor-content"
-            style="display: none; padding: 15px"
-          >
-            <!-- Feedback rendered here -->
           </div>
         </div>
 
-        <!-- ACTIONS & BUILDER (SIDE PANEL INSIDE WORKSPACE) -->
-        <div class="preview-actions">
-          <h4
-            style="margin: 0 0 10px 0; color: var(--primary); font-size: 0.9rem"
-          >
-            Ações
-          </h4>
-          <button class="pa-btn-wide pa-tiny" onclick="copyTinyUrlFlow()">
-            <i class="fa-solid fa-link"></i> <span>Gerar Link</span>
+        <!-- ACTIONS BAR -->
+        <div class="actions-bar">
+          <button class="act-btn" style="background:var(--success);" onclick="copyTinyUrlFlow()">
+            <i class="fa-solid fa-link"></i> Gerar Link
           </button>
-          <button
-            class="pa-btn-wide"
-            onclick="previewWorkout()"
-            style="background: #f59e0b"
-          >
-            <i class="fa-solid fa-eye"></i> <span>Preview</span>
+          <button class="act-btn" style="background:#f59e0b;" onclick="previewWorkout()">
+            <i class="fa-solid fa-eye"></i> Preview
           </button>
-          <button class="pa-btn-wide pa-update" onclick="saveToCloud('PATCH')">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>Salvar na Nuvem</span>
+          <button class="act-btn" style="background:#10b981;" onclick="saveToCloud('PATCH')">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem
           </button>
-          <button
-            class="pa-btn-wide"
-            onclick="saveWorkoutAsTemplate()"
-            style="background: #0891b2"
-          >
-            <i class="fa-solid fa-book-bookmark"></i>
-            <span>Salvar como Template</span>
+          <button class="act-btn" style="background:#0891b2;" onclick="saveWorkoutAsTemplate()">
+            <i class="fa-solid fa-book-bookmark"></i> Salvar Template
           </button>
-          <button
-            class="pa-btn-wide"
-            onclick="duplicateStudent()"
-            style="background: var(--accent)"
-          >
-            <i class="fa-solid fa-copy"></i> <span>Duplicar Aluno</span>
+          <button class="act-btn danger" onclick="deleteCurrentStudent()">
+            <i class="fa-solid fa-trash"></i> Excluir Aluno
           </button>
-          <button
-            class="pa-btn-wide"
-            onclick="deleteCurrentStudent()"
-            style="background: var(--danger)"
-          >
-            <i class="fa-solid fa-trash"></i> <span>Excluir Aluno</span>
-          </button>
+        </div>
 
-          <!-- BUILDER MENU -->
-          <div class="builder-controls">
-            <div
-              class="builder-header"
-            >
-              <span>CONSTRUTOR</span>
-            </div>
-            <div class="b-grid">
-              <button class="b-btn bb-block" onclick="addBlock()">
-                <i class="fa-solid fa-layer-group"></i> NOVO BLOCO
-              </button>
-              <button
-                class="b-btn"
-                onclick="pasteBlockFromClipboard()"
-                style="background: #10b981; color: white"
-              >
-                <i class="fa-solid fa-clipboard-check"></i> COLAR BLOCO
-              </button>
-
-              <button class="b-btn bb-iso" onclick="addMethod('Normal')">
-                <i class="fa-solid fa-dumbbell"></i> Isolado
-              </button>
-              <button class="b-btn bb-bi" onclick="addMethod('Bi-set')">
-                <i class="fa-solid fa-link"></i> Bi-set
-              </button>
-              <button class="b-btn bb-tri" onclick="addMethod('Tri-set')">
-                <i class="fa-solid fa-link"></i> Tri-set
-              </button>
-              <button class="b-btn bb-drop" onclick="addMethod('Drop-set')">
-                <i class="fa-solid fa-stairs"></i> Drop-set
-              </button>
-              <button class="b-btn bb-rest" onclick="addMethod('Rest-Pause')">
-                <i class="fa-solid fa-stopwatch"></i> Rest-Pause
-              </button>
-              <button class="b-btn bb-static" onclick="addMethod('Isometria')">
-                <i class="fa-solid fa-pause"></i> Isometria
-              </button>
-              <button class="b-btn bb-pyr" onclick="addMethod('Pirâmide')">
-                <i class="fa-solid fa-arrow-up-right-dots"></i> Pirâmide
-              </button>
-              <button class="b-btn bb-gvt" onclick="addMethod('GVT')">
-                <i class="fa-solid fa-g"></i> GVT (10x10)
-              </button>
-              <button class="b-btn bb-fst" onclick="addMethod('FST-7')">
-                <i class="fa-solid fa-f"></i> FST-7
-              </button>
-            </div>
+        <!-- TAB NAV -->
+        <div class="prod-tabs">
+          <div class="prod-tab active" id="tab-train" onclick="switchView('train')">
+            <i class="fa-solid fa-dumbbell"></i> Treino
+          </div>
+          <div class="prod-tab" id="tab-logic" onclick="switchView('logic')">
+            <i class="fa-solid fa-brain"></i> Pilares
+          </div>
+          <div class="prod-tab" id="tab-history" onclick="switchView('history')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Histórico
+          </div>
+          <div class="prod-tab" id="tab-feedback" onclick="switchView('feedback')">
+            <i class="fa-solid fa-comment-dots"></i> Feedbacks
           </div>
         </div>
+
+        <!-- BUILDER BAR (abaixo das tabs, visível só na tab Treino) -->
+        <div class="builder-bar" id="builder-bar">
+          <div class="builder-bar-head">Construtor</div>
+          <div class="builder-bar-grid">
+            <button class="b-btn bb-block" style="padding:5px 12px;" onclick="addBlock()">
+              <i class="fa-solid fa-layer-group"></i> Novo Bloco
+            </button>
+            <button class="b-btn" style="background:#10b981; color:white; padding:5px 12px;" onclick="pasteBlockFromClipboard()">
+              <i class="fa-solid fa-clipboard-check"></i> Colar Bloco
+            </button>
+            <button class="b-btn" style="background:#0891b2; color:white; padding:5px 12px;" onclick="openTemplatesModal()">
+              <i class="fa-solid fa-book-bookmark"></i> Templates
+            </button>
+            <div style="width:1px; background:var(--border); margin:0 4px;"></div>
+            <button class="b-btn bb-iso" onclick="addMethod('Normal')"><i class="fa-solid fa-dumbbell"></i> Isolado</button>
+            <button class="b-btn bb-bi" onclick="addMethod('Bi-set')"><i class="fa-solid fa-link"></i> Bi-set</button>
+            <button class="b-btn bb-tri" onclick="addMethod('Tri-set')"><i class="fa-solid fa-link"></i> Tri-set</button>
+            <button class="b-btn bb-drop" onclick="addMethod('Drop-set')"><i class="fa-solid fa-stairs"></i> Drop-set</button>
+            <button class="b-btn bb-rest" onclick="addMethod('Rest-Pause')"><i class="fa-solid fa-stopwatch"></i> Rest-Pause</button>
+            <button class="b-btn bb-static" onclick="addMethod('Isometria')"><i class="fa-solid fa-pause"></i> Isometria</button>
+            <button class="b-btn bb-pyr" onclick="addMethod('Pirâmide')"><i class="fa-solid fa-arrow-up-right-dots"></i> Pirâmide</button>
+            <button class="b-btn bb-gvt" onclick="addMethod('GVT')"><i class="fa-solid fa-g"></i> GVT 10×10</button>
+            <button class="b-btn bb-fst" onclick="addMethod('FST-7')"><i class="fa-solid fa-f"></i> FST-7</button>
+          </div>
+        </div>
+
+        <!-- CANVAS AREAS -->
+        <div id="editor-canvas" class="prod-canvas"></div>
+        <div id="method-canvas"   class="prod-canvas" style="display:none;"></div>
+        <div id="history-canvas"  class="prod-canvas" style="display:none;"></div>
+        <div id="feedback-canvas" class="prod-canvas" style="display:none;"></div>
       </div>
 
-      <!-- 3. RIGHT (LIBRARY GAVETA) -->
-      <div class="right-panel">
-        <div class="rp-header">
-          <div class="rp-tabs">
-            <div
-              class="rp-tab active"
-              onclick="switchRightTab('lib')"
-              id="rt-lib"
-            >
-              Biblioteca
-            </div>
-            <div
-              class="rp-tab"
-              onclick="switchRightTab('method')"
-              id="rt-method"
-            >
-              Metodologia
+      <!-- LIBRARY DRAWER (overlay) -->
+      <div class="lib-drawer" id="lib-drawer">
+        <div class="lib-drawer-header">
+          <span><i class="fa-solid fa-book-open" style="color:var(--accent); margin-right:6px;"></i> Biblioteca</span>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <div class="rp-tab active" onclick="switchRightTab('lib')" id="rt-lib" style="padding:4px 10px;">Biblioteca</div>
+            <div class="rp-tab" onclick="switchRightTab('method')" id="rt-method" style="padding:4px 10px;">Metodologia</div>
+            <div class="btn-icon-sm" onclick="toggleLibDrawer()" title="Fechar biblioteca">
+              <i class="fa-solid fa-xmark"></i>
             </div>
           </div>
+        </div>
 
+        <div class="rp-header" style="border-top:none;">
           <!-- LIBRARY CONTROLS -->
           <div id="lib-controls">
-
-            <!-- BADGE DE DESTINO — aparece ao clicar "+ Adicionar" numa stage -->
+            <!-- BADGE DE DESTINO -->
             <div id="dest-badge" class="dest-badge">
               <i class="fa-solid fa-location-crosshairs"></i>
               <span id="dest-badge-text">→ Destino</span>
               <span class="dest-badge-clear" onclick="clearDestination()" title="Limpar destino"><i class="fa-solid fa-xmark"></i></span>
             </div>
 
-            <input
-              class="search-inp"
-              id="lib-search"
-              style="
-                padding: 8px 10px;
-                height: 36px;
-                font-size: 0.8rem;
-                margin-bottom: 10px;
-              "
-              placeholder="Buscar exercício..."
-              onkeyup="renderLibrary()"
-            />
+            <input class="search-inp" id="lib-search"
+              style="padding:8px 10px; height:36px; font-size:0.8rem; margin-bottom:10px;"
+              placeholder="Buscar exercício..." onkeyup="renderLibrary()"/>
 
-            <!-- NEW FILTERS WITH GEARS -->
             <div class="filter-row">
               <div class="filter-group-row">
-                <select
-                  id="filter-group"
-                  class="filter-select"
-                  onchange="renderLibrary()"
-                ></select>
-                <i
-                  class="fa-solid fa-gear filter-gear"
-                  onclick="openCatManager('groups')"
-                  title="Gerenciar Grupos"
-                ></i>
+                <select id="filter-group" class="filter-select" onchange="renderLibrary()"></select>
+                <i class="fa-solid fa-gear filter-gear" onclick="openCatManager('groups')" title="Gerenciar Grupos"></i>
               </div>
               <div class="filter-group-row">
-                <select
-                  id="filter-equip"
-                  class="filter-select"
-                  onchange="renderLibrary()"
-                ></select>
-                <i
-                  class="fa-solid fa-gear filter-gear"
-                  onclick="openCatManager('equips')"
-                  title="Gerenciar Equipamentos"
-                ></i>
+                <select id="filter-equip" class="filter-select" onchange="renderLibrary()"></select>
+                <i class="fa-solid fa-gear filter-gear" onclick="openCatManager('equips')" title="Gerenciar Equipamentos"></i>
               </div>
               <div class="filter-group-row">
-                <select
-                  id="filter-method"
-                  class="filter-select"
-                  onchange="renderLibrary()"
-                ></select>
-                <i
-                  class="fa-solid fa-gear filter-gear"
-                  onclick="openCatManager('methods')"
-                  title="Gerenciar Métodos"
-                ></i>
+                <select id="filter-method" class="filter-select" onchange="renderLibrary()"></select>
+                <i class="fa-solid fa-gear filter-gear" onclick="openCatManager('methods')" title="Gerenciar Métodos"></i>
               </div>
             </div>
 
-            <button
-              class="btn-primary-block"
-              style="padding: 10px; font-size: 0.8rem; margin: 0"
-              onclick="openLibModal()"
-            >
+            <button class="btn-primary-block" style="padding:10px; font-size:0.8rem; margin:0;" onclick="openLibModal()">
               + Novo Exercício
             </button>
           </div>
         </div>
 
-        <div class="lib-content" id="right-content">
-          <!-- Library Items here -->
-        </div>
+        <div class="lib-content" id="right-content"></div>
       </div>
-    </div>
+
+      <!-- BOTÃO FLUTUANTE PARA ABRIR BIBLIOTECA -->
+      <button class="lib-toggle-btn" onclick="toggleLibDrawer()" id="lib-toggle-btn" title="Abrir / Fechar Biblioteca">
+        <i class="fa-solid fa-book-open"></i>
+      </button>
 
     <!-- MODAL: ADD EXERCISE (UPDATED) -->
     <div id="modal-lib" class="modal" style="z-index:300">
@@ -3527,34 +3516,39 @@
 
       // --- PHONE VIEWS (NEW) ---
       function switchView(view) {
-        const trainCanvas = document.getElementById("editor-canvas");
-        const methodCanvas = document.getElementById("method-canvas");
+        const trainCanvas   = document.getElementById("editor-canvas");
+        const methodCanvas  = document.getElementById("method-canvas");
         const historyCanvas = document.getElementById("history-canvas");
-        const feedbackCanvas = document.getElementById("feedback-canvas");
-        const tabs = document.querySelectorAll(".app-tab");
+        const feedbackCanvas= document.getElementById("feedback-canvas");
+        const builderBar    = document.getElementById("builder-bar");
 
-        tabs.forEach((t) => t.classList.remove("active"));
+        // Suporta tanto .prod-tab (novo) quanto .app-tab (legado)
+        document.querySelectorAll(".prod-tab, .app-tab").forEach(t => t.classList.remove("active"));
 
-        trainCanvas.style.display = "none";
-        methodCanvas.style.display = "none";
-        historyCanvas.style.display = "none";
+        trainCanvas.style.display    = "none";
+        methodCanvas.style.display   = "none";
+        historyCanvas.style.display  = "none";
         feedbackCanvas.style.display = "none";
 
         if (view === "train") {
           document.getElementById("tab-train").classList.add("active");
           trainCanvas.style.display = "block";
+          if (builderBar) builderBar.style.display = "block";
         } else if (view === "logic") {
           document.getElementById("tab-logic").classList.add("active");
           methodCanvas.style.display = "block";
+          if (builderBar) builderBar.style.display = "none";
           renderPhoneMethodology();
           switchRightTab("method");
         } else if (view === "history") {
           document.getElementById("tab-history").classList.add("active");
           historyCanvas.style.display = "block";
+          if (builderBar) builderBar.style.display = "none";
           loadHistory();
         } else if (view === "feedback") {
           document.getElementById("tab-feedback").classList.add("active");
           feedbackCanvas.style.display = "block";
+          if (builderBar) builderBar.style.display = "none";
           renderFeedbackView();
         }
       }
@@ -4099,11 +4093,21 @@
 
       // --- RIGHT PANEL (RESTORED & FIXED) ---
       function switchRightTab(tab) {
-        document
-          .querySelectorAll(".rp-tab")
-          .forEach((t) => t.classList.remove("active"));
+        document.querySelectorAll(".rp-tab").forEach(t => t.classList.remove("active"));
         const tabEl = document.getElementById("rt-" + tab);
         if (tabEl) tabEl.classList.add("active");
+
+        // Abre o drawer se estiver fechado
+        const drawer = document.getElementById("lib-drawer");
+        const btn    = document.getElementById("lib-toggle-btn");
+        if (drawer && !drawer.classList.contains("open")) {
+          drawer.classList.add("open");
+          if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            btn.title = "Fechar Biblioteca";
+          }
+        }
+
         const cont = document.getElementById("right-content");
         if (tab === "lib") {
           document.getElementById("lib-controls").style.display = "block";
@@ -4313,7 +4317,8 @@
 
       // --- LIBRARY FILTERING & RENDERING (NEW) ---
       function renderLibrary() {
-        if (document.querySelector(".rp-tab.active").id !== "rt-lib") return;
+        const activeTab = document.querySelector(".rp-tab.active");
+        if (activeTab && activeTab.id !== "rt-lib") return;
 
         // Populate Filter Selects if empty
         const grpSel = document.getElementById("filter-group");
@@ -4561,7 +4566,8 @@
           populateTplCategorySelect();
           return;
         }
-        if (document.querySelector(".rp-tab.active").id === "rt-lib") {
+        const _activeTab = document.querySelector(".rp-tab.active");
+        if (_activeTab && _activeTab.id === "rt-lib") {
           const filterMap = {
             groups: "filter-group",
             equips: "filter-equip",
@@ -6194,6 +6200,53 @@
         renderTemplateCards();
         showToast("Template excluído.");
       }
+
+      // ── PRODUCTION LAYOUT FUNCTIONS ─────────────────────
+      function toggleDetailsPanel() {
+        const panel   = document.getElementById("prod-details-panel");
+        const chevron = document.getElementById("details-chevron");
+        if (!panel) return;
+        const isOpen = panel.classList.contains("open");
+        panel.classList.toggle("open", !isOpen);
+        if (chevron) {
+          chevron.classList.toggle("fa-chevron-down", isOpen);
+          chevron.classList.toggle("fa-chevron-up",   !isOpen);
+        }
+      }
+
+      function toggleLibDrawer() {
+        const drawer = document.getElementById("lib-drawer");
+        const btn    = document.getElementById("lib-toggle-btn");
+        if (!drawer) return;
+        const isOpen = drawer.classList.contains("open");
+        drawer.classList.toggle("open", !isOpen);
+        if (btn) {
+          btn.innerHTML = isOpen
+            ? '<i class="fa-solid fa-book-open"></i>'
+            : '<i class="fa-solid fa-xmark"></i>';
+          btn.title = isOpen ? "Abrir Biblioteca" : "Fechar Biblioteca";
+        }
+        // Foca a busca ao abrir
+        if (!isOpen) {
+          setTimeout(() => {
+            const s = document.getElementById("lib-search");
+            if (s) s.focus();
+          }, 300);
+        }
+      }
+
+      // Fecha o drawer quando clicar fora dele
+      document.addEventListener("click", function(e) {
+        const drawer = document.getElementById("lib-drawer");
+        const btn    = document.getElementById("lib-toggle-btn");
+        if (!drawer || !drawer.classList.contains("open")) return;
+        if (!drawer.contains(e.target) && btn && !btn.contains(e.target)) {
+          drawer.classList.remove("open");
+          btn.innerHTML = '<i class="fa-solid fa-book-open"></i>';
+          btn.title = "Abrir Biblioteca";
+        }
+      });
+      // ─────────────────────────────────────────────────────
 
       function toggleTheme() {
         const isDark =
