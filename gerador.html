@@ -1037,6 +1037,50 @@
         border-left: 3px solid #db2777;
       }
 
+      /* --- TEMPLATES --- */
+      .tpl-tab {
+        flex: 1; padding: 9px; border-radius: 10px; border: 1px solid var(--border);
+        background: var(--surface); color: var(--text-muted); font-weight: 700;
+        font-size: 0.8rem; cursor: pointer; transition: 0.2s; display: flex;
+        align-items: center; justify-content: center; gap: 6px;
+      }
+      .tpl-tab.active { background: #0891b2; color: white; border-color: #0891b2; }
+      .tpl-tab:hover:not(.active) { border-color: #0891b2; color: #0891b2; }
+
+      .tpl-type-btn {
+        flex: 1; padding: 8px; border-radius: 8px; border: 2px solid var(--border);
+        background: var(--surface); color: var(--text-muted); font-weight: 700;
+        font-size: 0.8rem; cursor: pointer; transition: 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .tpl-type-btn.active { background: rgba(8,145,178,0.1); border-color: #0891b2; color: #0891b2; }
+
+      .tpl-card {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+        padding: 14px; display: flex; flex-direction: column; gap: 8px;
+        transition: 0.2s; border-left: 4px solid #0891b2;
+      }
+      .tpl-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.07); }
+      .tpl-card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+      .tpl-card-name { font-weight: 800; font-size: 0.95rem; color: var(--text); }
+      .tpl-card-meta { font-size: 0.72rem; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
+      .tpl-card-actions { display: flex; gap: 6px; }
+
+      .tpl-block-editor {
+        background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+        padding: 12px; margin-bottom: 10px;
+      }
+      .tpl-block-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 10px; gap: 8px;
+      }
+      .tpl-ex-row {
+        display: grid; grid-template-columns: 1.8fr 0.6fr 0.7fr 0.7fr 0.6fr; gap: 6px;
+        align-items: end; margin-bottom: 6px; background: var(--surface);
+        border: 1px solid var(--border); border-radius: 8px; padding: 8px;
+      }
+      .tpl-ex-row .stat-inp { font-size: 0.78rem; }
+
       /* --- DESTINATION BADGE --- */
       .dest-badge {
         display: none;
@@ -1644,6 +1688,9 @@
         <button class="btn-demo-block" onclick="createFullDemo()">
           <i class="fa-solid fa-wand-magic-sparkles"></i> Aluno Modelo
         </button>
+        <button class="btn-demo-block" onclick="openTemplatesModal()" style="background: #0891b2;">
+          <i class="fa-solid fa-book-bookmark"></i> Templates
+        </button>
 
         <div class="search-box">
           <i class="fa-solid fa-search search-icon"></i>
@@ -1912,6 +1959,14 @@
           </button>
           <button
             class="pa-btn-wide"
+            onclick="saveWorkoutAsTemplate()"
+            style="background: #0891b2"
+          >
+            <i class="fa-solid fa-book-bookmark"></i>
+            <span>Salvar como Template</span>
+          </button>
+          <button
+            class="pa-btn-wide"
             onclick="duplicateStudent()"
             style="background: var(--accent)"
           >
@@ -2167,7 +2222,7 @@
         <div class="lib-field-row" style="border-left: 4px solid var(--danger)">
           <label style="color: var(--danger)">Vídeo Demonstração</label>
           <div class="input-wrapper">
-            <i class="fa-brands fa-youtube" style="color: var(--danger)"></i>
+            <i class="fa-solid fa-circle-play" style="color: var(--danger)"></i>
             <input id="lib-video" placeholder="Link do YouTube" />
           </div>
         </div>
@@ -2395,6 +2450,72 @@
       </div>
     </div>
 
+    <!-- MODAL: TEMPLATES -->
+    <div id="modal-templates" class="modal">
+      <div class="modal-box" style="width:620px; max-height:88vh; display:flex; flex-direction:column;">
+        <div class="modal-head">
+          <span style="display:flex; align-items:center; gap:10px;">
+            <i class="fa-solid fa-book-bookmark" style="color:#0891b2"></i>
+            Catálogo de Templates
+          </span>
+          <i class="fa-solid fa-xmark" onclick="closeModal('modal-templates')" style="cursor:pointer"></i>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <button class="tpl-tab active" id="tpl-tab-blocos" onclick="switchTplTab('blocos')"><i class="fa-solid fa-layer-group"></i> Blocos</button>
+          <button class="tpl-tab" id="tpl-tab-treinos" onclick="switchTplTab('treinos')"><i class="fa-solid fa-dumbbell"></i> Treinos Completos</button>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <input id="tpl-search" class="search-inp" style="margin:0; flex:1;" placeholder="Buscar template..." oninput="renderTemplateCards()"/>
+          <button class="btn-primary-block" style="margin:0; width:auto; padding:0 14px; font-size:0.8rem; white-space:nowrap;" onclick="openTemplateEditor('NEW')">
+            <i class="fa-solid fa-plus"></i> Novo
+          </button>
+        </div>
+        <div id="tpl-cards" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px;"></div>
+      </div>
+    </div>
+
+    <!-- MODAL: TEMPLATE EDITOR -->
+    <div id="modal-tpl-editor" class="modal">
+      <div class="modal-box" style="width:680px; max-height:92vh; display:flex; flex-direction:column;">
+        <div class="modal-head">
+          <span id="tpl-editor-title" style="display:flex; align-items:center; gap:10px;">
+            <i class="fa-solid fa-book-bookmark" style="color:#0891b2"></i> Novo Template
+          </span>
+          <i class="fa-solid fa-xmark" onclick="closeModal('modal-tpl-editor')" style="cursor:pointer"></i>
+        </div>
+        <input type="hidden" id="tpl-editing-idx"/>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div class="lib-field-row" style="margin:0; border-left:4px solid #0891b2;">
+            <label>Nome do Template</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-tag" style="color:#0891b2"></i>
+              <input id="tpl-name" placeholder="Ex: Costas — Sequência Favorita"/>
+            </div>
+          </div>
+          <div class="lib-field-row" style="margin:0; border-left:4px solid var(--purple);">
+            <label>Categoria</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-folder" style="color:var(--purple)"></i>
+              <input id="tpl-category" placeholder="Ex: Patologia, Combo, Iniciante"/>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:14px;">
+          <button class="tpl-type-btn active" id="tpl-type-bloco" onclick="selectTplType('bloco')"><i class="fa-solid fa-layer-group"></i> Bloco único</button>
+          <button class="tpl-type-btn" id="tpl-type-treino" onclick="selectTplType('treino')"><i class="fa-solid fa-dumbbell"></i> Treino completo</button>
+        </div>
+        <div id="tpl-blocks-container" style="flex:1; overflow-y:auto; margin-bottom:12px;"></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-primary-block" style="margin:0; background:#0891b2; flex:1;" onclick="addTplBlock()">
+            <i class="fa-solid fa-plus"></i> Adicionar Bloco
+          </button>
+          <button class="btn-primary-block" style="margin:0; flex:1;" onclick="saveTemplate()">
+            <i class="fa-solid fa-check"></i> Salvar Template
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- CUSTOM MODALS -->
     <div id="custom-alert-modal" class="modal" style="z-index: 10000">
       <div class="modal-box" style="max-width: 400px; text-align: center">
@@ -2520,6 +2641,7 @@
         ],
         equips: ["Barra", "Halter", "Máquina", "Polia", "Livre", "Elástico"],
         methods: ["Musculação", "Calistenia", "Híbrido"],
+        templates: { treinos: [], blocos: [] },  // Catálogo de templates do treinador
         pillars: JSON.parse(JSON.stringify(DEFAULT_PILLARS)),
         masterGistId: null, // Armazena o ID do Gist Master
       };
@@ -2609,6 +2731,7 @@
         }
 
         // Init defaults if missing
+        if (!appData.templates) appData.templates = { treinos: [], blocos: [] };
         if (!appData.groups || appData.groups.length === 0)
           appData.groups = [
             "Peito",
@@ -3519,8 +3642,9 @@
                     <div class="blk-tools">
                         <div class="bt-icon min ${isCollapsed ? "active" : ""}" onclick="toggleBlockCollapse(${bIdx})"><i class="fa-solid ${collapseIcon}"></i></div>
                         <div class="bt-icon lock ${lockedClass}" onclick="toggleLock(${bIdx})"><i class="fa-solid ${lockIcon}"></i></div>
+                        <div class="bt-icon" onclick="saveBlockAsTemplate(${bIdx})" style="color:#0891b2;" title="Salvar bloco como Template"><i class="fa-solid fa-book-bookmark"></i></div>
                         <div class="bt-icon" onclick="copyBlockToClipboard(${bIdx})" style="color:#3b82f6;" title="Copiar Bloco"><i class="fa-solid fa-clipboard"></i></div>
-                        <div class="bt-icon" onclick="duplicateBlock(${bIdx})" style="color:var(--accent);" title="Duplicar Bloco"><i class="fa-solid fa-copy"></i></div>
+                        <div class="bt-icon" onclick="duplicateBlock(${bIdx})" style="color:var(--accent);" title="Duplicar Bloco"><i class="fa-solid fa-copy\"></i></div>
                         <div class="bt-icon del" onclick="delBlock(${bIdx})"><i class="fa-solid fa-trash"></i></div>
                     </div>
                 </div>
@@ -3609,7 +3733,7 @@
 
                   const hasVideo = item.link && item.link.length > 5;
                   const videoIcon = hasVideo
-                    ? '<i class="fa-brands fa-youtube" style="color:red; margin-left:5px;" title="Vídeo incluso"></i>'
+                    ? `<i class="fa-solid fa-circle-play" style="color:#0891b2; margin-left:5px; cursor:pointer;" title="Ver vídeo" onclick="event.stopPropagation(); window.open('${item.link}', '_blank')"></i>`
                     : "";
 
                   const dynamicFields = renderMethodFields(
@@ -4194,7 +4318,7 @@
           if (fMet && ex.method !== fMet) return;
 
           const vidIcon = ex.video
-            ? '<i class="fa-brands fa-youtube" style="color:red"></i>'
+            ? `<i class="fa-solid fa-circle-play" style="color:#0891b2; cursor:pointer;" title="Ver vídeo" onclick="event.stopPropagation(); window.open('${ex.video}', '_blank')"></i>`
             : "";
           const metLabel = ex.method || "Musculação";
 
@@ -4476,6 +4600,7 @@
           equips: appData.equips,
           methods: appData.methods,
           pillars: appData.pillars,
+          templates: appData.templates || { treinos: [], blocos: [] },
           studentIndex: appData.students.map((s) => ({
             id: s.id,
             name: s.name,
@@ -4534,11 +4659,12 @@
           const masterData = JSON.parse(j.files["benai_master.json"].content);
 
           // Update local data with Master data
-          appData.library = masterData.library || [];
-          appData.groups = masterData.groups || appData.groups;
-          appData.equips = masterData.equips || appData.equips;
-          appData.methods = masterData.methods || appData.methods;
-          appData.pillars = masterData.pillars || appData.pillars;
+          appData.library   = masterData.library   || [];
+          appData.groups    = masterData.groups    || appData.groups;
+          appData.equips    = masterData.equips    || appData.equips;
+          appData.methods   = masterData.methods   || appData.methods;
+          appData.pillars   = masterData.pillars   || appData.pillars;
+          appData.templates = masterData.templates || { treinos: [], blocos: [] };
 
           // Update Student Index (keep local data if it exists, otherwise add from index)
           if (masterData.studentIndex) {
@@ -4593,6 +4719,7 @@
           equips: appData.equips,
           methods: appData.methods,
           pillars: appData.pillars,
+          templates: appData.templates || { treinos: [], blocos: [] },
           studentIndex: appData.students.map((s) => ({
             id: s.id,
             name: s.name,
@@ -5461,6 +5588,398 @@
           }
         }
       };
+
+      // ==========================================
+      // SISTEMA DE TEMPLATES
+      // ==========================================
+
+      let tplCurrentTab  = "blocos";  // "blocos" | "treinos"
+      let tplCurrentType = "bloco";   // "bloco"  | "treino"
+      let tplBlocks      = [];        // blocos sendo editados no editor de template
+
+      // --- Abre o modal catálogo ---
+      function openTemplatesModal() {
+        document.getElementById("modal-templates").style.display = "flex";
+        renderTemplateCards();
+      }
+
+      // --- Troca aba Blocos / Treinos ---
+      function switchTplTab(tab) {
+        tplCurrentTab = tab;
+        document.querySelectorAll(".tpl-tab").forEach(t => t.classList.remove("active"));
+        document.getElementById("tpl-tab-" + tab).classList.add("active");
+        renderTemplateCards();
+      }
+
+      // --- Renderiza cards do catálogo ---
+      function renderTemplateCards() {
+        const container = document.getElementById("tpl-cards");
+        const search    = (document.getElementById("tpl-search")?.value || "").toLowerCase();
+        const list      = (appData.templates?.[tplCurrentTab] || []);
+
+        const filtered = list.filter(t =>
+          t.name.toLowerCase().includes(search) ||
+          (t.category || "").toLowerCase().includes(search)
+        );
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">
+            <i class="fa-solid fa-book-open" style="font-size:2rem; opacity:0.3; margin-bottom:10px; display:block;"></i>
+            Nenhum template ainda. Clique em <strong>+ Novo</strong> para criar.
+          </div>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map((t, i) => {
+          const realIdx = list.indexOf(t);
+          const blocoCount = t.blocks ? t.blocks.length : 0;
+          const exCount    = t.blocks ? t.blocks.reduce((acc, b) => {
+            return acc + Object.values(b.stages || {}).reduce((s, arr) => s + arr.length, 0);
+          }, 0) : 0;
+
+          return `<div class="tpl-card">
+            <div class="tpl-card-head">
+              <div>
+                <div class="tpl-card-name">${t.name}</div>
+                <div class="tpl-card-meta" style="margin-top:4px;">
+                  ${t.category ? `<span style="background:rgba(8,145,178,0.1); color:#0891b2; padding:2px 7px; border-radius:4px; font-weight:700;">${t.category}</span>` : ""}
+                  <span>${blocoCount} bloco${blocoCount !== 1 ? "s" : ""}</span>
+                  <span>·</span>
+                  <span>${exCount} exercício${exCount !== 1 ? "s" : ""}</span>
+                </div>
+              </div>
+              <div class="tpl-card-actions">
+                <div class="bt-icon" onclick="applyTemplate('${tplCurrentTab}', ${realIdx})" style="color:var(--success);" title="Aplicar ao aluno atual"><i class="fa-solid fa-play"></i></div>
+                <div class="bt-icon" onclick="openTemplateEditor(${realIdx})" style="color:var(--accent);" title="Editar"><i class="fa-solid fa-pencil"></i></div>
+                <div class="bt-icon del" onclick="deleteTemplate('${tplCurrentTab}', ${realIdx})" title="Excluir"><i class="fa-solid fa-trash"></i></div>
+              </div>
+            </div>
+            ${t.blocks && t.blocks.length > 0 ? `
+            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+              ${t.blocks.map(b => `<span style="font-size:0.68rem; background:var(--bg); border:1px solid var(--border); padding:2px 8px; border-radius:4px; color:var(--text-muted);">${b.name}</span>`).join("")}
+            </div>` : ""}
+          </div>`;
+        }).join("");
+      }
+
+      // --- Abre editor de template ---
+      function openTemplateEditor(idxOrNew) {
+        closeModal("modal-templates");
+        document.getElementById("modal-tpl-editor").style.display = "flex";
+
+        if (idxOrNew === "NEW") {
+          document.getElementById("tpl-editor-title").innerHTML =
+            '<i class="fa-solid fa-book-bookmark" style="color:#0891b2"></i> Novo Template';
+          document.getElementById("tpl-editing-idx").value = "NEW";
+          document.getElementById("tpl-name").value = "";
+          document.getElementById("tpl-category").value = "";
+          tplCurrentType = "bloco";
+          tplBlocks = [createTplBlock()];
+        } else {
+          const t = appData.templates[tplCurrentTab][idxOrNew];
+          document.getElementById("tpl-editor-title").innerHTML =
+            '<i class="fa-solid fa-book-bookmark" style="color:#0891b2"></i> Editar Template';
+          document.getElementById("tpl-editing-idx").value = idxOrNew;
+          document.getElementById("tpl-name").value = t.name;
+          document.getElementById("tpl-category").value = t.category || "";
+          tplCurrentType = tplCurrentTab === "blocos" ? "bloco" : "treino";
+          tplBlocks = JSON.parse(JSON.stringify(t.blocks || [createTplBlock()]));
+        }
+
+        selectTplType(tplCurrentType);
+        renderTplEditor();
+      }
+
+      // --- Seleciona tipo (bloco / treino) ---
+      function selectTplType(type) {
+        tplCurrentType = type;
+        document.querySelectorAll(".tpl-type-btn").forEach(b => b.classList.remove("active"));
+        document.getElementById("tpl-type-" + type).classList.add("active");
+        // Treino completo: pode ter múltiplos blocos. Bloco único: limita a 1.
+        if (type === "bloco" && tplBlocks.length > 1) tplBlocks = [tplBlocks[0]];
+        document.getElementById("tpl-blocks-container").querySelector &&
+          renderTplEditor();
+      }
+
+      // --- Cria estrutura de bloco de template ---
+      function createTplBlock() {
+        return {
+          name: "Bloco " + String.fromCharCode(65 + (tplBlocks?.length || 0)),
+          stages: { mobilidade: [], ativacao: [], forca: [], desaceleracao: [] }
+        };
+      }
+
+      // --- Cria exercício vazio de template ---
+      function createTplEx() {
+        return { name: "", group: appData.groups[0] || "", equip: appData.equips[0] || "",
+                 method: "Normal", sets: "3", reps: "10", rest: "60s", restEx: "", video: "", extra: "" };
+      }
+
+      // --- Renderiza editor de template ---
+      function renderTplEditor() {
+        const container = document.getElementById("tpl-blocks-container");
+        const stagesDef = [
+          { id: "mobilidade",   name: "Mobilidade",    color: "#e8f8f0", text: "#27ae60" },
+          { id: "ativacao",     name: "Ativação",      color: "#fff8e7", text: "#f39c12" },
+          { id: "forca",        name: "Força & Carga", color: "#ffeaec", text: "#e74c3c" },
+          { id: "desaceleracao",name: "Desaceleração", color: "#eaf4fc", text: "#2980b9" },
+        ];
+        const canAddBlock = tplCurrentType === "treino";
+
+        container.innerHTML = tplBlocks.map((blk, bIdx) => `
+          <div class="tpl-block-editor">
+            <div class="tpl-block-header">
+              <input class="inp-blk-title" style="flex:1;" value="${blk.name}"
+                onchange="tplBlocks[${bIdx}].name = this.value"/>
+              ${canAddBlock && tplBlocks.length > 1
+                ? `<div class="bt-icon del" onclick="removeTplBlock(${bIdx})" title="Remover bloco"><i class="fa-solid fa-trash"></i></div>`
+                : ""}
+            </div>
+            ${stagesDef.map(stg => {
+              const items = blk.stages[stg.id] || [];
+              return `<div style="background:${stg.color}; border-left:3px solid ${stg.text}; border-radius:6px; padding:8px; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <span style="font-size:0.78rem; font-weight:800; color:${stg.text};">${stg.name}</span>
+                  <button style="font-size:0.7rem; padding:3px 8px; border-radius:6px; border:none; background:${stg.text}; color:white; cursor:pointer; font-weight:700;"
+                    onclick="addTplEx(${bIdx},'${stg.id}')">+ Ex.</button>
+                </div>
+                ${items.map((ex, eIdx) => `
+                  <div class="tpl-ex-row">
+                    <div class="stat-input-grp">
+                      <label class="stat-lbl">Exercício</label>
+                      <input class="stat-inp" style="text-align:left; font-size:0.75rem;" list="library-exercises"
+                        value="${ex.name}" placeholder="Nome..."
+                        onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].name = this.value; autoFillTplEx(${bIdx},'${stg.id}',${eIdx},this.value)"/>
+                    </div>
+                    <div class="stat-input-grp">
+                      <label class="stat-lbl">Método</label>
+                      <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].method = this.value">
+                        ${["Normal","Bi-set","Tri-set","Drop-set","Rest-Pause","Isometria","Pirâmide","GVT","FST-7"]
+                          .map(m => `<option ${ex.method===m?"selected":""}>${m}</option>`).join("")}
+                      </select>
+                    </div>
+                    <div class="stat-input-grp">
+                      <label class="stat-lbl">Séries</label>
+                      <input class="stat-inp" type="text" value="${ex.sets}"
+                        onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].sets = this.value"/>
+                    </div>
+                    <div class="stat-input-grp">
+                      <label class="stat-lbl">Reps</label>
+                      <input class="stat-inp" type="text" value="${ex.reps}"
+                        onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].reps = this.value"/>
+                    </div>
+                    <div class="stat-input-grp" style="display:flex; align-items:flex-end; gap:4px;">
+                      <div style="flex:1;">
+                        <label class="stat-lbl">Desc.</label>
+                        <input class="stat-inp" type="text" value="${ex.rest}"
+                          onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].rest = this.value"/>
+                      </div>
+                      <div class="bt-icon del" style="width:24px; height:24px; flex-shrink:0;"
+                        onclick="removeTplEx(${bIdx},'${stg.id}',${eIdx})">
+                        <i class="fa-solid fa-xmark" style="font-size:0.7rem;"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:4px; padding:0 0 6px 0; border-bottom:1px dashed var(--border);">
+                    <div class="stat-input-grp">
+                      <label class="stat-lbl">Grupo</label>
+                      <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].group = this.value">
+                        ${appData.groups.map(g => `<option ${ex.group===g?"selected":""}>${g}</option>`).join("")}
+                      </select>
+                    </div>
+                    <div class="stat-input-grp">
+                      <label class="stat-lbl">Equipamento</label>
+                      <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].equip = this.value">
+                        ${appData.equips.map(e => `<option ${ex.equip===e?"selected":""}>${e}</option>`).join("")}
+                      </select>
+                    </div>
+                    <div class="stat-input-grp">
+                      <label class="stat-lbl">Vídeo (link)</label>
+                      <input class="stat-inp" style="text-align:left; font-size:0.72rem;" type="text" value="${ex.video||""}"
+                        placeholder="https://..."
+                        onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].video = this.value"/>
+                    </div>
+                  </div>
+                `).join("")}
+                ${items.length === 0 ? `<div style="font-size:0.72rem; color:${stg.text}; opacity:0.5; text-align:center; padding:4px 0;">Nenhum exercício</div>` : ""}
+              </div>`;
+            }).join("")}
+          </div>
+        `).join("") + (canAddBlock ? `
+          <button class="btn-primary-block" style="margin:0 0 10px 0; background:#0891b2; font-size:0.8rem;"
+            onclick="addTplBlock()">
+            <i class="fa-solid fa-plus"></i> Adicionar Bloco
+          </button>` : "");
+      }
+
+      function addTplBlock() {
+        tplBlocks.push(createTplBlock());
+        renderTplEditor();
+      }
+      function removeTplBlock(bIdx) {
+        tplBlocks.splice(bIdx, 1);
+        renderTplEditor();
+      }
+      function addTplEx(bIdx, stageId) {
+        tplBlocks[bIdx].stages[stageId].push(createTplEx());
+        renderTplEditor();
+      }
+      function removeTplEx(bIdx, stageId, eIdx) {
+        tplBlocks[bIdx].stages[stageId].splice(eIdx, 1);
+        renderTplEditor();
+      }
+
+      // Auto-preenche campos do exercício a partir da biblioteca
+      function autoFillTplEx(bIdx, stageId, eIdx, name) {
+        const libEx = appData.library.find(e => e.name.toLowerCase() === name.toLowerCase());
+        if (!libEx) {
+          // Exercício novo — adiciona à biblioteca automaticamente
+          if (name.trim()) {
+            const exists = appData.library.some(e => e.name.toLowerCase() === name.toLowerCase());
+            if (!exists) {
+              appData.library.push({
+                name: name.trim(),
+                group: tplBlocks[bIdx].stages[stageId][eIdx].group || appData.groups[0] || "Geral",
+                equip: tplBlocks[bIdx].stages[stageId][eIdx].equip || appData.equips[0] || "Livre",
+                method: tplBlocks[bIdx].stages[stageId][eIdx].method || "Musculação",
+                video: tplBlocks[bIdx].stages[stageId][eIdx].video || "",
+              });
+              saveLocal();
+              updateDatalist();
+              showToast("\"" + name + "\" adicionado à biblioteca!");
+            }
+          }
+          return;
+        }
+        // Exercício encontrado — preenche campos
+        const ex = tplBlocks[bIdx].stages[stageId][eIdx];
+        ex.group  = libEx.group  || ex.group;
+        ex.equip  = libEx.equip  || ex.equip;
+        ex.method = libEx.method || ex.method;
+        ex.video  = libEx.video  || ex.video;
+        renderTplEditor();
+        showToast("Preenchido da biblioteca!");
+      }
+
+      // --- Salva template ---
+      async function saveTemplate() {
+        const name = document.getElementById("tpl-name").value.trim();
+        if (!name) return customAlert("Dê um nome ao template.");
+
+        const hasEx = tplBlocks.some(b =>
+          Object.values(b.stages).some(arr => arr.some(e => e.name.trim()))
+        );
+        if (!hasEx) return customAlert("Adicione pelo menos um exercício.");
+
+        const category = document.getElementById("tpl-category").value.trim();
+        const idx      = document.getElementById("tpl-editing-idx").value;
+        const listKey  = tplCurrentType === "bloco" ? "blocos" : "treinos";
+
+        const template = {
+          name,
+          category,
+          type: tplCurrentType,
+          blocks: JSON.parse(JSON.stringify(tplBlocks)),
+          createdAt: idx === "NEW" ? new Date().toISOString() : undefined,
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (!appData.templates) appData.templates = { treinos: [], blocos: [] };
+
+        if (idx === "NEW") {
+          appData.templates[listKey].unshift(template);
+        } else {
+          appData.templates[listKey][parseInt(idx)] = template;
+        }
+
+        saveLocal();
+        closeModal("modal-tpl-editor");
+        tplCurrentTab = listKey;
+        openTemplatesModal();
+        showToast("Template salvo!");
+      }
+
+      // --- Aplica template ao aluno atual ---
+      async function applyTemplate(listKey, idx) {
+        if (!currentStudent) return customAlert("Selecione um aluno primeiro.");
+        const t = appData.templates[listKey][idx];
+
+        if (listKey === "treinos") {
+          const hasBlocks = currentStudent.blocks && currentStudent.blocks.length > 0;
+          if (hasBlocks) {
+            if (!(await customConfirm(
+              `Aplicar o template "${t.name}" vai substituir os blocos atuais de ${currentStudent.name}.\n\nDeseja continuar?`
+            ))) return;
+          }
+          currentStudent.blocks = JSON.parse(JSON.stringify(t.blocks));
+        } else {
+          // Bloco único — adiciona por cima
+          const blocksToAdd = JSON.parse(JSON.stringify(t.blocks));
+          currentStudent.blocks = currentStudent.blocks || [];
+          blocksToAdd.forEach(b => currentStudent.blocks.push(b));
+        }
+
+        saveLocal();
+        closeModal("modal-templates");
+        renderEditor();
+        switchView("train");
+        showToast(`Template "${t.name}" aplicado!`);
+      }
+
+      // --- Salva bloco como template direto do editor ---
+      async function saveBlockAsTemplate(bIdx) {
+        const blk  = currentStudent.blocks[bIdx];
+        const name = await customPrompt("Nome para este template de bloco:", blk.name);
+        if (!name) return;
+        const category = await customPrompt("Categoria (ex: Costas, Patologia, Combo):", "");
+
+        if (!appData.templates) appData.templates = { treinos: [], blocos: [] };
+        appData.templates.blocos.unshift({
+          name: name.trim(),
+          category: category?.trim() || "",
+          type: "bloco",
+          blocks: [JSON.parse(JSON.stringify(blk))],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
+        saveLocal();
+        showToast("Bloco salvo como template!");
+      }
+
+      // --- Salva treino completo como template ---
+      async function saveWorkoutAsTemplate() {
+        if (!currentStudent) return customAlert("Selecione um aluno primeiro.");
+        if (!currentStudent.blocks || currentStudent.blocks.length === 0)
+          return customAlert("O aluno não tem blocos para salvar como template.");
+
+        const name = await customPrompt("Nome para este template de treino:", currentStudent.name + " — Template");
+        if (!name) return;
+        const category = await customPrompt("Categoria (ex: Iniciante, Hipertrofia, Casa):", "");
+
+        if (!appData.templates) appData.templates = { treinos: [], blocos: [] };
+        appData.templates.treinos.unshift({
+          name: name.trim(),
+          category: category?.trim() || "",
+          type: "treino",
+          blocks: JSON.parse(JSON.stringify(currentStudent.blocks)),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
+        saveLocal();
+        showToast("Treino salvo como template!");
+      }
+
+      // --- Exclui template ---
+      async function deleteTemplate(listKey, idx) {
+        const t = appData.templates[listKey][idx];
+        if (!(await customConfirm(`Excluir o template "${t.name}"? Isso não afeta nenhum aluno.`))) return;
+        appData.templates[listKey].splice(idx, 1);
+        saveLocal();
+        renderTemplateCards();
+        showToast("Template excluído.");
+      }
 
       function toggleTheme() {
         const isDark =
