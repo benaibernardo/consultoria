@@ -4671,14 +4671,12 @@
             const localIds = appData.students.map((s) => s.id);
             masterData.studentIndex.forEach((idxStudent) => {
               if (!localIds.includes(idxStudent.id)) {
-                // FIX: só cria placeholder para alunos Gist (têm gistId real).
-                // Alunos do Sheets (gistId null) são carregados pelo syncFromSheets —
-                // criar placeholder aqui causa duplicatas fantasmas.
-                if (!idxStudent.gistId) return;
+                // Cria placeholder para qualquer aluno do índice que ainda não está local.
+                // Alunos Sheets sem gistId serão removidos pelo filtro de órfãos no syncFromSheets.
                 appData.students.push({
                   id: idxStudent.id,
                   name: idxStudent.name,
-                  gistId: idxStudent.gistId,
+                  gistId: idxStudent.gistId || null,
                   focus: "Carregando...",
                   blocks: [],
                 });
