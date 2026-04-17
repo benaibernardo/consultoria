@@ -94,7 +94,7 @@
       /* --- LAYOUT GRID --- */
       #main-layout {
         display: grid;
-        grid-template-columns: 260px 1fr;
+        grid-template-columns: 280px 1fr 310px;
         width: 100%;
         height: 100%;
       }
@@ -111,7 +111,7 @@
         height: 100%;
         overflow: hidden;
         box-sizing: border-box;
-        width: 260px;
+        width: 280px;
       }
 
       .sb-header {
@@ -307,11 +307,11 @@
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        padding: 0;
-        overflow-y: auto;
+        overflow: hidden;
         background: var(--mgr-bg);
         position: relative;
         height: 100%;
+        min-width: 0;
       }
 
       .phone-frame {
@@ -1079,6 +1079,27 @@
         border: 1px solid var(--border); border-radius: 8px; padding: 8px;
       }
       .tpl-ex-row .stat-inp { font-size: 0.78rem; }
+
+      /* Painel de Ações lateral (dentro do workspace) */
+      .actions-side-panel {
+        width: 220px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 14px;
+        background: var(--surface);
+        border-left: 1px solid var(--border);
+        overflow-y: auto;
+      }
+      .actions-side-head {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+      }
 
       /* ── PRODUCTION LAYOUT ─────────────────────────── */
 
@@ -1917,7 +1938,7 @@
       <!-- 2. CENTER: PRODUCTION WORKSPACE -->
       <div class="workspace" id="phone-preview">
 
-        <!-- COMPACT STUDENT HEADER -->
+        <!-- COMPACT STUDENT HEADER (navy) -->
         <div class="prod-header">
           <input id="ed-name" class="prod-header-name" value="Aluno"
             oninput="resizeNameInput(this); updateStudent('name', this.value);"
@@ -1926,11 +1947,11 @@
             oninput="updateStudent('focus', this.value)" onchange="autoSaveGestao()"/>
           <div class="prod-dates">
             <div class="prod-date-pill">
-              <i class="fa-regular fa-calendar" style="opacity:0.6;"></i>
+              <i class="fa-regular fa-calendar" style="opacity:0.6;font-size:0.7rem;"></i>
               <input type="date" id="ed-start" onchange="updateStudent('startDate',this.value); autoSaveGestao();"/>
             </div>
             <div class="prod-date-pill">
-              <i class="fa-solid fa-flag-checkered" style="opacity:0.6;"></i>
+              <i class="fa-solid fa-flag-checkered" style="opacity:0.6;font-size:0.7rem;"></i>
               <input type="date" id="ed-end" onchange="updateStudent('expiryDate',this.value); autoSaveGestao();"/>
             </div>
           </div>
@@ -1939,19 +1960,19 @@
           </button>
         </div>
 
-        <!-- COLLAPSIBLE DETAILS PANEL -->
+        <!-- COLLAPSIBLE DETAILS PANEL (navy) -->
         <div class="prod-details-panel" id="prod-details-panel">
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; align-items:start;">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; align-items:start;">
             <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
               <label class="hb-label" style="color:var(--accent);"><i class="fa-solid fa-star"></i> Plano</label>
-              <select id="ed-plano" class="chk-select" style="width:100%; margin-top:4px;" onchange="updateStudent('planoAtual',this.value)">
+              <select id="ed-plano" class="chk-select" style="width:100%;margin-top:4px;" onchange="updateStudent('planoAtual',this.value)">
                 <option value="individual">Individual</option>
                 <option value="casal">Casal</option>
               </select>
             </div>
             <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
               <label class="hb-label"><i class="fa-solid fa-laptop"></i> Tipo</label>
-              <select id="ed-tipo-consultoria" class="chk-select" style="width:100%; margin-top:4px;"
+              <select id="ed-tipo-consultoria" class="chk-select" style="width:100%;margin-top:4px;"
                 onchange="updateStudent('tipoConsultoria',this.value); autoSaveGestao();">
                 <option value="Online">Online</option>
                 <option value="Presencial">Presencial</option>
@@ -1960,7 +1981,7 @@
             </div>
             <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
               <label class="hb-label"><i class="fa-solid fa-chart-line"></i> Status</label>
-              <select id="ed-status-treino" class="chk-select" style="width:100%; margin-top:4px;"
+              <select id="ed-status-treino" class="chk-select" style="width:100%;margin-top:4px;"
                 onchange="updateStudent('statusTreino',this.value); autoSaveGestao();">
                 <option value="Ativo">Ativo</option>
                 <option value="Pendente">Pendente</option>
@@ -1980,104 +2001,103 @@
               <div class="checkup-controls">
                 <select id="ed-check-day" class="chk-select" onchange="updateCheckup()">
                   <option value="">Dia...</option>
-                  <option value="Seg">Segunda</option>
-                  <option value="Ter">Terça</option>
-                  <option value="Qua">Quarta</option>
-                  <option value="Qui">Quinta</option>
-                  <option value="Sex">Sexta</option>
-                  <option value="Sáb">Sábado</option>
+                  <option value="Seg">Segunda</option><option value="Ter">Terça</option>
+                  <option value="Qua">Quarta</option><option value="Qui">Quinta</option>
+                  <option value="Sex">Sexta</option><option value="Sáb">Sábado</option>
                   <option value="Dom">Domingo</option>
                 </select>
                 <span style="color:rgba(255,255,255,0.3)">|</span>
-                <input type="time" id="ed-check-time" class="hb-input" style="width:70px; text-align:center;" onchange="updateCheckup()"/>
+                <input type="time" id="ed-check-time" class="hb-input" style="width:70px;text-align:center;" onchange="updateCheckup()"/>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ACTIONS BAR -->
-        <div class="actions-bar">
-          <button class="act-btn" style="background:var(--success);" onclick="copyTinyUrlFlow()">
-            <i class="fa-solid fa-link"></i> Gerar Link
-          </button>
-          <button class="act-btn" style="background:#f59e0b;" onclick="previewWorkout()">
-            <i class="fa-solid fa-eye"></i> Preview
-          </button>
-          <button class="act-btn" style="background:#10b981;" onclick="saveToCloud('PATCH')">
-            <i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem
-          </button>
-          <button class="act-btn" style="background:#0891b2;" onclick="saveWorkoutAsTemplate()">
-            <i class="fa-solid fa-book-bookmark"></i> Salvar Template
-          </button>
-          <button class="act-btn danger" onclick="deleteCurrentStudent()">
-            <i class="fa-solid fa-trash"></i> Excluir Aluno
-          </button>
-        </div>
+        <!-- CONTENT ROW: Canvas (flex:1) + Actions panel (fixed width) -->
+        <div style="display:flex; flex:1; overflow:hidden; min-height:0;">
 
-        <!-- TAB NAV -->
-        <div class="prod-tabs">
-          <div class="prod-tab active" id="tab-train" onclick="switchView('train')">
-            <i class="fa-solid fa-dumbbell"></i> Treino
-          </div>
-          <div class="prod-tab" id="tab-logic" onclick="switchView('logic')">
-            <i class="fa-solid fa-brain"></i> Pilares
-          </div>
-          <div class="prod-tab" id="tab-history" onclick="switchView('history')">
-            <i class="fa-solid fa-clock-rotate-left"></i> Histórico
-          </div>
-          <div class="prod-tab" id="tab-feedback" onclick="switchView('feedback')">
-            <i class="fa-solid fa-comment-dots"></i> Feedbacks
-          </div>
-        </div>
-
-        <!-- BUILDER BAR (abaixo das tabs, visível só na tab Treino) -->
-        <div class="builder-bar" id="builder-bar">
-          <div class="builder-bar-head">Construtor</div>
-          <div class="builder-bar-grid">
-            <button class="b-btn bb-block" style="padding:5px 12px;" onclick="addBlock()">
-              <i class="fa-solid fa-layer-group"></i> Novo Bloco
-            </button>
-            <button class="b-btn" style="background:#10b981; color:white; padding:5px 12px;" onclick="pasteBlockFromClipboard()">
-              <i class="fa-solid fa-clipboard-check"></i> Colar Bloco
-            </button>
-            <button class="b-btn" style="background:#0891b2; color:white; padding:5px 12px;" onclick="openTemplatesModal()">
-              <i class="fa-solid fa-book-bookmark"></i> Templates
-            </button>
-            <div style="width:1px; background:var(--border); margin:0 4px;"></div>
-            <button class="b-btn bb-iso" onclick="addMethod('Normal')"><i class="fa-solid fa-dumbbell"></i> Isolado</button>
-            <button class="b-btn bb-bi" onclick="addMethod('Bi-set')"><i class="fa-solid fa-link"></i> Bi-set</button>
-            <button class="b-btn bb-tri" onclick="addMethod('Tri-set')"><i class="fa-solid fa-link"></i> Tri-set</button>
-            <button class="b-btn bb-drop" onclick="addMethod('Drop-set')"><i class="fa-solid fa-stairs"></i> Drop-set</button>
-            <button class="b-btn bb-rest" onclick="addMethod('Rest-Pause')"><i class="fa-solid fa-stopwatch"></i> Rest-Pause</button>
-            <button class="b-btn bb-static" onclick="addMethod('Isometria')"><i class="fa-solid fa-pause"></i> Isometria</button>
-            <button class="b-btn bb-pyr" onclick="addMethod('Pirâmide')"><i class="fa-solid fa-arrow-up-right-dots"></i> Pirâmide</button>
-            <button class="b-btn bb-gvt" onclick="addMethod('GVT')"><i class="fa-solid fa-g"></i> GVT 10×10</button>
-            <button class="b-btn bb-fst" onclick="addMethod('FST-7')"><i class="fa-solid fa-f"></i> FST-7</button>
-          </div>
-        </div>
-
-        <!-- CANVAS AREAS -->
-        <div id="editor-canvas" class="prod-canvas"></div>
-        <div id="method-canvas"   class="prod-canvas" style="display:none;"></div>
-        <div id="history-canvas"  class="prod-canvas" style="display:none;"></div>
-        <div id="feedback-canvas" class="prod-canvas" style="display:none;"></div>
-      </div>
-
-      <!-- LIBRARY DRAWER (overlay) -->
-      <div class="lib-drawer" id="lib-drawer">
-        <div class="lib-drawer-header">
-          <span><i class="fa-solid fa-book-open" style="color:var(--accent); margin-right:6px;"></i> Biblioteca</span>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <div class="rp-tab active" onclick="switchRightTab('lib')" id="rt-lib" style="padding:4px 10px;">Biblioteca</div>
-            <div class="rp-tab" onclick="switchRightTab('method')" id="rt-method" style="padding:4px 10px;">Metodologia</div>
-            <div class="btn-icon-sm" onclick="toggleLibDrawer()" title="Fechar biblioteca">
-              <i class="fa-solid fa-xmark"></i>
+          <!-- CANVAS SECTION -->
+          <div style="display:flex; flex-direction:column; flex:1; overflow:hidden; min-width:0;">
+            <!-- Tabs -->
+            <div class="prod-tabs">
+              <div class="prod-tab active" id="tab-train" onclick="switchView('train')">
+                <i class="fa-solid fa-dumbbell"></i> Treino
+              </div>
+              <div class="prod-tab" id="tab-logic" onclick="switchView('logic')">
+                <i class="fa-solid fa-brain"></i> Pilares
+              </div>
+              <div class="prod-tab" id="tab-history" onclick="switchView('history')">
+                <i class="fa-solid fa-clock-rotate-left"></i> Histórico
+              </div>
+              <div class="prod-tab" id="tab-feedback" onclick="switchView('feedback')">
+                <i class="fa-solid fa-comment-dots"></i> Feedbacks
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div class="rp-header" style="border-top:none;">
-          <!-- LIBRARY CONTROLS -->
+            <!-- Builder bar -->
+            <div class="builder-bar" id="builder-bar">
+              <div class="builder-bar-head">Construtor</div>
+              <div class="builder-bar-grid">
+                <button class="b-btn bb-block" style="padding:5px 10px;" onclick="addBlock()">
+                  <i class="fa-solid fa-layer-group"></i> Novo Bloco
+                </button>
+                <button class="b-btn" style="background:#10b981;color:white;padding:5px 10px;" onclick="pasteBlockFromClipboard()">
+                  <i class="fa-solid fa-clipboard-check"></i> Colar
+                </button>
+                <button class="b-btn" style="background:#0891b2;color:white;padding:5px 10px;" onclick="openTemplatesModal()">
+                  <i class="fa-solid fa-book-bookmark"></i> Templates
+                </button>
+                <div style="width:1px;background:var(--border);margin:0 2px;"></div>
+                <button class="b-btn bb-iso" onclick="addMethod('Normal')"><i class="fa-solid fa-dumbbell"></i> Isolado</button>
+                <button class="b-btn bb-bi"  onclick="addMethod('Bi-set')"><i class="fa-solid fa-link"></i> Bi-set</button>
+                <button class="b-btn bb-tri" onclick="addMethod('Tri-set')"><i class="fa-solid fa-link"></i> Tri-set</button>
+                <button class="b-btn bb-drop" onclick="addMethod('Drop-set')"><i class="fa-solid fa-stairs"></i> Drop-set</button>
+                <button class="b-btn bb-rest" onclick="addMethod('Rest-Pause')"><i class="fa-solid fa-stopwatch"></i> Rest-Pause</button>
+                <button class="b-btn bb-static" onclick="addMethod('Isometria')"><i class="fa-solid fa-pause"></i> Isometria</button>
+                <button class="b-btn bb-pyr" onclick="addMethod('Pirâmide')"><i class="fa-solid fa-arrow-up-right-dots"></i> Pirâmide</button>
+                <button class="b-btn bb-gvt" onclick="addMethod('GVT')"><i class="fa-solid fa-g"></i> GVT</button>
+                <button class="b-btn bb-fst" onclick="addMethod('FST-7')"><i class="fa-solid fa-f"></i> FST-7</button>
+              </div>
+            </div>
+
+            <!-- Canvas areas -->
+            <div id="editor-canvas"  class="prod-canvas"></div>
+            <div id="method-canvas"  class="prod-canvas" style="display:none;"></div>
+            <div id="history-canvas" class="prod-canvas" style="display:none;"></div>
+            <div id="feedback-canvas"class="prod-canvas" style="display:none;"></div>
+          </div>
+
+          <!-- ACTIONS PANEL (right of canvas, inside workspace) -->
+          <div class="actions-side-panel">
+            <div class="actions-side-head">Ações</div>
+            <button class="pa-btn-wide pa-tiny" onclick="copyTinyUrlFlow()">
+              <i class="fa-solid fa-link"></i> <span>Gerar Link</span>
+            </button>
+            <button class="pa-btn-wide" onclick="previewWorkout()" style="background:#f59e0b;">
+              <i class="fa-solid fa-eye"></i> <span>Preview</span>
+            </button>
+            <button class="pa-btn-wide pa-update" onclick="saveToCloud('PATCH')">
+              <i class="fa-solid fa-cloud-arrow-up"></i> <span>Salvar na Nuvem</span>
+            </button>
+            <button class="pa-btn-wide" onclick="saveWorkoutAsTemplate()" style="background:#0891b2;">
+              <i class="fa-solid fa-book-bookmark"></i> <span>Salvar Template</span>
+            </button>
+            <button class="pa-btn-wide" onclick="deleteCurrentStudent()" style="background:var(--danger);">
+              <i class="fa-solid fa-trash"></i> <span>Excluir Aluno</span>
+            </button>
+          </div>
+
+        </div><!-- /content-row -->
+      </div><!-- /workspace -->
+
+      <!-- 3. RIGHT: LIBRARY (always visible) -->
+      <div class="right-panel">
+        <div class="rp-header">
+          <div class="rp-tabs">
+            <div class="rp-tab active" onclick="switchRightTab('lib')" id="rt-lib">Biblioteca</div>
+            <div class="rp-tab" onclick="switchRightTab('method')" id="rt-method">Metodologia</div>
+          </div>
+
           <div id="lib-controls">
             <!-- BADGE DE DESTINO -->
             <div id="dest-badge" class="dest-badge">
@@ -2087,7 +2107,7 @@
             </div>
 
             <input class="search-inp" id="lib-search"
-              style="padding:8px 10px; height:36px; font-size:0.8rem; margin-bottom:10px;"
+              style="padding:8px 10px;height:36px;font-size:0.8rem;margin-bottom:10px;"
               placeholder="Buscar exercício..." onkeyup="renderLibrary()"/>
 
             <div class="filter-row">
@@ -2105,7 +2125,7 @@
               </div>
             </div>
 
-            <button class="btn-primary-block" style="padding:10px; font-size:0.8rem; margin:0;" onclick="openLibModal()">
+            <button class="btn-primary-block" style="padding:10px;font-size:0.8rem;margin:0;" onclick="openLibModal()">
               + Novo Exercício
             </button>
           </div>
@@ -2113,11 +2133,6 @@
 
         <div class="lib-content" id="right-content"></div>
       </div>
-
-      <!-- BOTÃO FLUTUANTE PARA ABRIR BIBLIOTECA -->
-      <button class="lib-toggle-btn" onclick="toggleLibDrawer()" id="lib-toggle-btn" title="Abrir / Fechar Biblioteca">
-        <i class="fa-solid fa-book-open"></i>
-      </button>
 
     <!-- MODAL: ADD EXERCISE (UPDATED) -->
     <div id="modal-lib" class="modal" style="z-index:300">
@@ -4096,17 +4111,6 @@
         document.querySelectorAll(".rp-tab").forEach(t => t.classList.remove("active"));
         const tabEl = document.getElementById("rt-" + tab);
         if (tabEl) tabEl.classList.add("active");
-
-        // Abre o drawer se estiver fechado
-        const drawer = document.getElementById("lib-drawer");
-        const btn    = document.getElementById("lib-toggle-btn");
-        if (drawer && !drawer.classList.contains("open")) {
-          drawer.classList.add("open");
-          if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-            btn.title = "Fechar Biblioteca";
-          }
-        }
 
         const cont = document.getElementById("right-content");
         if (tab === "lib") {
@@ -6214,38 +6218,6 @@
         }
       }
 
-      function toggleLibDrawer() {
-        const drawer = document.getElementById("lib-drawer");
-        const btn    = document.getElementById("lib-toggle-btn");
-        if (!drawer) return;
-        const isOpen = drawer.classList.contains("open");
-        drawer.classList.toggle("open", !isOpen);
-        if (btn) {
-          btn.innerHTML = isOpen
-            ? '<i class="fa-solid fa-book-open"></i>'
-            : '<i class="fa-solid fa-xmark"></i>';
-          btn.title = isOpen ? "Abrir Biblioteca" : "Fechar Biblioteca";
-        }
-        // Foca a busca ao abrir
-        if (!isOpen) {
-          setTimeout(() => {
-            const s = document.getElementById("lib-search");
-            if (s) s.focus();
-          }, 300);
-        }
-      }
-
-      // Fecha o drawer quando clicar fora dele
-      document.addEventListener("click", function(e) {
-        const drawer = document.getElementById("lib-drawer");
-        const btn    = document.getElementById("lib-toggle-btn");
-        if (!drawer || !drawer.classList.contains("open")) return;
-        if (!drawer.contains(e.target) && btn && !btn.contains(e.target)) {
-          drawer.classList.remove("open");
-          btn.innerHTML = '<i class="fa-solid fa-book-open"></i>';
-          btn.title = "Abrir Biblioteca";
-        }
-      });
       // ─────────────────────────────────────────────────────
 
       function toggleTheme() {
