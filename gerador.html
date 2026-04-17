@@ -2493,10 +2493,13 @@
             </div>
           </div>
           <div class="lib-field-row" style="margin:0; border-left:4px solid var(--purple);">
-            <label>Categoria</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+              <label style="margin:0; color:var(--purple);">Categoria</label>
+              <i class="fa-solid fa-gear" onclick="openCatManager('tplCategories')" style="cursor:pointer; color:var(--text-muted); font-size:0.85rem;" title="Gerenciar categorias"></i>
+            </div>
             <div class="input-wrapper">
               <i class="fa-solid fa-folder" style="color:var(--purple)"></i>
-              <input id="tpl-category" placeholder="Ex: Patologia, Combo, Iniciante"/>
+              <select id="tpl-category" style="border:none; background:transparent; width:100%; font-weight:600; font-size:0.85rem; color:var(--text); outline:none; cursor:pointer;"></select>
             </div>
           </div>
         </div>
@@ -2642,6 +2645,7 @@
         equips: ["Barra", "Halter", "Máquina", "Polia", "Livre", "Elástico"],
         methods: ["Musculação", "Calistenia", "Híbrido"],
         templates: { treinos: [], blocos: [] },  // Catálogo de templates do treinador
+        tplCategories: ["Patologia", "Combo", "Iniciante", "Intermediário", "Avançado", "Casa", "Academia"],
         pillars: JSON.parse(JSON.stringify(DEFAULT_PILLARS)),
         masterGistId: null, // Armazena o ID do Gist Master
       };
@@ -2732,6 +2736,7 @@
 
         // Init defaults if missing
         if (!appData.templates) appData.templates = { treinos: [], blocos: [] };
+        if (!appData.tplCategories) appData.tplCategories = ["Patologia","Combo","Iniciante","Intermediário","Avançado","Casa","Academia"];
         if (!appData.groups || appData.groups.length === 0)
           appData.groups = [
             "Peito",
@@ -3249,6 +3254,7 @@
 
         appData.students
           .filter((s) => s.name.toLowerCase().includes(term))
+          .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
           .forEach((s) => {
             let progress = 0;
             let daysLeft = 0;
@@ -4485,9 +4491,10 @@
         document.getElementById("modal-cat").style.display = "flex";
 
         let title = "Categorias";
-        if (type === "groups") title = "Grupos Musculares";
-        else if (type === "equips") title = "Equipamentos";
-        else if (type === "methods") title = "Métodos de Treino";
+        if (type === "groups")        title = "Grupos Musculares";
+        else if (type === "equips")   title = "Equipamentos";
+        else if (type === "methods")  title = "Métodos de Treino";
+        else if (type === "tplCategories") title = "Categorias de Templates";
 
         document.getElementById("cat-modal-title").innerText = title;
         renderCatList();
@@ -4525,6 +4532,11 @@
 
       function refreshSelects(type) {
         // Helper to refresh Dropdowns without closing modal
+        // tplCategories: refresh only the template category dropdown
+        if (type === "tplCategories") {
+          populateTplCategorySelect();
+          return;
+        }
         if (document.querySelector(".rp-tab.active").id === "rt-lib") {
           const filterMap = {
             groups: "filter-group",
@@ -4558,6 +4570,14 @@
           );
           populate(libMap[type], appData[type], null);
         }
+      }
+
+      function populateTplCategorySelect(currentVal = "") {
+        const sel = document.getElementById("tpl-category");
+        if (!sel) return;
+        sel.innerHTML = "";
+        (appData.tplCategories || []).forEach(c => sel.add(new Option(c, c)));
+        if (currentVal) sel.value = currentVal;
       }
 
       function editCategory(idx) {
@@ -4601,6 +4621,7 @@
           methods: appData.methods,
           pillars: appData.pillars,
           templates: appData.templates || { treinos: [], blocos: [] },
+          tplCategories: appData.tplCategories || [],
           studentIndex: appData.students.map((s) => ({
             id: s.id,
             name: s.name,
@@ -4664,7 +4685,8 @@
           appData.equips    = masterData.equips    || appData.equips;
           appData.methods   = masterData.methods   || appData.methods;
           appData.pillars   = masterData.pillars   || appData.pillars;
-          appData.templates = masterData.templates || { treinos: [], blocos: [] };
+          appData.templates     = masterData.templates     || { treinos: [], blocos: [] };
+          appData.tplCategories = masterData.tplCategories || appData.tplCategories || [];
 
           // Update Student Index (keep local data if it exists, otherwise add from index)
           if (masterData.studentIndex) {
@@ -4718,6 +4740,7 @@
           methods: appData.methods,
           pillars: appData.pillars,
           templates: appData.templates || { treinos: [], blocos: [] },
+          tplCategories: appData.tplCategories || [],
           studentIndex: appData.students.map((s) => ({
             id: s.id,
             name: s.name,
@@ -5670,7 +5693,7 @@
             '<i class="fa-solid fa-book-bookmark" style="color:#0891b2"></i> Novo Template';
           document.getElementById("tpl-editing-idx").value = "NEW";
           document.getElementById("tpl-name").value = "";
-          document.getElementById("tpl-category").value = "";
+          populateTplCategorySelect();
           tplCurrentType = "bloco";
           tplBlocks = [createTplBlock()];
         } else {
@@ -5679,7 +5702,7 @@
             '<i class="fa-solid fa-book-bookmark" style="color:#0891b2"></i> Editar Template';
           document.getElementById("tpl-editing-idx").value = idxOrNew;
           document.getElementById("tpl-name").value = t.name;
-          document.getElementById("tpl-category").value = t.category || "";
+          populateTplCategorySelect(t.category || "");
           tplCurrentType = tplCurrentTab === "blocos" ? "bloco" : "treino";
           tplBlocks = JSON.parse(JSON.stringify(t.blocks || [createTplBlock()]));
         }
@@ -5723,6 +5746,7 @@
           { id: "desaceleracao",name: "Desaceleração", color: "#eaf4fc", text: "#2980b9" },
         ];
         const canAddBlock = tplCurrentType === "treino";
+        const methods     = ["Normal","Bi-set","Tri-set","Drop-set","Rest-Pause","Isometria","Pirâmide","GVT","FST-7"];
 
         container.innerHTML = tplBlocks.map((blk, bIdx) => `
           <div class="tpl-block-editor">
@@ -5736,70 +5760,80 @@
             ${stagesDef.map(stg => {
               const items = blk.stages[stg.id] || [];
               return `<div style="background:${stg.color}; border-left:3px solid ${stg.text}; border-radius:6px; padding:8px; margin-bottom:8px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                   <span style="font-size:0.78rem; font-weight:800; color:${stg.text};">${stg.name}</span>
-                  <button style="font-size:0.7rem; padding:3px 8px; border-radius:6px; border:none; background:${stg.text}; color:white; cursor:pointer; font-weight:700;"
-                    onclick="addTplEx(${bIdx},'${stg.id}')">+ Ex.</button>
+                  <button style="font-size:0.7rem; padding:3px 10px; border-radius:6px; border:none; background:${stg.text}; color:white; cursor:pointer; font-weight:700;"
+                    onclick="addTplEx(${bIdx},'${stg.id}')">+ Exercício</button>
                 </div>
                 ${items.map((ex, eIdx) => `
-                  <div class="tpl-ex-row">
-                    <div class="stat-input-grp">
-                      <label class="stat-lbl">Exercício</label>
-                      <input class="stat-inp" style="text-align:left; font-size:0.75rem;" list="library-exercises"
-                        value="${ex.name}" placeholder="Nome..."
+                  <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:8px; border-left:3px solid ${stg.text};">
+                    <!-- Linha 1: Nome + excluir -->
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                      <input class="stat-inp" style="flex:1; text-align:left; font-size:0.82rem; font-weight:700;" list="library-exercises"
+                        value="${ex.name}" placeholder="Nome do exercício..."
                         onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].name = this.value; autoFillTplEx(${bIdx},'${stg.id}',${eIdx},this.value)"/>
+                      ${ex.video ? `<i class="fa-solid fa-circle-play" style="color:#0891b2; cursor:pointer; font-size:1rem; flex-shrink:0;" onclick="window.open('${ex.video}','_blank')" title="Ver vídeo"></i>` : ""}
+                      <div class="bt-icon del" style="width:26px; height:26px; flex-shrink:0;" onclick="removeTplEx(${bIdx},'${stg.id}',${eIdx})" title="Remover exercício">
+                        <i class="fa-solid fa-trash" style="font-size:0.7rem;"></i>
+                      </div>
                     </div>
-                    <div class="stat-input-grp">
-                      <label class="stat-lbl">Método</label>
-                      <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].method = this.value">
-                        ${["Normal","Bi-set","Tri-set","Drop-set","Rest-Pause","Isometria","Pirâmide","GVT","FST-7"]
-                          .map(m => `<option ${ex.method===m?"selected":""}>${m}</option>`).join("")}
-                      </select>
-                    </div>
-                    <div class="stat-input-grp">
-                      <label class="stat-lbl">Séries</label>
-                      <input class="stat-inp" type="text" value="${ex.sets}"
-                        onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].sets = this.value"/>
-                    </div>
-                    <div class="stat-input-grp">
-                      <label class="stat-lbl">Reps</label>
-                      <input class="stat-inp" type="text" value="${ex.reps}"
-                        onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].reps = this.value"/>
-                    </div>
-                    <div class="stat-input-grp" style="display:flex; align-items:flex-end; gap:4px;">
-                      <div style="flex:1;">
-                        <label class="stat-lbl">Desc.</label>
+                    <!-- Linha 2: Método | Séries | Reps | Descanso | Pós-Ex -->
+                    <div style="display:grid; grid-template-columns:1.4fr 0.7fr 0.7fr 0.7fr 0.7fr; gap:5px; margin-bottom:8px;">
+                      <div class="stat-input-grp">
+                        <label class="stat-lbl">Método</label>
+                        <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].method = this.value">
+                          ${methods.map(m => `<option ${ex.method===m?"selected":""}>${m}</option>`).join("")}
+                        </select>
+                      </div>
+                      <div class="stat-input-grp">
+                        <label class="stat-lbl">Séries</label>
+                        <input class="stat-inp" type="text" value="${ex.sets}"
+                          onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].sets = this.value"/>
+                      </div>
+                      <div class="stat-input-grp">
+                        <label class="stat-lbl">Reps</label>
+                        <input class="stat-inp" type="text" value="${ex.reps}"
+                          onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].reps = this.value"/>
+                      </div>
+                      <div class="stat-input-grp">
+                        <label class="stat-lbl">Descanso</label>
                         <input class="stat-inp" type="text" value="${ex.rest}"
                           onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].rest = this.value"/>
                       </div>
-                      <div class="bt-icon del" style="width:24px; height:24px; flex-shrink:0;"
-                        onclick="removeTplEx(${bIdx},'${stg.id}',${eIdx})">
-                        <i class="fa-solid fa-xmark" style="font-size:0.7rem;"></i>
+                      <div class="stat-input-grp">
+                        <label class="stat-lbl">Pós-Ex</label>
+                        <input class="stat-inp" type="text" value="${ex.restEx||""}" placeholder="-"
+                          onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].restEx = this.value"/>
+                      </div>
+                    </div>
+                    <!-- Linha 3: Grupo (c/ engrenagem) | Equipamento (c/ engrenagem) | Vídeo -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:5px;">
+                      <div class="stat-input-grp">
+                        <label class="stat-lbl" style="display:flex; justify-content:space-between; align-items:center;">
+                          Grupo <i class="fa-solid fa-gear" style="cursor:pointer; opacity:0.6;" onclick="openCatManager('groups')" title="Gerenciar grupos"></i>
+                        </label>
+                        <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].group = this.value">
+                          ${appData.groups.map(g => `<option ${ex.group===g?"selected":""}>${g}</option>`).join("")}
+                        </select>
+                      </div>
+                      <div class="stat-input-grp">
+                        <label class="stat-lbl" style="display:flex; justify-content:space-between; align-items:center;">
+                          Equipamento <i class="fa-solid fa-gear" style="cursor:pointer; opacity:0.6;" onclick="openCatManager('equips')" title="Gerenciar equipamentos"></i>
+                        </label>
+                        <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].equip = this.value">
+                          ${appData.equips.map(e => `<option ${ex.equip===e?"selected":""}>${e}</option>`).join("")}
+                        </select>
+                      </div>
+                      <div class="stat-input-grp">
+                        <label class="stat-lbl">Link do Vídeo</label>
+                        <input class="stat-inp" style="text-align:left; font-size:0.7rem;" type="text" value="${ex.video||""}"
+                          placeholder="https://..."
+                          onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].video = this.value; renderTplEditor()"/>
                       </div>
                     </div>
                   </div>
-                  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:4px; padding:0 0 6px 0; border-bottom:1px dashed var(--border);">
-                    <div class="stat-input-grp">
-                      <label class="stat-lbl">Grupo</label>
-                      <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].group = this.value">
-                        ${appData.groups.map(g => `<option ${ex.group===g?"selected":""}>${g}</option>`).join("")}
-                      </select>
-                    </div>
-                    <div class="stat-input-grp">
-                      <label class="stat-lbl">Equipamento</label>
-                      <select class="stat-inp" onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].equip = this.value">
-                        ${appData.equips.map(e => `<option ${ex.equip===e?"selected":""}>${e}</option>`).join("")}
-                      </select>
-                    </div>
-                    <div class="stat-input-grp">
-                      <label class="stat-lbl">Vídeo (link)</label>
-                      <input class="stat-inp" style="text-align:left; font-size:0.72rem;" type="text" value="${ex.video||""}"
-                        placeholder="https://..."
-                        onchange="tplBlocks[${bIdx}].stages['${stg.id}'][${eIdx}].video = this.value"/>
-                    </div>
-                  </div>
                 `).join("")}
-                ${items.length === 0 ? `<div style="font-size:0.72rem; color:${stg.text}; opacity:0.5; text-align:center; padding:4px 0;">Nenhum exercício</div>` : ""}
+                ${items.length === 0 ? `<div style="font-size:0.72rem; color:${stg.text}; opacity:0.5; text-align:center; padding:6px 0;">Nenhum exercício nesta stage</div>` : ""}
               </div>`;
             }).join("")}
           </div>
@@ -5869,7 +5903,7 @@
         );
         if (!hasEx) return customAlert("Adicione pelo menos um exercício.");
 
-        const category = document.getElementById("tpl-category").value.trim();
+        const category = document.getElementById("tpl-category").value || "";
         const idx      = document.getElementById("tpl-editing-idx").value;
         const listKey  = tplCurrentType === "bloco" ? "blocos" : "treinos";
 
@@ -5899,29 +5933,74 @@
 
       // --- Aplica template ao aluno atual ---
       async function applyTemplate(listKey, idx) {
-        if (!currentStudent) return customAlert("Selecione um aluno primeiro.");
         const t = appData.templates[listKey][idx];
 
+        // Monta lista de alunos para seleção
+        const students = appData.students.filter(s => s.name && s.name !== "Novo Aluno");
+        if (students.length === 0) return customAlert("Nenhum aluno disponível. Crie um aluno primeiro.");
+
+        // Cria options do select
+        const options = students
+          .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
+          .map(s => `<option value="${s.id}"${currentStudent && s.id === currentStudent.id ? " selected" : ""}>${s.name}</option>`)
+          .join("");
+
+        // Usa customConfirm adaptado com select embutido
+        const targetId = await new Promise(resolve => {
+          const msg = `Aplicar template <strong>"${t.name}"</strong> em qual aluno?`;
+          document.getElementById("custom-confirm-msg").innerHTML =
+            msg + `<br/><br/><select id="apply-tpl-student" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:700;font-size:0.9rem;margin-top:4px;">${options}</select>`;
+          document.getElementById("custom-confirm-modal").style.display = "flex";
+
+          const btnYes = document.getElementById("custom-confirm-yes");
+          const btnNo  = document.getElementById("custom-confirm-no");
+          const newYes = btnYes.cloneNode(true);
+          const newNo  = btnNo.cloneNode(true);
+          btnYes.parentNode.replaceChild(newYes, btnYes);
+          btnNo.parentNode.replaceChild(newNo, btnNo);
+
+          newYes.addEventListener("click", () => {
+            const sel = document.getElementById("apply-tpl-student");
+            document.getElementById("custom-confirm-modal").style.display = "none";
+            resolve(sel ? sel.value : null);
+          });
+          newNo.addEventListener("click", () => {
+            document.getElementById("custom-confirm-modal").style.display = "none";
+            resolve(null);
+          });
+        });
+
+        if (!targetId) return;
+
+        // Carrega o aluno alvo (pode não ser o currentStudent)
+        const targetStudent = appData.students.find(s => s.id === targetId);
+        if (!targetStudent) return customAlert("Aluno não encontrado.");
+
         if (listKey === "treinos") {
-          const hasBlocks = currentStudent.blocks && currentStudent.blocks.length > 0;
+          const hasBlocks = targetStudent.blocks && targetStudent.blocks.length > 0;
           if (hasBlocks) {
             if (!(await customConfirm(
-              `Aplicar o template "${t.name}" vai substituir os blocos atuais de ${currentStudent.name}.\n\nDeseja continuar?`
+              `Aplicar o template "${t.name}" vai substituir os blocos atuais de ${targetStudent.name}.\n\nDeseja continuar?`
             ))) return;
           }
-          currentStudent.blocks = JSON.parse(JSON.stringify(t.blocks));
+          targetStudent.blocks = JSON.parse(JSON.stringify(t.blocks));
         } else {
-          // Bloco único — adiciona por cima
-          const blocksToAdd = JSON.parse(JSON.stringify(t.blocks));
-          currentStudent.blocks = currentStudent.blocks || [];
-          blocksToAdd.forEach(b => currentStudent.blocks.push(b));
+          targetStudent.blocks = targetStudent.blocks || [];
+          JSON.parse(JSON.stringify(t.blocks)).forEach(b => targetStudent.blocks.push(b));
         }
 
         saveLocal();
         closeModal("modal-templates");
-        renderEditor();
-        switchView("train");
-        showToast(`Template "${t.name}" aplicado!`);
+
+        // Se o aluno alvo for o atual, re-renderiza o editor
+        if (currentStudent && currentStudent.id === targetId) {
+          renderEditor();
+          switchView("train");
+        } else {
+          // Carrega o aluno alvo na tela
+          loadStudent(targetId);
+        }
+        showToast(`Template "${t.name}" aplicado em ${targetStudent.name}!`);
       }
 
       // --- Salva bloco como template direto do editor ---
