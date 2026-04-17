@@ -1899,25 +1899,29 @@
     <div id="main-layout">
       <!-- 1. SIDEBAR (CRM) -->
       <div class="sidebar">
-        <div class="sb-header">
-          <div class="brand" style="font-size:1rem;">
-            <i class="fa-solid fa-dumbbell"></i> Benai Manager
+        <div class="sb-header" style="flex-wrap:nowrap; gap:6px; margin-bottom:12px; align-items:center;">
+          <div class="brand" style="font-size:0.9rem; flex-shrink:1; min-width:0; overflow:hidden;">
+            <i class="fa-solid fa-dumbbell" style="color:var(--accent); flex-shrink:0;"></i>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Benai Manager</span>
           </div>
-          <div style="display:flex; gap:4px; flex-shrink:0;">
-            <a href="portal.html" class="btn-icon-sm" title="Portal" style="text-decoration:none;">
+          <div style="display:flex; gap:3px; flex-shrink:0;">
+            <a href="portal.html" class="btn-icon-sm" title="Voltar ao Portal" style="text-decoration:none; color:#64748b;">
               <i class="fa-solid fa-arrow-left"></i>
             </a>
             <div class="btn-icon-sm" onclick="openCloudModal()" title="Dados e Nuvem"
-              style="background:var(--accent); color:white; border-color:var(--accent);">
+              style="background:#0ea5e9; color:white; border-color:#0ea5e9;">
               <i class="fa-solid fa-cloud"></i>
             </div>
-            <div class="btn-icon-sm" onclick="createStudent()" title="Novo Aluno (emergência)">
+            <div class="btn-icon-sm" onclick="createStudent()" title="Novo Aluno"
+              style="background:var(--primary); color:white; border-color:var(--primary);">
               <i class="fa-solid fa-user-plus"></i>
             </div>
-            <div class="btn-icon-sm" onclick="createFullDemo()" title="Aluno Modelo">
+            <div class="btn-icon-sm" onclick="createFullDemo()" title="Aluno Modelo"
+              style="background:#8b5cf6; color:white; border-color:#8b5cf6;">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
             </div>
-            <div class="btn-icon-sm" onclick="toggleTheme()" title="Tema">
+            <div class="btn-icon-sm" onclick="toggleTheme()" title="Alternar Tema"
+              style="background:#f59e0b; color:white; border-color:#f59e0b;">
               <i class="fa-solid fa-circle-half-stroke"></i>
             </div>
           </div>
@@ -1945,14 +1949,16 @@
             onchange="autoSaveGestao()"/>
           <input id="ed-focus" class="prod-header-focus" placeholder="OBJETIVO"
             oninput="updateStudent('focus', this.value)" onchange="autoSaveGestao()"/>
-          <div class="prod-dates">
-            <div class="prod-date-pill">
-              <i class="fa-regular fa-calendar" style="opacity:0.6;font-size:0.7rem;"></i>
-              <input type="date" id="ed-start" onchange="updateStudent('startDate',this.value); autoSaveGestao();"/>
+          <div style="display:flex; gap:8px; margin-left:auto; align-items:center;">
+            <div style="display:flex; flex-direction:column; align-items:center; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:4px 10px;">
+              <span style="font-size:0.55rem; font-weight:800; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">Início</span>
+              <input type="date" id="ed-start" style="background:transparent; border:none; color:white; font-size:0.78rem; font-weight:700; outline:none; cursor:pointer;"
+                onchange="updateStudent('startDate',this.value); autoSaveGestao();"/>
             </div>
-            <div class="prod-date-pill">
-              <i class="fa-solid fa-flag-checkered" style="opacity:0.6;font-size:0.7rem;"></i>
-              <input type="date" id="ed-end" onchange="updateStudent('expiryDate',this.value); autoSaveGestao();"/>
+            <div style="display:flex; flex-direction:column; align-items:center; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:4px 10px;">
+              <span style="font-size:0.55rem; font-weight:800; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">Fim</span>
+              <input type="date" id="ed-end" style="background:transparent; border:none; color:white; font-size:0.78rem; font-weight:700; outline:none; cursor:pointer;"
+                onchange="updateStudent('expiryDate',this.value); autoSaveGestao();"/>
             </div>
           </div>
           <button class="prod-expand-btn" onclick="toggleDetailsPanel()" title="Dados de gestão">
@@ -1962,64 +1968,62 @@
 
         <!-- COLLAPSIBLE DETAILS PANEL (navy) -->
         <div class="prod-details-panel" id="prod-details-panel">
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; align-items:start;">
-            <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
-              <label class="hb-label" style="color:var(--accent);"><i class="fa-solid fa-star"></i> Plano</label>
-              <select id="ed-plano" class="chk-select" style="width:100%;margin-top:4px;" onchange="updateStudent('planoAtual',this.value)">
+          <!-- Linha 1: Plano | Tipo | Status | Check-up -->
+          <div style="display:flex; gap:8px; flex-wrap:nowrap; margin-bottom:8px;">
+            <div style="display:flex; flex-direction:column; min-width:90px;">
+              <label style="font-size:0.55rem; font-weight:800; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:3px;"><i class="fa-solid fa-star" style="color:var(--accent);"></i> Plano</label>
+              <select id="ed-plano" class="chk-select" style="font-size:0.8rem; padding:3px 0;" onchange="updateStudent('planoAtual',this.value)">
                 <option value="individual">Individual</option>
                 <option value="casal">Casal</option>
               </select>
             </div>
-            <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
-              <label class="hb-label"><i class="fa-solid fa-laptop"></i> Tipo</label>
-              <select id="ed-tipo-consultoria" class="chk-select" style="width:100%;margin-top:4px;"
+            <div style="display:flex; flex-direction:column; min-width:90px;">
+              <label style="font-size:0.55rem; font-weight:800; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:3px;"><i class="fa-solid fa-laptop"></i> Tipo</label>
+              <select id="ed-tipo-consultoria" class="chk-select" style="font-size:0.8rem; padding:3px 0;"
                 onchange="updateStudent('tipoConsultoria',this.value); autoSaveGestao();">
                 <option value="Online">Online</option>
                 <option value="Presencial">Presencial</option>
                 <option value="Hibrida">Híbrida</option>
               </select>
             </div>
-            <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
-              <label class="hb-label"><i class="fa-solid fa-chart-line"></i> Status</label>
-              <select id="ed-status-treino" class="chk-select" style="width:100%;margin-top:4px;"
+            <div style="display:flex; flex-direction:column; min-width:80px;">
+              <label style="font-size:0.55rem; font-weight:800; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:3px;"><i class="fa-solid fa-chart-line"></i> Status</label>
+              <select id="ed-status-treino" class="chk-select" style="font-size:0.8rem; padding:3px 0;"
                 onchange="updateStudent('statusTreino',this.value); autoSaveGestao();">
                 <option value="Ativo">Ativo</option>
                 <option value="Pendente">Pendente</option>
                 <option value="Inativo">Inativo</option>
               </select>
             </div>
-            <div class="header-box" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); grid-column:span 2;">
-              <label class="hb-label"><i class="fa-solid fa-envelope"></i> E-mail do Aluno</label>
-              <input type="email" id="ed-email" class="hb-input" placeholder="email@exemplo.com"
-                onchange="updateStudent('email',this.value); autoSaveGestao();"/>
-            </div>
-            <div class="header-box checkup-box" style="background:rgba(139,92,246,0.15); border-color:rgba(139,92,246,0.3);">
-              <label class="hb-label checkup-label">
-                <span><i class="fa-solid fa-user-doctor"></i> Check-up</span>
-                <span id="chk-next-date" class="chk-date-display">--/--</span>
-              </label>
-              <div class="checkup-controls">
-                <select id="ed-check-day" class="chk-select" onchange="updateCheckup()">
+            <div style="display:flex; flex-direction:column; margin-left:8px; padding-left:8px; border-left:1px solid rgba(255,255,255,0.15);">
+              <label style="font-size:0.55rem; font-weight:800; color:#e9d5ff; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:3px;"><i class="fa-solid fa-user-doctor"></i> Check-up <span id="chk-next-date" style="opacity:0.7; font-weight:600;">--/--</span></label>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <select id="ed-check-day" class="chk-select" style="font-size:0.78rem; padding:3px 0;" onchange="updateCheckup()">
                   <option value="">Dia...</option>
-                  <option value="Seg">Segunda</option><option value="Ter">Terça</option>
-                  <option value="Qua">Quarta</option><option value="Qui">Quinta</option>
-                  <option value="Sex">Sexta</option><option value="Sáb">Sábado</option>
-                  <option value="Dom">Domingo</option>
+                  <option value="Seg">Seg</option><option value="Ter">Ter</option>
+                  <option value="Qua">Qua</option><option value="Qui">Qui</option>
+                  <option value="Sex">Sex</option><option value="Sáb">Sáb</option>
+                  <option value="Dom">Dom</option>
                 </select>
-                <span style="color:rgba(255,255,255,0.3)">|</span>
-                <input type="time" id="ed-check-time" class="hb-input" style="width:70px;text-align:center;" onchange="updateCheckup()"/>
+                <input type="time" id="ed-check-time" class="hb-input" style="width:65px; font-size:0.78rem;" onchange="updateCheckup()"/>
               </div>
             </div>
+          </div>
+          <!-- Linha 2: E-mail -->
+          <div style="display:flex; flex-direction:column;">
+            <label style="font-size:0.55rem; font-weight:800; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:3px;"><i class="fa-solid fa-envelope"></i> E-mail do Aluno</label>
+            <input type="email" id="ed-email" class="hb-input" placeholder="email@exemplo.com" style="font-size:0.85rem;"
+              onchange="updateStudent('email',this.value); autoSaveGestao();"/>
           </div>
         </div>
 
         <!-- CONTENT ROW: Canvas (flex:1) + Actions panel (fixed width) -->
-        <div style="display:flex; flex:1; overflow:hidden; min-height:0;">
+        <div style="display:flex; flex:1; overflow:hidden; min-height:0; background:var(--mgr-bg); gap:12px; padding:12px 12px 12px 12px;">
 
-          <!-- CANVAS SECTION -->
-          <div style="display:flex; flex-direction:column; flex:1; overflow:hidden; min-width:0;">
+          <!-- CANVAS SECTION — card flutuante -->
+          <div style="display:flex; flex-direction:column; flex:1; overflow:hidden; min-width:0; background:var(--surface); border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,0.07); border:1px solid var(--border);">
             <!-- Tabs -->
-            <div class="prod-tabs">
+            <div class="prod-tabs" style="border-radius:16px 16px 0 0; overflow:hidden;">
               <div class="prod-tab active" id="tab-train" onclick="switchView('train')">
                 <i class="fa-solid fa-dumbbell"></i> Treino
               </div>
@@ -2034,8 +2038,8 @@
               </div>
             </div>
 
-            <!-- Builder bar -->
-            <div class="builder-bar" id="builder-bar">
+            <!-- Builder bar — card interno destacado -->
+            <div class="builder-bar" id="builder-bar" style="border-radius:0; border-top:none; border-left:none; border-right:none; border-bottom:2px solid var(--border);">
               <div class="builder-bar-head">Construtor</div>
               <div class="builder-bar-grid">
                 <button class="b-btn bb-block" style="padding:5px 10px;" onclick="addBlock()">
@@ -2061,14 +2065,14 @@
             </div>
 
             <!-- Canvas areas -->
-            <div id="editor-canvas"  class="prod-canvas"></div>
-            <div id="method-canvas"  class="prod-canvas" style="display:none;"></div>
-            <div id="history-canvas" class="prod-canvas" style="display:none;"></div>
-            <div id="feedback-canvas"class="prod-canvas" style="display:none;"></div>
+            <div id="editor-canvas"  class="prod-canvas" style="border-radius:0 0 16px 16px;"></div>
+            <div id="method-canvas"  class="prod-canvas" style="display:none; border-radius:0 0 16px 16px;"></div>
+            <div id="history-canvas" class="prod-canvas" style="display:none; border-radius:0 0 16px 16px;"></div>
+            <div id="feedback-canvas"class="prod-canvas" style="display:none; border-radius:0 0 16px 16px;"></div>
           </div>
 
-          <!-- ACTIONS PANEL (right of canvas, inside workspace) -->
-          <div class="actions-side-panel">
+          <!-- ACTIONS PANEL — card flutuante -->
+          <div class="actions-side-panel" style="border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,0.07); border:1px solid var(--border);">
             <div class="actions-side-head">Ações</div>
             <button class="pa-btn-wide pa-tiny" onclick="copyTinyUrlFlow()">
               <i class="fa-solid fa-link"></i> <span>Gerar Link</span>
