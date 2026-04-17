@@ -13,10 +13,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Benai Manager | Studio CRM</title>
     <script>
+      // Tratador de erros global — usa console porque customAlert ainda não existe neste ponto.
+      // Erros críticos de carregamento aparecem no console do browser (F12).
       window.onerror = function (msg, url, lineNo, columnNo, error) {
-        customAlert(
-          "Error: " + msg + "\nLine: " + lineNo + "\nColumn: " + columnNo,
-        );
+        console.error("Erro global: " + msg + " | Linha: " + lineNo + " | Coluna: " + columnNo);
         return false;
       };
     </script>
@@ -326,140 +326,6 @@
         position: relative;
         flex-shrink: 0;
         transition: all 0.3s ease-in-out;
-      }
-
-      .preview-actions {
-        width: 220px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        position: sticky;
-        top: 20px;
-        flex-shrink: 0;
-      }
-
-      .pa-btn-wide {
-        width: 100%;
-        padding: 12px;
-        border-radius: 12px;
-        border: none;
-        font-weight: 800;
-        color: white;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 10px;
-        transition: 0.2s;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .pa-btn-wide:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      }
-      .pa-tiny {
-        background: #3b82f6;
-      }
-      .pa-update {
-        background: #10b981;
-      }
-      .pa-link {
-        background: #8b5cf6;
-      }
-
-      .builder-controls {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 15px;
-        margin-top: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-      }
-      .builder-header {
-        font-size: 0.7rem;
-        font-weight: 800;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        margin-bottom: 10px;
-        letter-spacing: 1px;
-      }
-      .b-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 6px;
-      }
-      .b-btn {
-        padding: 8px 10px;
-        border-radius: 8px;
-        border: 1px solid transparent;
-        font-size: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        justify-content: flex-start;
-      }
-      .b-btn:hover {
-        transform: translateY(-1px);
-      }
-      .bb-block {
-        background: var(--primary);
-        color: white;
-        margin-bottom: 5px;
-        justify-content: center;
-      }
-      .bb-iso {
-        background: #f1f5f9;
-        color: #475569;
-        border-color: #cbd5e1;
-      }
-      .bb-bi {
-        background: #eff6ff;
-        color: #3b82f6;
-        border-color: #bfdbfe;
-      }
-      .bb-tri {
-        background: #f3e8ff;
-        color: #8b5cf6;
-        border-color: #ddd6fe;
-      }
-      .bb-drop {
-        background: #fef2f2;
-        color: #ef4444;
-        border-color: #fecaca;
-      }
-      .bb-rest {
-        background: #fff7ed;
-        color: #f97316;
-        border-color: #fed7aa;
-      }
-      .bb-static {
-        background: #ecfeff;
-        color: #06b6d4;
-        border-color: #a5f3fc;
-      }
-      .bb-pyr {
-        background: #eef2ff;
-        color: #6366f1;
-        border-color: #c7d2fe;
-      }
-      .bb-gvt {
-        background: #ecfdf5;
-        color: #10b981;
-        border-color: #a7f3d0;
-      }
-      .bb-fst {
-        background: #fce7f3;
-        color: #db2777;
-        border-color: #fbcfe8;
-      }
-      [data-theme="dark"] .b-btn:not(.bb-block) {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.1);
       }
 
       .app-header {
@@ -1170,6 +1036,32 @@
       .bb-fst {
         border-left: 3px solid #db2777;
       }
+
+      /* --- DESTINATION BADGE --- */
+      .dest-badge {
+        display: none;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0, 168, 232, 0.12);
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: var(--accent);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        animation: fadeIn 0.2s ease-out;
+      }
+      .dest-badge.visible { display: flex; }
+      .dest-badge-clear {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.6;
+        font-size: 0.8rem;
+      }
+      .dest-badge-clear:hover { opacity: 1; }
 
       /* --- RIGHT PANEL (LIBRARY) --- */
       .right-panel {
@@ -2037,31 +1929,8 @@
           <div class="builder-controls">
             <div
               class="builder-header"
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
             >
               <span>CONSTRUTOR</span>
-              <select
-                id="target-stage-select"
-                style="
-                  font-size: 0.65rem;
-                  padding: 2px;
-                  border-radius: 4px;
-                  border: 1px solid var(--border);
-                  background: var(--bg);
-                  color: var(--text);
-                  outline: none;
-                  cursor: pointer;
-                "
-              >
-                <option value="mobilidade">Mobilidade</option>
-                <option value="ativacao">Ativação</option>
-                <option value="forca" selected>Força</option>
-                <option value="desaceleracao">Desaceleração</option>
-              </select>
             </div>
             <div class="b-grid">
               <button class="b-btn bb-block" onclick="addBlock()">
@@ -2129,6 +1998,14 @@
 
           <!-- LIBRARY CONTROLS -->
           <div id="lib-controls">
+
+            <!-- BADGE DE DESTINO — aparece ao clicar "+ Adicionar" numa stage -->
+            <div id="dest-badge" class="dest-badge">
+              <i class="fa-solid fa-location-crosshairs"></i>
+              <span id="dest-badge-text">→ Destino</span>
+              <span class="dest-badge-clear" onclick="clearDestination()" title="Limpar destino"><i class="fa-solid fa-xmark"></i></span>
+            </div>
+
             <input
               class="search-inp"
               id="lib-search"
@@ -3551,41 +3428,7 @@
           } else {
             // Reverse to show newest first
             data.reverse().forEach((item) => {
-              let fullDate = item["Data/Hora"] || "Data Desconhecida";
-              try {
-                if (
-                  typeof fullDate === "string" &&
-                  fullDate.includes("T") &&
-                  fullDate.includes("Z")
-                ) {
-                  const d = new Date(fullDate);
-                  if (!isNaN(d.getTime())) {
-                    const dia = String(d.getDate()).padStart(2, "0");
-                    const mes = String(d.getMonth() + 1).padStart(2, "0");
-                    const ano = d.getFullYear();
-                    const hora = String(d.getHours()).padStart(2, "0");
-                    const min = String(d.getMinutes()).padStart(2, "0");
-                    fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
-                  }
-                } else if (
-                  fullDate instanceof Date ||
-                  (typeof fullDate === "string" &&
-                    !isNaN(Date.parse(fullDate)) &&
-                    !fullDate.includes("/"))
-                ) {
-                  const d = new Date(fullDate);
-                  if (!isNaN(d.getTime())) {
-                    const dia = String(d.getDate()).padStart(2, "0");
-                    const mes = String(d.getMonth() + 1).padStart(2, "0");
-                    const ano = d.getFullYear();
-                    const hora = String(d.getHours()).padStart(2, "0");
-                    const min = String(d.getMinutes()).padStart(2, "0");
-                    fullDate = `${dia}/${mes}/${ano} às ${hora}:${min}`;
-                  }
-                }
-              } catch (e) {
-                // Keep original if parsing fails
-              }
+              const fullDate = parseSheetDate(item["Data/Hora"]).fullFormatted;
 
               html += `
                     <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:15px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
@@ -3719,20 +3562,33 @@
             ];
 
             stagesDef.forEach((stg) => {
+              const stageItems  = (blk.stages && blk.stages[stg.id]) || [];
+              const isEmpty     = stageItems.length === 0;
+              // Stage vazia começa colapsada — expande ao adicionar o primeiro exercício
+              const isCollapsed = isEmpty;
+
               const stageDiv = document.createElement("div");
               stageDiv.className = "stage-section";
-              stageDiv.style.background = stg.color;
-              stageDiv.style.borderLeft = `4px solid ${stg.text}`;
-              stageDiv.style.padding = "10px";
-              stageDiv.style.marginBottom = "10px";
-              stageDiv.style.borderRadius = "8px";
+              stageDiv.style.background    = stg.color;
+              stageDiv.style.borderLeft    = `4px solid ${stg.text}`;
+              stageDiv.style.padding       = "10px";
+              stageDiv.style.marginBottom  = "10px";
+              stageDiv.style.borderRadius  = "8px";
 
               stageDiv.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <h4 style="margin:0; color:${stg.text}; font-size:0.9rem; font-weight:600;"><i class="fa-solid ${stg.icon}"></i> ${stg.name}</h4>
-                            <button class="btn-primary-block" style="padding:5px 10px; font-size:0.75rem; margin:0; width:auto; background:${stg.text}; border:none;" onclick="openLibModalForStage(${bIdx}, '${stg.id}')">+ Adicionar</button>
+                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleStageCollapse(this)">
+                            <h4 style="margin:0; color:${stg.text}; font-size:0.9rem; font-weight:600; display:flex; align-items:center; gap:6px;">
+                              <i class="fa-solid ${stg.icon}"></i> ${stg.name}
+                              ${isEmpty ? '<span style="font-size:0.65rem; opacity:0.5; font-weight:500;">(vazia)</span>' : `<span style="font-size:0.65rem; opacity:0.7; font-weight:700;">${stageItems.length} ex.</span>`}
+                            </h4>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                              <button class="btn-primary-block" style="padding:5px 10px; font-size:0.75rem; margin:0; width:auto; background:${stg.text}; border:none;" onclick="event.stopPropagation(); openLibModalForStage(${bIdx}, '${stg.id}')">+ Adicionar</button>
+                              <i class="fa-solid fa-chevron-${isCollapsed ? 'down' : 'up'}" style="color:${stg.text}; font-size:0.75rem; transition:0.2s;"></i>
+                            </div>
                         </div>
-                        <div class="stage-items" id="blk-${bIdx}-stage-${stg.id}" style="min-height:30px;"></div>
+                        <div class="stage-body" style="overflow:hidden; transition: max-height 0.3s ease, opacity 0.3s ease; max-height:${isCollapsed ? '0' : '5000px'}; opacity:${isCollapsed ? '0' : '1'}; margin-top:${isCollapsed ? '0' : '10px'};">
+                          <div class="stage-items" id="blk-${bIdx}-stage-${stg.id}" style="min-height:${isCollapsed ? '0' : '30px'};"></div>
+                        </div>
                     `;
               bodyList.appendChild(stageDiv);
 
@@ -3863,6 +3719,23 @@
           html = `<div class="extra-field-Row"><input class="extra-inp" placeholder="Cargas (Ex: 10/12/14kg)" value="${val}" onchange="updItem(${bIdx},'${stageId}',${iIdx},'extra',this.value)" ${disabled}></div>`;
         }
         return html;
+      }
+
+      function toggleStageCollapse(headerEl) {
+        const body   = headerEl.nextElementSibling;
+        const icon   = headerEl.querySelector(".fa-chevron-up, .fa-chevron-down");
+        const isOpen = body.style.maxHeight !== "0px" && body.style.maxHeight !== "0";
+        if (isOpen) {
+          body.style.maxHeight = "0";
+          body.style.opacity   = "0";
+          body.style.marginTop = "0";
+          if (icon) { icon.classList.remove("fa-chevron-up"); icon.classList.add("fa-chevron-down"); }
+        } else {
+          body.style.maxHeight = "5000px";
+          body.style.opacity   = "1";
+          body.style.marginTop = "10px";
+          if (icon) { icon.classList.remove("fa-chevron-down"); icon.classList.add("fa-chevron-up"); }
+        }
       }
 
       function toggleItemCollapse(bIdx, stageId, iIdx) {
@@ -4029,9 +3902,8 @@
           lastBlock.collapsed = false;
         }
 
-        const targetStage = document.getElementById(
-          "target-stage-select",
-        ).value;
+        // UX: usa destino selecionado via "+ Adicionar" de uma stage; senão Força por padrão
+        const targetStage = targetStageId || "forca";
 
         const createItem = (m, name = "Novo Exercício") => ({
           name: name,
@@ -4162,18 +4034,6 @@
       function updatePillarItem(idx, val) {
         currentStudent.pillars[idx].text = val;
         saveLocal();
-      }
-
-      function movePillar(oldIdx, newIdx) {
-        const item = currentStudent.pillars.splice(oldIdx, 1)[0];
-        currentStudent.pillars.splice(newIdx, 0, item);
-        saveLocal();
-        // Check if phone preview is active for methodology to update it live
-        if (
-          document.getElementById("method-canvas").style.display === "block"
-        ) {
-          renderPhoneMethodology();
-        }
       }
 
       // --- PILLAR MANAGER ---
@@ -4365,7 +4225,35 @@
         targetBlockIdx = bIdx;
         targetStageId = stageId;
         switchRightTab("lib");
+        // UX: atualiza badge de destino
+        updateDestBadge(bIdx, stageId);
+        // UX: foca o campo de busca automaticamente para o Benai já digitar
+        setTimeout(() => {
+          const searchEl = document.getElementById("lib-search");
+          if (searchEl) { searchEl.focus(); searchEl.select(); }
+        }, 50);
         showToast("Selecione um exercício na biblioteca");
+      }
+
+      function updateDestBadge(bIdx, stageId) {
+        const badge    = document.getElementById("dest-badge");
+        const badgeTxt = document.getElementById("dest-badge-text");
+        if (!badge || !badgeTxt) return;
+        if (bIdx === null || stageId === null) {
+          badge.classList.remove("visible");
+          return;
+        }
+        const stageNames = { mobilidade: "Mobilidade", ativacao: "Ativação", forca: "Força", desaceleracao: "Desaceleração" };
+        const blkName  = currentStudent?.blocks[bIdx]?.name || ("Bloco " + (bIdx + 1));
+        badgeTxt.innerText = "→ " + blkName + " · " + (stageNames[stageId] || stageId);
+        badge.classList.add("visible");
+      }
+
+      function clearDestination() {
+        targetBlockIdx = null;
+        targetStageId  = null;
+        const badge = document.getElementById("dest-badge");
+        if (badge) badge.classList.remove("visible");
       }
 
       function addFromLib(idx) {
@@ -4399,6 +4287,8 @@
         // FIX: reseta o destino após adicionar — próximo clique vai para o último bloco por padrão
         targetBlockIdx = null;
         targetStageId  = null;
+        // UX: esconde o badge de destino
+        clearDestination();
       }
 
       async function deleteLibItem(idx) {
@@ -5207,6 +5097,44 @@
           });
         });
       }
+      // --- UTILITÁRIO DE DATA ---
+      /**
+       * Converte qualquer formato de data do Sheets para { dateOnly, timeOnly, fullFormatted }.
+       * Centraliza a lógica que antes estava copiada em 3 lugares diferentes.
+       */
+      function parseSheetDate(raw) {
+        let dateOnly = String(raw || "Data Desconhecida");
+        let timeOnly = "";
+        try {
+          if (typeof raw === "string" && raw.includes("T") && raw.includes("Z")) {
+            const d = new Date(raw);
+            if (!isNaN(d.getTime())) {
+              dateOnly = String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0") + "/" + d.getFullYear();
+              timeOnly = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+            }
+          } else if (raw instanceof Date || (typeof raw === "string" && !isNaN(Date.parse(raw)) && !raw.includes("/"))) {
+            const d = new Date(raw);
+            if (!isNaN(d.getTime())) {
+              dateOnly = String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0") + "/" + d.getFullYear();
+              timeOnly = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+            }
+          } else if (typeof raw === "string" && raw.includes(" às ")) {
+            const parts = raw.split(" às ");
+            dateOnly = parts[0];
+            timeOnly = parts[1] || "";
+          } else if (typeof raw === "string" && raw.includes(" ")) {
+            const parts = raw.split(" ");
+            dateOnly = parts[0];
+            timeOnly = parts[1] || "";
+          }
+        } catch(e) { /* mantém original */ }
+        return {
+          dateOnly,
+          timeOnly,
+          fullFormatted: timeOnly ? dateOnly + " às " + timeOnly : dateOnly
+        };
+      }
+
       // --- HISTORY LOGIC ---
       let cachedHistoryData = [];
       let cachedFeedbackData = [];
@@ -5260,57 +5188,8 @@
 
         const grouped = {};
         cachedHistoryData.forEach((row) => {
-          let fullDate = row["Data/Hora"] || "Data Desconhecida";
-          let dateOnly = fullDate;
-          let timeOnly = "";
-
-          try {
-            if (
-              typeof fullDate === "string" &&
-              fullDate.includes("T") &&
-              fullDate.includes("Z")
-            ) {
-              const d = new Date(fullDate);
-              if (!isNaN(d.getTime())) {
-                const dia = String(d.getDate()).padStart(2, "0");
-                const mes = String(d.getMonth() + 1).padStart(2, "0");
-                const ano = d.getFullYear();
-                const hora = String(d.getHours()).padStart(2, "0");
-                const min = String(d.getMinutes()).padStart(2, "0");
-                dateOnly = `${dia}/${mes}/${ano}`;
-                timeOnly = `${hora}:${min}`;
-              }
-            } else if (
-              fullDate instanceof Date ||
-              (typeof fullDate === "string" &&
-                !isNaN(Date.parse(fullDate)) &&
-                !fullDate.includes("/"))
-            ) {
-              const d = new Date(fullDate);
-              if (!isNaN(d.getTime())) {
-                const dia = String(d.getDate()).padStart(2, "0");
-                const mes = String(d.getMonth() + 1).padStart(2, "0");
-                const ano = d.getFullYear();
-                const hora = String(d.getHours()).padStart(2, "0");
-                const min = String(d.getMinutes()).padStart(2, "0");
-                dateOnly = `${dia}/${mes}/${ano}`;
-                timeOnly = `${hora}:${min}`;
-              }
-            } else if (typeof fullDate === "string" && fullDate.includes(" às ")) {
-              const parts = fullDate.split(" às ");
-              dateOnly = parts[0];
-              timeOnly = parts[1];
-            } else if (typeof fullDate === "string" && fullDate.includes(" ")) {
-              const parts = fullDate.split(" ");
-              dateOnly = parts[0];
-              timeOnly = parts[1];
-            }
-          } catch (e) {
-            // Keep original if parsing fails
-          }
-
+          const { dateOnly, timeOnly } = parseSheetDate(row["Data/Hora"]);
           row._timeOnly = timeOnly;
-
           if (!grouped[dateOnly]) grouped[dateOnly] = [];
           grouped[dateOnly].push(row);
         });
@@ -5491,46 +5370,14 @@
 
         const trainedDays = new Set();
         historyData.forEach((row) => {
-          let dStr = row["Data/Hora"];
-          if (dStr) {
-            try {
-              if (
-                typeof dStr === "string" &&
-                dStr.includes("T") &&
-                dStr.includes("Z")
-              ) {
-                const d = new Date(dStr);
-                if (!isNaN(d.getTime())) {
-                  if (d.getMonth() === month && d.getFullYear() === year) {
-                    trainedDays.add(d.getDate());
-                  }
-                }
-              } else if (
-                dStr instanceof Date ||
-                (typeof dStr === "string" &&
-                  !isNaN(Date.parse(dStr)) &&
-                  !dStr.includes("/"))
-              ) {
-                const d = new Date(dStr);
-                if (!isNaN(d.getTime())) {
-                  if (d.getMonth() === month && d.getFullYear() === year) {
-                    trainedDays.add(d.getDate());
-                  }
-                }
-              } else {
-                // Fallback for non-standard formats like DD/MM/YYYY
-                const parts = dStr.split(" ")[0].split("/");
-                if (parts.length === 3) {
-                  if (
-                    parseInt(parts[1]) - 1 === month &&
-                    parseInt(parts[2]) === year
-                  ) {
-                    trainedDays.add(parseInt(parts[0]));
-                  }
-                }
-              }
-            } catch (e) {
-              // Ignore parsing errors
+          if (row["Data/Hora"]) {
+            const { dateOnly } = parseSheetDate(row["Data/Hora"]);
+            const parts = dateOnly.split("/");
+            if (parts.length === 3) {
+              const d = parseInt(parts[0]);
+              const m = parseInt(parts[1]) - 1;
+              const y = parseInt(parts[2]);
+              if (m === month && y === year) trainedDays.add(d);
             }
           }
         });
