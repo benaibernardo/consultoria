@@ -2785,11 +2785,12 @@
         if (!appData.methods || appData.methods.length === 0)
           appData.methods = ["Musculação", "Calistenia", "Híbrido"];
 
-        // Limpa duplicatas acumuladas no localStorage — mantém primeiro por email ou sheetsId
+        // Limpa duplicatas — chave: email > sheetsId > gistId > id (nunca undefined)
         const seen = new Set();
         appData.students = appData.students.filter(s => {
-          const key = s.email || s.sheetsId || s.id;
-          if (!key || seen.has(key)) return false;
+          const key = s.email || s.sheetsId || s.gistId || s.id;
+          if (!key) return false;
+          if (seen.has(key)) return false;
           seen.add(key);
           return true;
         });
@@ -4858,19 +4859,20 @@
           }
 
           // Deduplicação final — garante zero duplicatas antes de salvar
+          // Usa email > sheetsId > gistId > id como chave — s.id é sempre garantido
           const seenSync = new Set();
           appData.students = appData.students.filter(s => {
-            const key = s.email || s.sheetsId || s.id;
-            if (!key || seenSync.has(key)) return false;
+            const key = s.email || s.sheetsId || s.gistId || s.id;
+            if (!key) return false; // só cai aqui se o objeto está completamente corrompido
+            if (seenSync.has(key)) return false;
             seenSync.add(key);
             return true;
           });
 
-          // FIX: remove placeholders órfãos de alunos Sheets.
-          // Esses fantasmas surgem quando o Master Gist criava placeholder sem gistId.
-          // Alunos Gist reais SEMPRE têm gistId preenchido — são preservados.
+          // Remove APENAS placeholders de alunos Sheets (focus=Carregando + sem gistId E sem id real).
+          // Alunos Gist (têm gistId) são preservados mesmo que focus=Carregando.
           appData.students = appData.students.filter(s =>
-            !(s.focus === "Carregando..." && !s.gistId)
+            !(s.focus === "Carregando..." && !s.gistId && !s.sheetsId)
           );
 
           saveLocal();
