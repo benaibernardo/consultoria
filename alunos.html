@@ -441,6 +441,12 @@
             <i data-lucide="bell" class="w-4 h-4"></i> Notificar Aluno
           </button>
           <button
+            onclick="openPagamentoModal()"
+            class="flex-1 sm:flex-none px-4 py-2 bg-emerald-500 text-white text-sm font-bold rounded-xl hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2 shadow-sm"
+          >
+            <i data-lucide="circle-dollar-sign" class="w-4 h-4"></i> Confirmar Pagamento
+          </button>
+          <button
             onclick="viewHistory()"
             class="flex-1 sm:flex-none px-4 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
           >
@@ -473,6 +479,81 @@
       </div>
     </div>
 
+
+    <!-- MODAL: CONFIRMAR PAGAMENTO -->
+    <div id="modalPagamento" class="fixed inset-0 z-[60] hidden">
+      <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closePagamentoModal()"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-4 bg-emerald-500 flex justify-between items-center">
+          <div>
+            <h3 class="text-white font-head font-extrabold text-lg">Confirmar Pagamento</h3>
+            <p id="pag-aluno-nome" class="text-emerald-100 text-sm font-medium"></p>
+          </div>
+          <button onclick="closePagamentoModal()" class="text-white/70 hover:text-white transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <!-- Body -->
+        <div class="p-6 space-y-4">
+          <!-- Período -->
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Período</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button id="btn-mensal" onclick="selectPeriodo('mensal')"
+                class="py-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm transition-all">
+                📅 Mensal<br><span class="text-xs font-normal text-slate-500">+30 dias</span>
+              </button>
+              <button id="btn-trimestral" onclick="selectPeriodo('trimestral')"
+                class="py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm transition-all hover:border-emerald-300">
+                📅 Trimestral<br><span class="text-xs font-normal text-slate-500">+90 dias</span>
+              </button>
+            </div>
+          </div>
+          <!-- Forma de pagamento -->
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Forma de Pagamento</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button id="btn-pix" onclick="selectForma('PIX')"
+                class="py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm transition-all hover:border-emerald-300">
+                💸 PIX
+              </button>
+              <button id="btn-cartao" onclick="selectForma('Cartão')"
+                class="py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm transition-all hover:border-emerald-300">
+                💳 Cartão
+              </button>
+            </div>
+          </div>
+          <!-- Valor -->
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Valor Recebido (opcional)</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span>
+              <input id="pag-valor" type="number" step="0.01" placeholder="0,00"
+                class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"/>
+            </div>
+          </div>
+          <!-- Data -->
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Data do Pagamento</label>
+            <input id="pag-data" type="date"
+              class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"/>
+          </div>
+          <!-- Nova validade preview -->
+          <div id="pag-preview" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+            <p class="text-xs text-emerald-600 font-bold uppercase tracking-wider">Nova validade</p>
+            <p id="pag-nova-data" class="text-emerald-700 font-extrabold text-lg"></p>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div class="px-6 pb-6">
+          <button id="btn-confirmar-pag" onclick="confirmarPagamento()"
+            class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i data-lucide="check-circle" class="w-5 h-5"></i> Confirmar Pagamento
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Template Oculto para o PDF -->
     <div id="pdf-container">
@@ -1157,6 +1238,24 @@
           </div>`;
 
         contentList.innerHTML = painelGestao + contentList.innerHTML;
+
+        // --- HISTÓRICO DE PAGAMENTOS ---
+        const emailAluno = currentStudent.Email || currentStudent.email || "";
+        if (emailAluno) {
+          // Adiciona seção placeholder enquanto carrega
+          const secPag = document.createElement("div");
+          secPag.id = "secao-pagamentos";
+          secPag.className = "mt-6";
+          secPag.innerHTML = `
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="credit-card" class="w-4 h-4 text-emerald-500"></i>
+              <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Histórico de Pagamentos</h3>
+            </div>
+            <div id="pag-lista" class="text-sm text-slate-400 italic">Carregando...</div>`;
+          contentList.appendChild(secPag);
+          carregarHistoricoPagamentos(emailAluno);
+        }
+
         lucide.createIcons();
         const modal = document.getElementById("studentModal");
         const overlay = document.getElementById("studentModalOverlay");
@@ -1170,6 +1269,175 @@
           contentBox.classList.add("scale-100", "opacity-100");
         }, 10);
       }
+
+      // ── PAGAMENTOS ────────────────────────────────────────
+      let pagPeriodo = "mensal";
+      let pagForma   = "";
+
+      function openPagamentoModal() {
+        if (!currentStudent) return;
+        pagPeriodo = "mensal";
+        pagForma   = "";
+
+        document.getElementById("pag-aluno-nome").innerText = currentStudent.Nome || "";
+        document.getElementById("pag-valor").value = "";
+        document.getElementById("pag-preview").classList.add("hidden");
+
+        // Data padrão = hoje
+        const hoje = new Date().toISOString().split("T")[0];
+        document.getElementById("pag-data").value = hoje;
+
+        // Reset visual dos botões
+        selectPeriodo("mensal");
+        ["btn-pix","btn-cartao"].forEach(id => {
+          const b = document.getElementById(id);
+          b.classList.remove("border-emerald-500","bg-emerald-50","text-emerald-700");
+          b.classList.add("border-slate-200","bg-white","text-slate-600");
+        });
+
+        document.getElementById("modalPagamento").classList.remove("hidden");
+        lucide.createIcons();
+      }
+
+      function closePagamentoModal() {
+        document.getElementById("modalPagamento").classList.add("hidden");
+      }
+
+      function selectPeriodo(p) {
+        pagPeriodo = p;
+        const dias = p === "trimestral" ? 90 : 30;
+
+        ["mensal","trimestral"].forEach(id => {
+          const b = document.getElementById("btn-" + id);
+          const active = id === p;
+          b.classList.toggle("border-emerald-500", active);
+          b.classList.toggle("bg-emerald-50",      active);
+          b.classList.toggle("text-emerald-700",   active);
+          b.classList.toggle("border-slate-200",  !active);
+          b.classList.toggle("bg-white",          !active);
+          b.classList.toggle("text-slate-600",    !active);
+        });
+
+        // Atualiza preview da nova data
+        const novaData = new Date();
+        novaData.setDate(novaData.getDate() + dias);
+        document.getElementById("pag-nova-data").innerText =
+          novaData.toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric" });
+        document.getElementById("pag-preview").classList.remove("hidden");
+      }
+
+      function selectForma(f) {
+        pagForma = f;
+        const idMap = { "PIX": "btn-pix", "Cartão": "btn-cartao" };
+        ["btn-pix","btn-cartao"].forEach(id => {
+          const b = document.getElementById(id);
+          const active = idMap[f] === id;
+          b.classList.toggle("border-emerald-500", active);
+          b.classList.toggle("bg-emerald-50",      active);
+          b.classList.toggle("text-emerald-700",   active);
+          b.classList.toggle("border-slate-200",  !active);
+          b.classList.toggle("bg-white",          !active);
+          b.classList.toggle("text-slate-600",    !active);
+        });
+      }
+
+      async function confirmarPagamento() {
+        if (!currentStudent) return;
+        if (!pagForma) { alert("Selecione a forma de pagamento."); return; }
+
+        const btn = document.getElementById("btn-confirmar-pag");
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Confirmando...';
+        lucide.createIcons();
+
+        const email = currentStudent.Email || currentStudent.email || "";
+        const nome  = currentStudent.Nome  || "";
+        const valor = document.getElementById("pag-valor").value || "";
+
+        try {
+          const res = await fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tipo:    "pagamento",
+              chave:   "BENAI_SECRET_2026",
+              email:   email,
+              nome:    nome,
+              periodo: pagPeriodo,
+              forma:   pagForma,
+              valor:   valor,
+              plano:   currentStudent.Plano_Atual || "Individual",
+              origem:  "Manual"
+            })
+          });
+
+          const data = await res.json();
+          if (data.status === "sucesso") {
+            closePagamentoModal();
+            // Atualiza data no card do aluno na lista
+            if (data.novaFim) {
+              const idx = students.findIndex(s => (s.Email || s.email) === email);
+              if (idx !== -1) students[idx].Data_Fim = data.novaFim;
+              renderStudentCards();
+            }
+            // Recarrega histórico
+            if (email) carregarHistoricoPagamentos(email);
+            alert("✅ Pagamento confirmado! Nova validade: " + (data.novaFim || ""));
+          } else {
+            alert("Erro: " + (data.message || "Falha ao confirmar pagamento."));
+          }
+        } catch(e) {
+          alert("Erro de conexão: " + e.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i> Confirmar Pagamento';
+          lucide.createIcons();
+        }
+      }
+
+      async function carregarHistoricoPagamentos(email) {
+        const lista = document.getElementById("pag-lista");
+        if (!lista) return;
+        try {
+          const res  = await fetch(GAS_URL + "?tipo=pagamentos&email=" + encodeURIComponent(email));
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            lista.innerHTML = '<span class="text-slate-400 italic">Nenhum pagamento registrado ainda.</span>';
+            return;
+          }
+
+          // Ordena do mais recente para o mais antigo
+          const sorted = [...data].reverse();
+          lista.innerHTML = sorted.map(p => {
+            const forma  = p.Forma    || p.forma    || "—";
+            const periodo= p.Periodo  || p.periodo  || "—";
+            const valor  = p.Valor    || p.valor    || "";
+            const origem = p.Origem   || p.origem   || "";
+            const dataHora = p.Data_Hora || p.data_hora || "—";
+            const isAuto = origem.toLowerCase().includes("asaas");
+            return `
+              <div class="flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm
+                    ${forma === 'PIX' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}">
+                    ${forma === 'PIX' ? '💸' : '💳'}
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-slate-700">${forma} · ${periodo.charAt(0).toUpperCase() + periodo.slice(1)}</p>
+                    <p class="text-xs text-slate-400">${dataHora}${isAuto ? ' · <span class="text-emerald-500">Automático</span>' : ''}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  ${valor ? `<p class="text-sm font-bold text-slate-700">R$ ${parseFloat(valor).toFixed(2).replace('.',',')}</p>` : ''}
+                </div>
+              </div>`;
+          }).join("");
+        } catch(e) {
+          lista.innerHTML = '<span class="text-red-400 text-xs">Erro ao carregar histórico.</span>';
+        }
+      }
+      // ─────────────────────────────────────────────────────
 
       function closeStudentModal() {
         const modal = document.getElementById("studentModal");
